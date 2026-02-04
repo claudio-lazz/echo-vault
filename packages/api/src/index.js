@@ -25,9 +25,10 @@ app.post('/context/request', (req, res) => {
   if (!payment) {
     return res.status(402).json(build402Challenge({ amount: 0.001, mint: 'USDC' }));
   }
-  const verified = verify402Payment(payment);
-  if (!verified.ok) return res.status(402).json(verified);
-  res.status(501).json({ error: 'not_implemented' });
+  verify402Payment(payment).then((verified) => {
+    if (!verified.ok) return res.status(402).json(verified);
+    res.status(501).json({ error: 'not_implemented' });
+  });
 });
 
 const port = process.env.PORT || 8787;
