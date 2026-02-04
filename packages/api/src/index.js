@@ -7,6 +7,18 @@ const { build402Challenge, verify402Payment } = require('./x402');
 // Health
 app.get('/health', (_, res) => res.json({ ok: true }));
 
+// Vault init (stub)
+app.post('/vault/init', (req, res) => {
+  const { owner, context_uri } = req.body || {};
+  res.status(200).json({ ok: true, owner, context_uri });
+});
+
+// Grant access (stub)
+app.post('/vault/grant', (req, res) => {
+  const { owner, grantee, scope_hash, expires_at } = req.body || {};
+  res.status(200).json({ ok: true, owner, grantee, scope_hash, expires_at });
+});
+
 // Context request endpoint (placeholder)
 app.post('/context/request', (req, res) => {
   const { payment } = req.body || {};
