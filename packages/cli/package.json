@@ -1,6 +1,7 @@
 {
   "name": "@echovault/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
-  "bin": { "echovault": "src/index.js" }
+  "bin": { "echovault": "src/index.js" },
+  "dependencies": { "node-fetch": "^3.3.2" }
 }

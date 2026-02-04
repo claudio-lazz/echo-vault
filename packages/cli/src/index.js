@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 
+const { postJson } = require('./http');
 const cmd = process.argv[2];
+const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
 if (!cmd) {
   console.log('echovault <init|grant|request>');
   process.exit(0);
 }
 
-if (cmd === 'init') {
-  console.log('init vault (stub)');
-  console.log('POST /vault/init { owner, context_uri }');
-} else if (cmd === 'grant') {
-  console.log('grant access (stub)');
-  console.log('POST /vault/grant { owner, grantee, scope_hash, expires_at }');
-} else if (cmd === 'request') {
-  console.log('request context (stub)');
-  console.log('POST /context/request { payment? }');
-} else {
-  console.log('unknown command');
-}
+(async () => {
+  if (cmd === 'init') {
+    const { status, json } = await postJson(`${api}/vault/init`, { owner: 'OWNER', context_uri: 'ipfs://...' });
+    console.log(status, json);
+  } else if (cmd === 'grant') {
+    const { status, json } = await postJson(`${api}/vault/grant`, { owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'HASH', expires_at: Date.now()/1000 });
+    console.log(status, json);
+  } else if (cmd === 'request') {
+    const { status, json } = await postJson(`${api}/context/request`, { });
+    console.log(status, json);
+  } else {
+    console.log('unknown command');
+  }
+})();
