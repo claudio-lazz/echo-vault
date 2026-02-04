@@ -10,8 +10,9 @@ function build402Challenge({ amount, mint }) {
   };
 }
 
-function verify402Payment(_payload) {
-  // TODO: verify payment tx signature + mint + amount
+function verify402Payment(payload) {
+  // TODO: verify payment tx signature + mint + amount on Solana
+  if (!payload || !payload.txSig) return { ok: false, reason: "missing_tx" };
   return { ok: false, reason: "not_implemented" };
 }
 
