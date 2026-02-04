@@ -1,0 +1,12 @@
+{
+  "name": "echovault",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "echo 'lint placeholder'",
+    "test": "echo 'test placeholder'"
+  }
+}
