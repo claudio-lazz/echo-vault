@@ -22,10 +22,13 @@ if (!cmd) {
     const amount = process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001';
     const payer = process.env.ECHOVAULT_PAYMENT_PAYER;
     const recipient = process.env.ECHOVAULT_PAYMENT_RECIPIENT;
+    const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
+    const grantee = process.env.ECHOVAULT_GRANTEE || 'GRANTEE';
+    const scope_hash = process.env.ECHOVAULT_SCOPE_HASH || 'SCOPE_HASH';
     const payment = txSig ? { txSig, mint, amount } : null;
     if (payment && payer) payment.payer = payer;
     if (payment && recipient) payment.recipient = recipient;
-    const body = payment ? { payment } : {};
+    const body = payment ? { owner, grantee, scope_hash, payment } : { owner, grantee, scope_hash };
     const { status, json } = await postJson(`${api}/context/request`, body);
     console.log(status, json);
   } else {

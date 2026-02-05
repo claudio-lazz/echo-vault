@@ -16,6 +16,11 @@ export ECHOVAULT_API=http://localhost:8787
 echovault init
 
 # Grant access (stub)
+export ECHOVAULT_OWNER=OWNER
+export ECHOVAULT_GRANTEE=GRANTEE
+export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
+
+# Grant stores in-memory grant
 echovault grant
 
 # Request context (returns 402 challenge)
