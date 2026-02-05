@@ -20,7 +20,12 @@ if (!cmd) {
     const txSig = process.env.ECHOVAULT_PAYMENT_TX;
     const mint = process.env.ECHOVAULT_PAYMENT_MINT || 'USDC';
     const amount = process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001';
-    const body = txSig ? { payment: { txSig, mint, amount } } : {};
+    const payer = process.env.ECHOVAULT_PAYMENT_PAYER;
+    const recipient = process.env.ECHOVAULT_PAYMENT_RECIPIENT;
+    const payment = txSig ? { txSig, mint, amount } : null;
+    if (payment && payer) payment.payer = payer;
+    if (payment && recipient) payment.recipient = recipient;
+    const body = payment ? { payment } : {};
     const { status, json } = await postJson(`${api}/context/request`, body);
     console.log(status, json);
   } else {

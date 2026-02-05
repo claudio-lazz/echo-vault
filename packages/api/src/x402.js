@@ -65,14 +65,22 @@ async function verify402Payment(payload) {
       .map((parsed) => ({ type: parsed.type, info: parsed.info }))
       .filter((ix) => ix.type === "transfer" || ix.type === "transferChecked");
 
+    const expectedRecipient = payload.recipient || process.env.ECHOVAULT_PAYMENT_RECIPIENT || null;
+    const expectedPayer = payload.payer || process.env.ECHOVAULT_PAYMENT_PAYER || null;
+
     const matches = transfers.some(({ info }) => {
       if (!info) return false;
       if (info.mint && info.mint !== mint) return false;
       const tokenAmount = info.tokenAmount || {};
       const uiAmount = typeof tokenAmount.uiAmount === "number" ? tokenAmount.uiAmount : Number(tokenAmount.uiAmountString);
       if (!Number.isFinite(uiAmount)) return false;
-      if (amount == null) return true;
-      return uiAmount + 1e-9 >= amount;
+      if (amount != null && uiAmount + 1e-9 < amount) return false;
+      if (expectedRecipient && info.destination && info.destination !== expectedRecipient) return false;
+      if (expectedPayer) {
+        const authority = info.authority || info.owner || null;
+        if (authority && authority !== expectedPayer && info.source !== expectedPayer) return false;
+      }
+      return true;
     });
 
     if (!matches) return { ok: false, reason: "mint_amount_mismatch" };

@@ -25,6 +25,9 @@ echovault request
 export ECHOVAULT_PAYMENT_TX=TX_SIG
 export ECHOVAULT_PAYMENT_MINT=USDC
 export ECHOVAULT_PAYMENT_AMOUNT=0.001
+# Optional: enforce payer/recipient validation
+export ECHOVAULT_PAYMENT_PAYER=PAYER_PUBKEY
+export ECHOVAULT_PAYMENT_RECIPIENT=RECIPIENT_TOKEN_ACCOUNT
 
 echovault request
 ```
