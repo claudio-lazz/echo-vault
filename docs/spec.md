@@ -17,6 +17,7 @@ Wallet-native, encrypted personal context stored as on-chain assets with permiss
 - **Agent SDK**: request access, fetch, decrypt
 
 ## API (dev stub)
+- Dev persistence: set `ECHOVAULT_STORE_PATH` to persist vaults/grants/blobs between restarts.
 - **POST /vault/init** → `{ owner, context_uri, encrypted_blob }`
 - **POST /vault/grant** → `{ owner, grantee, scope_hash, expires_at }`
 - **POST /vault/revoke** → `{ owner, grantee, scope_hash }`
