@@ -11,7 +11,10 @@ if (!cmd) {
 
 (async () => {
   if (cmd === 'init') {
-    const { status, json } = await postJson(`${api}/vault/init`, { owner: 'OWNER', context_uri: 'ipfs://...' });
+    const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
+    const context_uri = process.env.ECHOVAULT_CONTEXT_URI || 'ipfs://encrypted-context-placeholder';
+    const encrypted_blob = process.env.ECHOVAULT_ENCRYPTED_BLOB || 'ENCRYPTED_BLOB_PLACEHOLDER';
+    const { status, json } = await postJson(`${api}/vault/init`, { owner, context_uri, encrypted_blob });
     console.log(status, json);
   } else if (cmd === 'grant') {
     const { status, json } = await postJson(`${api}/vault/grant`, { owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'HASH', expires_at: Date.now()/1000 });

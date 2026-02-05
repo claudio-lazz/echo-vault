@@ -17,11 +17,11 @@ Wallet-native, encrypted personal context stored as on-chain assets with permiss
 - **Agent SDK**: request access, fetch, decrypt
 
 ## API (dev stub)
-- **POST /vault/init** → `{ owner, context_uri }`
+- **POST /vault/init** → `{ owner, context_uri, encrypted_blob }`
 - **POST /vault/grant** → `{ owner, grantee, scope_hash, expires_at }`
 - **POST /context/request** → `{ owner, grantee, scope_hash, payment? }`
   - 402 response: `{ status:402, required:true, amount, mint, paymentUrl }`
-  - 200 response: `{ ok:true, context_uri, meta:{ owner, grantee, scope_hash, payment } }`
+  - 200 response: `{ ok:true, context_uri, encrypted_blob, meta:{ owner, grantee, scope_hash, payment } }`
 
 ## x402 flow (pay-per-read)
 1. Agent requests context

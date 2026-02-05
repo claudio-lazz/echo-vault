@@ -13,6 +13,9 @@ node src/index.js
 export ECHOVAULT_API=http://localhost:8787
 
 # Init vault (stub)
+export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
+export ECHOVAULT_ENCRYPTED_BLOB=ENCRYPTED_BLOB_PLACEHOLDER
+
 echovault init
 
 # Grant access (stub)

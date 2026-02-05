@@ -12,8 +12,8 @@ async function postJson(url, body) {
   return { ok: res.ok, status: res.status, json };
 }
 
-async function initVault({ owner, context_uri, api = defaultApi }) {
-  return postJson(`${api}/vault/init`, { owner, context_uri });
+async function initVault({ owner, context_uri, encrypted_blob, api = defaultApi }) {
+  return postJson(`${api}/vault/init`, { owner, context_uri, encrypted_blob });
 }
 
 async function grantAccess({ owner, grantee, scope_hash, expires_at, api = defaultApi }) {
