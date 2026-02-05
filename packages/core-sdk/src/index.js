@@ -20,8 +20,12 @@ async function grantAccess({ owner, grantee, scope_hash, expires_at, api = defau
   return postJson(`${api}/vault/grant`, { owner, grantee, scope_hash, expires_at });
 }
 
+async function revokeAccess({ owner, grantee, scope_hash, api = defaultApi }) {
+  return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
+}
+
 async function requestContext({ owner, grantee, scope_hash, payment, api = defaultApi }) {
   return postJson(`${api}/context/request`, { owner, grantee, scope_hash, payment });
 }
 
-module.exports = { initVault, grantAccess, requestContext };
+module.exports = { initVault, grantAccess, revokeAccess, requestContext };

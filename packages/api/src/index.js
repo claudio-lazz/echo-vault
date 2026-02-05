@@ -26,6 +26,7 @@ app.post('/vault/init', (req, res) => {
 
 // In-memory grant store (dev stub)
 const grants = new Map();
+const revoked = new Set();
 const grantKey = ({ owner, grantee, scope_hash }) => `${owner}:${grantee}:${scope_hash}`;
 
 // Grant access (dev stub)
@@ -33,16 +34,30 @@ app.post('/vault/grant', (req, res) => {
   const { owner, grantee, scope_hash, expires_at } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields' });
   const grant = { owner, grantee, scope_hash, expires_at: Number(expires_at) || null };
-  grants.set(grantKey(grant), grant);
+  const key = grantKey(grant);
+  grants.set(key, grant);
+  revoked.delete(key);
   res.status(200).json({ ok: true, grant });
+});
+
+// Revoke access (dev stub)
+app.post('/vault/revoke', (req, res) => {
+  const { owner, grantee, scope_hash } = req.body || {};
+  if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields' });
+  const key = grantKey({ owner, grantee, scope_hash });
+  if (!grants.has(key)) return res.status(404).json({ ok: false, reason: 'grant_not_found' });
+  revoked.add(key);
+  res.status(200).json({ ok: true, revoked: true });
 });
 
 // Context request endpoint (dev stub)
 app.post('/context/request', (req, res) => {
   const { owner, grantee, scope_hash, payment } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields' });
-  const grant = grants.get(grantKey({ owner, grantee, scope_hash }));
+  const key = grantKey({ owner, grantee, scope_hash });
+  const grant = grants.get(key);
   if (!grant) return res.status(403).json({ ok: false, reason: 'grant_not_found' });
+  if (revoked.has(key)) return res.status(403).json({ ok: false, reason: 'grant_revoked' });
   if (grant.expires_at && Date.now() / 1000 > grant.expires_at) return res.status(403).json({ ok: false, reason: 'grant_expired' });
   if (!payment) {
     return res.status(402).json(build402Challenge({ amount: 0.001, mint: 'USDC' }));

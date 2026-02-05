@@ -26,6 +26,9 @@ export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
 # Grant stores in-memory grant
 echovault grant
 
+# Optional: revoke grant
+echovault revoke
+
 # Request context (returns 402 challenge)
 echovault request
 
