@@ -1,0 +1,116 @@
+# EchoVault API (Dev Stub)
+
+Base URL: `http://localhost:8787`
+
+## POST /vault/init
+Create or update a vault for an owner.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "context_uri": "ipfs://encrypted-context-placeholder",
+  "encrypted_blob": "ENCRYPTED_BLOB_PLACEHOLDER"
+}
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "vault": {
+    "owner": "OWNER",
+    "context_uri": "ipfs://...",
+    "encrypted_blob": "..."
+  }
+}
+```
+
+## POST /vault/grant
+Grant access to a grantee.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "grantee": "GRANTEE",
+  "scope_hash": "SCOPE_HASH",
+  "expires_at": 1730000000
+}
+```
+
+## POST /vault/revoke
+Revoke an access grant.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "grantee": "GRANTEE",
+  "scope_hash": "SCOPE_HASH"
+}
+```
+
+## POST /context/request
+Request context. If payment is required, a 402 is returned.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "grantee": "GRANTEE",
+  "scope_hash": "SCOPE_HASH",
+  "payment": {
+    "txSig": "TX_SIG",
+    "mint": "USDC",
+    "amount": "0.001",
+    "payer": "PAYER_PUBKEY",
+    "recipient": "RECIPIENT_TOKEN_ACCOUNT"
+  }
+}
+```
+
+**402 Response**
+```json
+{
+  "status": 402,
+  "required": true,
+  "amount": 0.001,
+  "mint": "USDC",
+  "paymentUrl": "/pay"
+}
+```
+
+**200 Response**
+```json
+{
+  "ok": true,
+  "context_uri": "ipfs://...",
+  "encrypted_blob": "...",
+  "meta": {
+    "owner": "OWNER",
+    "grantee": "GRANTEE",
+    "scope_hash": "SCOPE_HASH",
+    "payment": {
+      "ok": true,
+      "reason": "mint_amount_verified",
+      "mint": "USDC"
+    }
+  }
+}
+```
+
+## Error Codes
+All 400/403/404/402 error responses include `reason` and `code`.
+
+Common codes:
+- `missing_owner`
+- `missing_context_uri`
+- `missing_encrypted_blob`
+- `missing_fields`
+- `grant_not_found`
+- `grant_revoked`
+- `grant_expired`
+- `missing_tx`
+- `invalid_amount`
+- `vault_not_found`

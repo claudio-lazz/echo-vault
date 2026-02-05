@@ -70,6 +70,9 @@ See `docs/demo.md` for the end‑to‑end walkthrough, or run:
 node scripts/e2e-demo.js
 ```
 
+## API Reference (Dev Stub)
+See `docs/api.md` for request/response examples and error codes.
+
 ## Repo Layout
 - `programs/` — Solana programs (Anchor)
 - `packages/` — SDK + API + CLI
