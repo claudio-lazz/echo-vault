@@ -9,7 +9,7 @@ async function postJson(url, body) {
     body: JSON.stringify(body || {})
   });
   const json = await res.json().catch(() => ({}));
-  return { status: res.status, json };
+  return { ok: res.ok, status: res.status, json };
 }
 
 async function initVault({ owner, context_uri, api = defaultApi }) {
