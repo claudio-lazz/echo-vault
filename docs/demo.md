@@ -36,3 +36,13 @@ export ECHOVAULT_PAYMENT_RECIPIENT=RECIPIENT_TOKEN_ACCOUNT
 
 echovault request
 ```
+
+## SDK (minimal)
+```js
+const { grantAccess, requestContext } = require('@echovault/core-sdk');
+
+const api = 'http://localhost:8787';
+await grantAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+const res = await requestContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+console.log(res.status, res.json);
+```
