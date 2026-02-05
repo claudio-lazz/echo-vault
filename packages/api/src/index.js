@@ -9,6 +9,20 @@ const { build402Challenge, verify402Payment } = require('./x402');
 // Health
 app.get('/health', (_, res) => res.json({ ok: true }));
 
+// Status (dev)
+app.get('/status', (_, res) => {
+  res.json({
+    ok: true,
+    counts: {
+      vaults: vaults.size,
+      grants: grants.size,
+      revoked: revoked.size,
+      blobs: blobs.size
+    },
+    storePath
+  });
+});
+
 // In-memory stores (dev stub)
 const vaults = new Map();
 const grants = new Map();

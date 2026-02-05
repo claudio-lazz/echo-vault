@@ -2,6 +2,23 @@
 
 Base URL: `http://localhost:8787`
 
+## GET /status
+Returns dev store counts.
+
+**Response**
+```json
+{
+  "ok": true,
+  "counts": {
+    "vaults": 1,
+    "grants": 2,
+    "revoked": 0,
+    "blobs": 1
+  },
+  "storePath": "/tmp/echovault-store.json"
+}
+```
+
 ## POST /vault/init
 Create or update a vault for an owner.
 
