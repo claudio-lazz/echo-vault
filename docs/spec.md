@@ -23,7 +23,8 @@ Wallet-native, encrypted personal context stored as on-chain assets with permiss
 - **POST /context/request** → `{ owner, grantee, scope_hash, payment? }`
   - 402 response: `{ status:402, required:true, amount, mint, paymentUrl }`
   - 200 response: `{ ok:true, context_uri, encrypted_blob, meta:{ owner, grantee, scope_hash, payment } }`
-  - 403 response: `{ ok:false, reason: 'grant_revoked' | 'grant_expired' | 'grant_not_found' }`
+  - 403 response: `{ ok:false, reason, code }` where `code` ∈ `grant_revoked|grant_expired|grant_not_found`
+  - 400/404/402 errors now include `{ ok:false, reason, code }`
 
 ## x402 flow (pay-per-read)
 1. Agent requests context
