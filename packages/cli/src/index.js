@@ -18,7 +18,9 @@ if (!cmd) {
     console.log(status, json);
   } else if (cmd === 'request') {
     const txSig = process.env.ECHOVAULT_PAYMENT_TX;
-    const body = txSig ? { payment: { txSig } } : {};
+    const mint = process.env.ECHOVAULT_PAYMENT_MINT || 'USDC';
+    const amount = process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001';
+    const body = txSig ? { payment: { txSig, mint, amount } } : {};
     const { status, json } = await postJson(`${api}/context/request`, body);
     console.log(status, json);
   } else {

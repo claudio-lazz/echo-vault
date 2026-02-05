@@ -37,7 +37,8 @@ async function verify402Payment(payload) {
   }
 
   // placeholder: mint/amount validation will be added next
-  return { ok: true, reason: "status_found" };
+  const mint = process.env.ECHOVAULT_PAYMENT_MINT || "USDC";
+  return { ok: true, reason: "status_found", mint };
 }
 
 module.exports = { build402Challenge, verify402Payment };
