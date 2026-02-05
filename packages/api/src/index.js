@@ -50,6 +50,8 @@ loadStore();
 app.post('/vault/init', (req, res) => {
   const { owner, context_uri, encrypted_blob } = req.body || {};
   if (!owner) return res.status(400).json({ ok: false, reason: 'missing_owner', code: 'missing_owner' });
+  if (!context_uri) return res.status(400).json({ ok: false, reason: 'missing_context_uri', code: 'missing_context_uri' });
+  if (!encrypted_blob) return res.status(400).json({ ok: false, reason: 'missing_encrypted_blob', code: 'missing_encrypted_blob' });
   const vault = {
     owner,
     context_uri: context_uri || 'ipfs://encrypted-context-placeholder',
@@ -95,6 +97,10 @@ app.post('/context/request', (req, res) => {
   if (grant.expires_at && Date.now() / 1000 > grant.expires_at) return res.status(403).json({ ok: false, reason: 'grant_expired', code: 'grant_expired' });
   if (!payment) {
     return res.status(402).json(build402Challenge({ amount: 0.001, mint: 'USDC' }));
+  }
+  if (!payment.txSig) return res.status(400).json({ ok: false, reason: 'missing_tx', code: 'missing_tx' });
+  if (payment.amount && Number.isNaN(Number(payment.amount))) {
+    return res.status(400).json({ ok: false, reason: 'invalid_amount', code: 'invalid_amount' });
   }
   verify402Payment(payment).then((verified) => {
     if (!verified.ok) return res.status(402).json({ ...verified, code: verified.reason || 'payment_failed' });

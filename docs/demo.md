@@ -16,6 +16,8 @@ export ECHOVAULT_STORE_PATH=/tmp/echovault-store.json
 
 # Run e2e script (optional)
 node scripts/e2e-demo.js
+# Run validation script (optional)
+node scripts/validate-e2e.js
 
 # Init vault (stub)
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
