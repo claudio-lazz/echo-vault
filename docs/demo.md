@@ -14,6 +14,9 @@ export ECHOVAULT_API=http://localhost:8787
 # Optional: file-backed dev store
 export ECHOVAULT_STORE_PATH=/tmp/echovault-store.json
 
+# Run e2e script (optional)
+node scripts/e2e-demo.js
+
 # Init vault (stub)
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
 export ECHOVAULT_ENCRYPTED_BLOB=ENCRYPTED_BLOB_PLACEHOLDER
