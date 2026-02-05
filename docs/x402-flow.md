@@ -15,8 +15,8 @@ Allow agents to pay per context read using x402, with verification before data i
 - `txSig`
 - `mint`
 - `amount`
-- `payer`
-- `recipient`
+- `payer` (optional but recommended)
+- `recipient` (optional but recommended)
 
 ## Verification (server)
 - Confirm tx on Solana
