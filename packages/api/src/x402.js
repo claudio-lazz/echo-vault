@@ -68,6 +68,22 @@ async function verify402Payment(payload) {
     const expectedRecipient = payload.recipient || process.env.ECHOVAULT_PAYMENT_RECIPIENT || null;
     const expectedPayer = payload.payer || process.env.ECHOVAULT_PAYMENT_PAYER || null;
 
+    const accountKeys = (tx?.transaction?.message?.accountKeys || []).map((k) =>
+      typeof k === "string" ? k : k?.pubkey
+    );
+    const tokenBalances = (tx?.meta?.postTokenBalances || []).map((post) => {
+      const pre = (tx?.meta?.preTokenBalances || []).find((b) => b.accountIndex === post.accountIndex);
+      const postAmount = Number(post?.uiTokenAmount?.uiAmountString ?? post?.uiTokenAmount?.uiAmount ?? 0);
+      const preAmount = Number(pre?.uiTokenAmount?.uiAmountString ?? pre?.uiTokenAmount?.uiAmount ?? 0);
+      return {
+        accountIndex: post.accountIndex,
+        account: accountKeys[post.accountIndex],
+        owner: post.owner,
+        mint: post.mint,
+        delta: postAmount - preAmount
+      };
+    });
+
     const matches = transfers.some(({ info }) => {
       if (!info) return false;
       if (info.mint && info.mint !== mint) return false;
@@ -81,14 +97,21 @@ async function verify402Payment(payload) {
         if (authority && authority !== expectedPayer && info.source !== expectedPayer) return false;
       }
       return true;
+    }) || tokenBalances.some((bal) => {
+      if (bal.mint !== mint) return false;
+      if (amount != null && bal.delta + 1e-9 < amount) return false;
+      if (expectedRecipient && bal.account !== expectedRecipient && bal.owner !== expectedRecipient) return false;
+      if (expectedPayer && bal.owner !== expectedPayer && bal.account !== expectedPayer) return false;
+      return true;
     });
 
     if (!matches) {
-      const anyRecipient = transfers.some(({ info }) => info?.destination === expectedRecipient);
+      const anyRecipient = transfers.some(({ info }) => info?.destination === expectedRecipient)
+        || tokenBalances.some((bal) => bal.account === expectedRecipient || bal.owner === expectedRecipient);
       const anyPayer = transfers.some(({ info }) => {
         const authority = info?.authority || info?.owner || null;
         return authority === expectedPayer || info?.source === expectedPayer;
-      });
+      }) || tokenBalances.some((bal) => bal.account === expectedPayer || bal.owner === expectedPayer || bal.delta < 0);
       if (expectedRecipient && !anyRecipient) return { ok: false, reason: "recipient_mismatch" };
       if (expectedPayer && !anyPayer) return { ok: false, reason: "payer_mismatch" };
       return { ok: false, reason: "mint_amount_mismatch" };
