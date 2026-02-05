@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
@@ -7,9 +9,42 @@ const { build402Challenge, verify402Payment } = require('./x402');
 // Health
 app.get('/health', (_, res) => res.json({ ok: true }));
 
-// In-memory vault store (dev stub)
+// In-memory stores (dev stub)
 const vaults = new Map();
+const grants = new Map();
+const revoked = new Set();
+const blobs = new Map();
+
 const vaultKey = (owner) => owner;
+const grantKey = ({ owner, grantee, scope_hash }) => `${owner}:${grantee}:${scope_hash}`;
+const blobKey = ({ owner, context_uri }) => `${owner}:${context_uri}`;
+
+const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
+
+function loadStore() {
+  try {
+    if (!fs.existsSync(storePath)) return;
+    const data = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    (data.vaults || []).forEach((vault) => vaults.set(vaultKey(vault.owner), vault));
+    (data.grants || []).forEach((grant) => grants.set(grantKey(grant), grant));
+    (data.revoked || []).forEach((key) => revoked.add(key));
+    (data.blobs || []).forEach(({ key, value }) => blobs.set(key, value));
+  } catch (e) {
+    console.warn('store_load_failed', e.message);
+  }
+}
+
+function saveStore() {
+  const data = {
+    vaults: Array.from(vaults.values()),
+    grants: Array.from(grants.values()),
+    revoked: Array.from(revoked),
+    blobs: Array.from(blobs.entries()).map(([key, value]) => ({ key, value }))
+  };
+  fs.writeFileSync(storePath, JSON.stringify(data, null, 2));
+}
+
+loadStore();
 
 // Vault init (dev stub)
 app.post('/vault/init', (req, res) => {
@@ -22,13 +57,9 @@ app.post('/vault/init', (req, res) => {
   };
   vaults.set(vaultKey(owner), vault);
   blobs.set(blobKey({ owner, context_uri: vault.context_uri }), vault.encrypted_blob);
+  saveStore();
   res.status(200).json({ ok: true, vault });
 });
-
-// In-memory grant store (dev stub)
-const grants = new Map();
-const revoked = new Set();
-const grantKey = ({ owner, grantee, scope_hash }) => `${owner}:${grantee}:${scope_hash}`;
 
 // Grant access (dev stub)
 app.post('/vault/grant', (req, res) => {
@@ -38,6 +69,7 @@ app.post('/vault/grant', (req, res) => {
   const key = grantKey(grant);
   grants.set(key, grant);
   revoked.delete(key);
+  saveStore();
   res.status(200).json({ ok: true, grant });
 });
 
@@ -48,12 +80,9 @@ app.post('/vault/revoke', (req, res) => {
   const key = grantKey({ owner, grantee, scope_hash });
   if (!grants.has(key)) return res.status(404).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
   revoked.add(key);
+  saveStore();
   res.status(200).json({ ok: true, revoked: true });
 });
-
-// Simple in-memory blob store (dev stub)
-const blobs = new Map();
-const blobKey = ({ owner, context_uri }) => `${owner}:${context_uri}`;
 
 // Context request endpoint (dev stub)
 app.post('/context/request', (req, res) => {

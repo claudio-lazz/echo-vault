@@ -11,6 +11,8 @@ node src/index.js
 ```
 # Set API URL
 export ECHOVAULT_API=http://localhost:8787
+# Optional: file-backed dev store
+export ECHOVAULT_STORE_PATH=/tmp/echovault-store.json
 
 # Init vault (stub)
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
