@@ -10,17 +10,8 @@ Users own their context. Agents request permissioned, revocable access. Access c
 - **Off-chain**: Encryption + storage gateway, Context API, Agent SDK
 - **Payments**: x402 pay-per-read
 
-## Demo (stub)
-```
-# 1) Init vault (stub)
-echovault init
-
-# 2) Grant access (stub)
-echovault grant
-
-# 3) Request context (stub)
-echovault request
-```
+## Demo (draft)
+See `docs/demo.md` for the end-to-end walkthrough.
 
 ## Repo layout
 - `programs/` Solana programs (Anchor)
