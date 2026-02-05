@@ -47,10 +47,21 @@ echovault request
 
 ## SDK (minimal)
 ```js
-const { grantAccess, requestContext } = require('@echovault/core-sdk');
+const { grantAccess, revokeAccess, requestContext, unwrapOrThrow } = require('@echovault/core-sdk');
 
 const api = 'http://localhost:8787';
-await grantAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
-const res = await requestContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
-console.log(res.status, res.json);
+const grant = await grantAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+console.log('grant', grant.status, grant.json);
+
+// Optional: revoke grant and observe error handling
+await revokeAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+
+try {
+  const res = await requestContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+  console.log('request', res.status, res.json);
+  // or throw on errors:
+  // const payload = unwrapOrThrow(res);
+} catch (e) {
+  console.error('request failed', e.code, e.status);
+}
 ```

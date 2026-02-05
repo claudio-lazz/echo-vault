@@ -28,4 +28,16 @@ async function requestContext({ owner, grantee, scope_hash, payment, api = defau
   return postJson(`${api}/context/request`, { owner, grantee, scope_hash, payment });
 }
 
-module.exports = { initVault, grantAccess, revokeAccess, requestContext };
+function unwrapOrThrow(result) {
+  if (!result?.ok) {
+    const code = result?.json?.code || result?.json?.reason || 'request_failed';
+    const err = new Error(code);
+    err.code = code;
+    err.status = result?.status;
+    err.payload = result?.json;
+    throw err;
+  }
+  return result.json;
+}
+
+module.exports = { initVault, grantAccess, revokeAccess, requestContext, unwrapOrThrow };
