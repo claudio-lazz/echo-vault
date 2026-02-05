@@ -83,7 +83,16 @@ async function verify402Payment(payload) {
       return true;
     });
 
-    if (!matches) return { ok: false, reason: "mint_amount_mismatch" };
+    if (!matches) {
+      const anyRecipient = transfers.some(({ info }) => info?.destination === expectedRecipient);
+      const anyPayer = transfers.some(({ info }) => {
+        const authority = info?.authority || info?.owner || null;
+        return authority === expectedPayer || info?.source === expectedPayer;
+      });
+      if (expectedRecipient && !anyRecipient) return { ok: false, reason: "recipient_mismatch" };
+      if (expectedPayer && !anyPayer) return { ok: false, reason: "payer_mismatch" };
+      return { ok: false, reason: "mint_amount_mismatch" };
+    }
   } catch (e) {
     return { ok: false, reason: "rpc_error" };
   }

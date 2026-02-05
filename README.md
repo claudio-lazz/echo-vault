@@ -11,7 +11,7 @@ Users own their context. Agents request permissioned, revocable access. Access c
 - **Payments**: x402 pay-per-read
 
 ## Demo (draft)
-See `docs/demo.md` for the end-to-end walkthrough.
+See `docs/demo.md` for the end-to-end walkthrough. x402 verification now checks mint, amount, and optional payer/recipient.
 
 ## Repo layout
 - `programs/` Solana programs (Anchor)
