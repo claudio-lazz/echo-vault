@@ -23,5 +23,8 @@ echovault request
 
 # Provide payment tx signature (stub)
 export ECHOVAULT_PAYMENT_TX=TX_SIG
+export ECHOVAULT_PAYMENT_MINT=USDC
+export ECHOVAULT_PAYMENT_AMOUNT=0.001
+
 echovault request
 ```
