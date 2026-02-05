@@ -36,7 +36,8 @@ async function verify402Payment(payload) {
     return { ok: false, reason: "rpc_error" };
   }
 
-  return { ok: false, reason: "not_implemented" };
+  // placeholder: mint/amount validation will be added next
+  return { ok: true, reason: "status_found" };
 }
 
 module.exports = { build402Challenge, verify402Payment };
