@@ -63,6 +63,14 @@ app.post('/vault/init', (req, res) => {
   res.status(200).json({ ok: true, vault });
 });
 
+// Vault fetch (dev stub)
+app.get('/vault/:owner', (req, res) => {
+  const owner = req.params.owner;
+  const vault = vaults.get(vaultKey(owner));
+  if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
+  res.status(200).json({ ok: true, vault });
+});
+
 // Grant access (dev stub)
 app.post('/vault/grant', (req, res) => {
   const { owner, grantee, scope_hash, expires_at } = req.body || {};
@@ -84,6 +92,20 @@ app.post('/vault/revoke', (req, res) => {
   revoked.add(key);
   saveStore();
   res.status(200).json({ ok: true, revoked: true });
+});
+
+// List grants (dev stub)
+app.get('/vault/grants', (req, res) => {
+  const { owner, grantee } = req.query || {};
+  const list = Array.from(grants.values()).filter((grant) => {
+    if (owner && grant.owner !== owner) return false;
+    if (grantee && grant.grantee !== grantee) return false;
+    return true;
+  }).map((grant) => ({
+    ...grant,
+    revoked: revoked.has(grantKey(grant))
+  }));
+  res.status(200).json({ ok: true, grants: list });
 });
 
 // Context request endpoint (dev stub)

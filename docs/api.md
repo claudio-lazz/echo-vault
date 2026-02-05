@@ -26,6 +26,21 @@ Create or update a vault for an owner.
 }
 ```
 
+## GET /vault/:owner
+Fetch a vault by owner.
+
+**Response**
+```json
+{
+  "ok": true,
+  "vault": {
+    "owner": "OWNER",
+    "context_uri": "ipfs://...",
+    "encrypted_blob": "..."
+  }
+}
+```
+
 ## POST /vault/grant
 Grant access to a grantee.
 
@@ -41,6 +56,30 @@ Grant access to a grantee.
 
 ## POST /vault/revoke
 Revoke an access grant.
+
+## GET /vault/grants
+List grants (filter by `owner` or `grantee`).
+
+Example:
+```
+GET /vault/grants?owner=OWNER
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "grants": [
+    {
+      "owner": "OWNER",
+      "grantee": "GRANTEE",
+      "scope_hash": "SCOPE_HASH",
+      "expires_at": 1730000000,
+      "revoked": false
+    }
+  ]
+}
+```
 
 **Request**
 ```json
