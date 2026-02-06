@@ -70,6 +70,14 @@ Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` fo
 node scripts/e2e-demo.js
 ```
 
+### Encrypted demo (AES‑GCM)
+```bash
+export ECHOVAULT_SECRET=dev-secret
+node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
+export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
+node scripts/e2e-encrypt-demo.js
+```
+
 ## API Reference (Dev Stub)
 See `docs/api.md` for request/response examples and error codes.
 
