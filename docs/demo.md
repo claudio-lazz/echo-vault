@@ -70,6 +70,8 @@ const {
   requestContext,
   fetchContext,
   decryptBlob,
+  encryptBlob,
+  decryptBlobPayload,
   unwrapOrThrow
 } = require('@echovault/core-sdk');
 
@@ -80,6 +82,10 @@ console.log('grant', grant.status, grant.json);
 const preview = await previewContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
 console.log('preview', preview.status, preview.json);
 
+// Example: encrypt locally before init
+const secret = process.env.ECHOVAULT_SECRET || 'dev-secret';
+const encrypted = encryptBlob({ plaintext: JSON.stringify({ hello: 'world' }), secret });
+
 // Optional: revoke grant and observe error handling
 await revokeAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
 
@@ -89,9 +95,10 @@ try {
   // or throw on errors:
   // const payload = unwrapOrThrow(res);
 
-  // helper path: fetch + decrypt stub
+  // helper path: fetch + decrypt
   // const payload = await fetchContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api, payment: { txSig: 'TX_SIG', mint: 'USDC', amount: '0.001' } });
-  // const plaintext = decryptBlob({ encrypted_blob: payload.encrypted_blob, decryptor: (blob) => blob });
+  // const plaintext = decryptBlobPayload({ secret, ...payload.encrypted_blob });
+  // const fallback = decryptBlob({ encrypted_blob: payload.encrypted_blob, decryptor: (blob) => blob });
 } catch (e) {
   console.error('request failed', e.code, e.status);
 }

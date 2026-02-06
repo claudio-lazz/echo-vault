@@ -41,7 +41,7 @@ The goal is a simple, composable primitive: *portable context that respects user
 - End‑to‑end flow: init → grant → request → payment verify → return encrypted blob
 - In‑memory grant + revocation store (dev stub)
 - In‑memory encrypted blob store (dev stub)
-- SDK helpers for init/grant/revoke/preview/request + fetch/decrypt stubs
+- SDK helpers for init/grant/revoke/preview/request + fetch/decrypt + AES-GCM encrypt/decrypt helpers
 
 See `docs/demo.md` for the walkthrough.
 

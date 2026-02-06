@@ -42,6 +42,8 @@ function decryptBlob({ encrypted_blob, decryptor }) {
   return encrypted_blob;
 }
 
+const { encryptBlob, decryptBlob: decryptBlobPayload } = require('./crypto');
+
 function unwrapOrThrow(result) {
   if (!result?.ok) {
     const code = result?.json?.code || result?.json?.reason || 'request_failed';
@@ -62,5 +64,7 @@ module.exports = {
   requestContext,
   fetchContext,
   decryptBlob,
+  encryptBlob,
+  decryptBlobPayload,
   unwrapOrThrow
 };
