@@ -132,6 +132,30 @@ app.get('/vault/grants', (req, res) => {
   res.status(200).json({ ok: true, grants: list });
 });
 
+// Context preview (dev stub)
+app.post('/context/preview', (req, res) => {
+  const { owner, grantee, scope_hash } = req.body || {};
+  if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
+  const key = grantKey({ owner, grantee, scope_hash });
+  const grant = grants.get(key);
+  if (!grant) return res.status(403).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
+  if (revoked.has(key)) return res.status(403).json({ ok: false, reason: 'grant_revoked', code: 'grant_revoked' });
+  if (grant.expires_at && Date.now() / 1000 > grant.expires_at) return res.status(403).json({ ok: false, reason: 'grant_expired', code: 'grant_expired' });
+  const vault = vaults.get(vaultKey(owner));
+  if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
+  const blob = blobs.get(blobKey({ owner, context_uri: vault.context_uri }));
+  res.status(200).json({
+    ok: true,
+    preview: {
+      owner,
+      grantee,
+      scope_hash,
+      context_uri: vault.context_uri,
+      byte_length: blob ? String(blob).length : 0
+    }
+  });
+});
+
 // Context request endpoint (dev stub)
 app.post('/context/request', (req, res) => {
   const { owner, grantee, scope_hash, payment } = req.body || {};

@@ -39,6 +39,10 @@ echovault grant
 # Optional: revoke grant
 echovault revoke
 
+# Preview context (metadata only)
+curl -X POST $ECHOVAULT_API/context/preview -H "Content-Type: application/json" \
+  -d '{"owner":"'$ECHOVAULT_OWNER'","grantee":"'$ECHOVAULT_GRANTEE'","scope_hash":"'$ECHOVAULT_SCOPE_HASH'"}'
+
 # Request context (returns 402 challenge)
 echovault request
 

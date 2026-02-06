@@ -115,6 +115,32 @@ GET /vault/grants?owner=OWNER
 }
 ```
 
+## POST /context/preview
+Returns a metadata-only preview if grant is valid.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "grantee": "GRANTEE",
+  "scope_hash": "SCOPE_HASH"
+}
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "preview": {
+    "owner": "OWNER",
+    "grantee": "GRANTEE",
+    "scope_hash": "SCOPE_HASH",
+    "context_uri": "ipfs://...",
+    "byte_length": 1234
+  }
+}
+```
+
 ## POST /context/request
 Request context. If payment is required, a 402 is returned.
 
