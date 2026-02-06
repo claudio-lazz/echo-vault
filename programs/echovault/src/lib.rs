@@ -27,9 +27,20 @@ pub mod echovault {
         Ok(())
     }
 
+    pub fn update_context_vault(ctx: Context<UpdateContextVault>, context_uri: String) -> Result<()> {
+        let vault = &mut ctx.accounts.vault;
+        vault.context_uri = context_uri;
+        vault.version = vault.version.saturating_add(1);
+        vault.updated_at = Clock::get()?.unix_timestamp;
+        Ok(())
+    }
+
     pub fn revoke_access(ctx: Context<RevokeAccess>) -> Result<()> {
         let grant = &mut ctx.accounts.grant;
         grant.revoked = true;
+        let registry = &mut ctx.accounts.registry;
+        registry.grant = grant.key();
+        registry.revoked_at = Clock::get()?.unix_timestamp;
         Ok(())
     }
 }
@@ -53,6 +64,12 @@ pub struct AccessGrant {
     pub created_at: i64,
 }
 
+#[account]
+pub struct RevocationRegistry {
+    pub grant: Pubkey,
+    pub revoked_at: i64,
+}
+
 impl ContextVault {
     pub const MAX_URI_LEN: usize = 256;
     pub const LEN: usize = 8 + 32 + 4 + Self::MAX_URI_LEN + 8 + 8 + 8;
@@ -60,6 +77,10 @@ impl ContextVault {
 
 impl AccessGrant {
     pub const LEN: usize = 8 + 32 + 32 + 32 + 8 + 1 + 8;
+}
+
+impl RevocationRegistry {
+    pub const LEN: usize = 8 + 32 + 8;
 }
 
 #[derive(Accounts)]
@@ -98,13 +119,36 @@ pub struct GrantAccess<'info> {
 }
 
 #[derive(Accounts)]
+pub struct UpdateContextVault<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"vault", owner.key().as_ref()],
+        bump,
+        has_one = owner
+    )]
+    pub vault: Account<'info, ContextVault>,
+}
+
+#[derive(Accounts)]
 pub struct RevokeAccess<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
     #[account(
         mut,
         seeds = [b"grant", grant.owner.as_ref(), grant.grantee.as_ref(), grant.scope_hash.as_ref()],
-        bump
+        bump,
+        has_one = owner
     )]
     pub grant: Account<'info, AccessGrant>,
+    #[account(
+        init,
+        payer = owner,
+        space = RevocationRegistry::LEN,
+        seeds = [b"revoke", grant.key().as_ref()],
+        bump
+    )]
+    pub registry: Account<'info, RevocationRegistry>,
+    pub system_program: Program<'info, System>,
 }
