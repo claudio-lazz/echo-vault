@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
-const { postJson } = require('./http');
+const { postJson, getJson } = require('./http');
 const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
 if (!cmd) {
-  console.log('echovault <init|grant|revoke|preview|request>');
+  console.log('echovault <status|init|grant|revoke|preview|request>');
   process.exit(0);
 }
 
 (async () => {
-  if (cmd === 'init') {
+  if (cmd === 'status') {
+    const { status, json } = await getJson(`${api}/status`);
+    if (json?.code) console.error('error', json.code);
+    console.log(status, json);
+  } else if (cmd === 'init') {
     const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
     const context_uri = process.env.ECHOVAULT_CONTEXT_URI || 'ipfs://encrypted-context-placeholder';
     const encrypted_blob = process.env.ECHOVAULT_ENCRYPTED_BLOB || 'ENCRYPTED_BLOB_PLACEHOLDER';

@@ -10,4 +10,10 @@ async function postJson(url, body) {
   return { status: res.status, json };
 }
 
-module.exports = { postJson };
+async function getJson(url) {
+  const res = await fetch(url);
+  const json = await res.json().catch(() => ({}));
+  return { status: res.status, json };
+}
+
+module.exports = { postJson, getJson };
