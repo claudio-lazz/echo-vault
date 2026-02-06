@@ -7,6 +7,10 @@ pub mod echovault {
     use super::*;
 
     pub fn init_context_vault(ctx: Context<InitContextVault>, context_uri: String) -> Result<()> {
+        require!(
+            context_uri.as_bytes().len() <= ContextVault::MAX_URI_LEN,
+            EchoVaultError::ContextUriTooLong
+        );
         let vault = &mut ctx.accounts.vault;
         vault.owner = ctx.accounts.owner.key();
         vault.context_uri = context_uri;
@@ -17,17 +21,24 @@ pub mod echovault {
     }
 
     pub fn grant_access(ctx: Context<GrantAccess>, scope_hash: [u8; 32], expires_at: i64) -> Result<()> {
+        require!(scope_hash != [0u8; 32], EchoVaultError::InvalidScopeHash);
+        let now = Clock::get()?.unix_timestamp;
+        require!(expires_at > now, EchoVaultError::InvalidExpiry);
         let grant = &mut ctx.accounts.grant;
         grant.owner = ctx.accounts.owner.key();
         grant.grantee = ctx.accounts.grantee.key();
         grant.scope_hash = scope_hash;
         grant.expires_at = expires_at;
         grant.revoked = false;
-        grant.created_at = Clock::get()?.unix_timestamp;
+        grant.created_at = now;
         Ok(())
     }
 
     pub fn update_context_vault(ctx: Context<UpdateContextVault>, context_uri: String) -> Result<()> {
+        require!(
+            context_uri.as_bytes().len() <= ContextVault::MAX_URI_LEN,
+            EchoVaultError::ContextUriTooLong
+        );
         let vault = &mut ctx.accounts.vault;
         vault.context_uri = context_uri;
         vault.version = vault.version.saturating_add(1);
@@ -37,6 +48,7 @@ pub mod echovault {
 
     pub fn revoke_access(ctx: Context<RevokeAccess>) -> Result<()> {
         let grant = &mut ctx.accounts.grant;
+        require!(!grant.revoked, EchoVaultError::AlreadyRevoked);
         grant.revoked = true;
         let registry = &mut ctx.accounts.registry;
         registry.grant = grant.key();
@@ -81,6 +93,18 @@ impl AccessGrant {
 
 impl RevocationRegistry {
     pub const LEN: usize = 8 + 32 + 8;
+}
+
+#[error_code]
+pub enum EchoVaultError {
+    #[msg("context_uri exceeds max length")]
+    ContextUriTooLong,
+    #[msg("scope_hash must be non-zero")]
+    InvalidScopeHash,
+    #[msg("expires_at must be in the future")]
+    InvalidExpiry,
+    #[msg("grant already revoked")]
+    AlreadyRevoked,
 }
 
 #[derive(Accounts)]
