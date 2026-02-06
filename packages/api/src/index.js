@@ -185,7 +185,8 @@ app.post('/context/preview', async (req, res) => {
       scope_hash,
       context_uri: vault.context_uri,
       byte_length: blob ? String(blob).length : 0,
-      source: 'dev'
+      source: 'dev',
+      storage: process.env.ECHOVAULT_STORAGE_DIR ? 'filesystem' : 'memory'
     }
   });
 });
