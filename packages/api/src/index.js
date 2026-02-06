@@ -6,6 +6,7 @@ const app = express();
 app.use(express.json());
 const { build402Challenge, verify402Payment } = require('./x402');
 const { validateOnchainGrant } = require('./solana');
+const { storeBlob, fetchBlob } = require('./storage');
 
 // Health
 app.get('/health', (_, res) => res.json({ ok: true }));
@@ -84,6 +85,7 @@ app.post('/vault/init', (req, res) => {
   };
   vaults.set(vaultKey(owner), vault);
   blobs.set(blobKey({ owner, context_uri: vault.context_uri }), vault.encrypted_blob);
+  storeBlob({ owner, context_uri: vault.context_uri, encrypted_blob: vault.encrypted_blob }).catch(() => null);
   saveStore();
   res.status(200).json({ ok: true, vault });
 });
@@ -216,11 +218,13 @@ app.post('/context/request', async (req, res) => {
     const vault = vaults.get(vaultKey(owner));
     if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
     const stored = blobs.get(blobKey({ owner, context_uri: vault.context_uri }));
-    res.status(200).json({
-      ok: true,
-      context_uri: vault.context_uri,
-      encrypted_blob: stored || vault.encrypted_blob,
-      meta: { owner, grantee, scope_hash, payment: verified, source: onchain.ok ? 'onchain' : 'dev' }
+    fetchBlob({ owner, context_uri: vault.context_uri }).then((diskBlob) => {
+      res.status(200).json({
+        ok: true,
+        context_uri: vault.context_uri,
+        encrypted_blob: diskBlob || stored || vault.encrypted_blob,
+        meta: { owner, grantee, scope_hash, payment: verified, source: onchain.ok ? 'onchain' : 'dev' }
+      });
     });
   });
 });

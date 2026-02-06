@@ -11,6 +11,10 @@ Set the following env vars to enable read-only on-chain grant validation:
 - `ECHOVAULT_PROGRAM_ID` — program id (defaults to Ech0VaulT11111111111111111111111111111111)
 - `ECHOVAULT_ONCHAIN_STRICT=true` — fail if on-chain grant is missing/invalid or RPC not configured (no dev fallback)
 
+## Storage adapter (dev)
+By default encrypted blobs are stored in-memory. A filesystem adapter is available:
+- `ECHOVAULT_STORAGE_DIR` — path to store encrypted blobs as JSON files (default: `./echovault-storage`)
+
 ## POST /dev/reset
 Clears dev in-memory + persisted store (dangerous).
 
