@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 const { build402Challenge, verify402Payment } = require('./x402');
+const { validateOnchainGrant } = require('./solana');
 
 // Health
 app.get('/health', (_, res) => res.json({ ok: true }));
@@ -132,10 +133,30 @@ app.get('/vault/grants', (req, res) => {
   res.status(200).json({ ok: true, grants: list });
 });
 
-// Context preview (dev stub)
-app.post('/context/preview', (req, res) => {
+// Context preview (dev stub + optional on-chain validation)
+app.post('/context/preview', async (req, res) => {
   const { owner, grantee, scope_hash } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
+
+  const strict = process.env.ECHOVAULT_ONCHAIN_STRICT === 'true';
+  const onchain = await validateOnchainGrant({ owner, grantee, scope_hash });
+  if (onchain.ok) {
+    return res.status(200).json({
+      ok: true,
+      preview: {
+        owner,
+        grantee,
+        scope_hash,
+        context_uri: 'onchain',
+        byte_length: 0,
+        source: 'onchain'
+      }
+    });
+  }
+  if (strict && onchain.reason !== 'onchain_not_configured') {
+    return res.status(403).json({ ok: false, reason: onchain.reason, code: onchain.reason });
+  }
+
   const key = grantKey({ owner, grantee, scope_hash });
   const grant = grants.get(key);
   if (!grant) return res.status(403).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
@@ -151,15 +172,25 @@ app.post('/context/preview', (req, res) => {
       grantee,
       scope_hash,
       context_uri: vault.context_uri,
-      byte_length: blob ? String(blob).length : 0
+      byte_length: blob ? String(blob).length : 0,
+      source: 'dev'
     }
   });
 });
 
-// Context request endpoint (dev stub)
-app.post('/context/request', (req, res) => {
+// Context request endpoint (dev stub + optional on-chain validation)
+app.post('/context/request', async (req, res) => {
   const { owner, grantee, scope_hash, payment } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
+
+  const strict = process.env.ECHOVAULT_ONCHAIN_STRICT === 'true';
+  const onchain = await validateOnchainGrant({ owner, grantee, scope_hash });
+  if (onchain.ok) {
+    if (!payment) return res.status(402).json(build402Challenge({ amount: 0.001, mint: 'USDC' }));
+  } else if (strict && onchain.reason !== 'onchain_not_configured') {
+    return res.status(403).json({ ok: false, reason: onchain.reason, code: onchain.reason });
+  }
+
   const key = grantKey({ owner, grantee, scope_hash });
   const grant = grants.get(key);
   if (!grant) return res.status(403).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
@@ -181,7 +212,7 @@ app.post('/context/request', (req, res) => {
       ok: true,
       context_uri: vault.context_uri,
       encrypted_blob: stored || vault.encrypted_blob,
-      meta: { owner, grantee, scope_hash, payment: verified }
+      meta: { owner, grantee, scope_hash, payment: verified, source: onchain.ok ? 'onchain' : 'dev' }
     });
   });
 });

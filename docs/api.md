@@ -5,6 +5,12 @@ Base URL: `http://localhost:8787`
 ## GET /status
 Returns dev store counts.
 
+## On-chain validation (optional)
+Set the following env vars to enable read-only on-chain grant validation:
+- `ECHOVAULT_ONCHAIN_RPC` — Solana RPC endpoint
+- `ECHOVAULT_PROGRAM_ID` — program id (defaults to Ech0VaulT11111111111111111111111111111111)
+- `ECHOVAULT_ONCHAIN_STRICT=true` — fail if on-chain grant is missing/invalid (no dev fallback)
+
 ## POST /dev/reset
 Clears dev in-memory + persisted store (dangerous).
 
