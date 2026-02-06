@@ -78,6 +78,8 @@ export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
 node scripts/e2e-encrypt-demo.js
 ```
 
+See `docs/demo-video-plan.md` for the recording checklist.
+
 ## API Reference (Dev Stub)
 See `docs/api.md` for request/response examples and error codes.
 
