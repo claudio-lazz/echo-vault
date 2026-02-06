@@ -81,6 +81,10 @@ node scripts/e2e-encrypt-demo.js
 ## API Reference (Dev Stub)
 See `docs/api.md` for request/response examples and error codes.
 
+## Runtime toggles (dev)
+- `ECHOVAULT_ONCHAIN_RPC` + `ECHOVAULT_PROGRAM_ID` + `ECHOVAULT_ONCHAIN_STRICT=true` to enforce on-chain grant validation.
+- `ECHOVAULT_STORAGE_DIR` to persist encrypted blobs to disk (filesystem adapter).
+
 ## Repo Layout
 - `programs/` — Solana programs (Anchor)
 - `packages/` — SDK + API + CLI
