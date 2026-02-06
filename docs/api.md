@@ -9,7 +9,7 @@ Returns dev store counts.
 Set the following env vars to enable read-only on-chain grant validation:
 - `ECHOVAULT_ONCHAIN_RPC` — Solana RPC endpoint
 - `ECHOVAULT_PROGRAM_ID` — program id (defaults to Ech0VaulT11111111111111111111111111111111)
-- `ECHOVAULT_ONCHAIN_STRICT=true` — fail if on-chain grant is missing/invalid (no dev fallback)
+- `ECHOVAULT_ONCHAIN_STRICT=true` — fail if on-chain grant is missing/invalid or RPC not configured (no dev fallback)
 
 ## POST /dev/reset
 Clears dev in-memory + persisted store (dangerous).

@@ -157,6 +157,10 @@ app.post('/context/preview', async (req, res) => {
     return res.status(403).json({ ok: false, reason: onchain.reason, code: onchain.reason });
   }
 
+  if (strict) {
+    return res.status(403).json({ ok: false, reason: 'onchain_not_configured', code: 'onchain_not_configured' });
+  }
+
   const key = grantKey({ owner, grantee, scope_hash });
   const grant = grants.get(key);
   if (!grant) return res.status(403).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
@@ -189,6 +193,10 @@ app.post('/context/request', async (req, res) => {
     if (!payment) return res.status(402).json(build402Challenge({ amount: 0.001, mint: 'USDC' }));
   } else if (strict && onchain.reason !== 'onchain_not_configured') {
     return res.status(403).json({ ok: false, reason: onchain.reason, code: onchain.reason });
+  }
+
+  if (strict) {
+    return res.status(403).json({ ok: false, reason: 'onchain_not_configured', code: 'onchain_not_configured' });
   }
 
   const key = grantKey({ owner, grantee, scope_hash });
