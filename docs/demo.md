@@ -39,6 +39,9 @@ node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
 # Use encrypted blob for init
 export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
 
+# End-to-end demo with encryption
+node scripts/e2e-encrypt-demo.js
+
 echovault init
 
 # Grant access (stub)

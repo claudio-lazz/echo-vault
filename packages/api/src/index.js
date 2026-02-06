@@ -85,9 +85,15 @@ app.post('/vault/init', (req, res) => {
   };
   vaults.set(vaultKey(owner), vault);
   blobs.set(blobKey({ owner, context_uri: vault.context_uri }), vault.encrypted_blob);
-  storeBlob({ owner, context_uri: vault.context_uri, encrypted_blob: vault.encrypted_blob }).catch(() => null);
-  saveStore();
-  res.status(200).json({ ok: true, vault });
+  storeBlob({ owner, context_uri: vault.context_uri, encrypted_blob: vault.encrypted_blob })
+    .then((stored) => {
+      saveStore();
+      res.status(200).json({ ok: true, vault: { ...vault, storage: stored?.location || null } });
+    })
+    .catch(() => {
+      saveStore();
+      res.status(200).json({ ok: true, vault });
+    });
 });
 
 // Vault fetch (dev stub)
