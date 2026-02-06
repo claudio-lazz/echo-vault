@@ -64,7 +64,7 @@ Agent
 - **Composable** with agent payments and on‑chain reputation
 
 ## Demo
-See `docs/demo.md` for the end‑to‑end walkthrough, or run:
+Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` for the end‑to‑end walkthrough, or run:
 
 ```bash
 node scripts/e2e-demo.js
