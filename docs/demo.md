@@ -40,8 +40,7 @@ echovault grant
 echovault revoke
 
 # Preview context (metadata only)
-curl -X POST $ECHOVAULT_API/context/preview -H "Content-Type: application/json" \
-  -d '{"owner":"'$ECHOVAULT_OWNER'","grantee":"'$ECHOVAULT_GRANTEE'","scope_hash":"'$ECHOVAULT_SCOPE_HASH'"}'
+echovault preview
 
 # Request context (returns 402 challenge)
 echovault request
@@ -61,11 +60,22 @@ echovault request
 
 ## SDK (minimal)
 ```js
-const { grantAccess, revokeAccess, requestContext, unwrapOrThrow } = require('@echovault/core-sdk');
+const {
+  grantAccess,
+  revokeAccess,
+  previewContext,
+  requestContext,
+  fetchContext,
+  decryptBlob,
+  unwrapOrThrow
+} = require('@echovault/core-sdk');
 
 const api = 'http://localhost:8787';
 const grant = await grantAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
 console.log('grant', grant.status, grant.json);
+
+const preview = await previewContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
+console.log('preview', preview.status, preview.json);
 
 // Optional: revoke grant and observe error handling
 await revokeAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
@@ -75,6 +85,10 @@ try {
   console.log('request', res.status, res.json);
   // or throw on errors:
   // const payload = unwrapOrThrow(res);
+
+  // helper path: fetch + decrypt stub
+  // const payload = await fetchContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api, payment: { txSig: 'TX_SIG', mint: 'USDC', amount: '0.001' } });
+  // const plaintext = decryptBlob({ encrypted_blob: payload.encrypted_blob, decryptor: (blob) => blob });
 } catch (e) {
   console.error('request failed', e.code, e.status);
 }
