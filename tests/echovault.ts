@@ -28,6 +28,33 @@ describe('echovault', () => {
     if (!grantPda || !revokePda) throw new Error('pda_derivation_failed');
   });
 
+  it('init + update vault (smoke)', async () => {
+    const owner = provider.wallet.publicKey;
+    const payer = provider.wallet.publicKey;
+    const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('vault'), owner.toBuffer()],
+      program.programId
+    );
+
+    await program.methods
+      .initContextVault('ipfs://initial')
+      .accounts({
+        payer,
+        owner,
+        vault: vaultPda,
+        systemProgram: anchor.web3.SystemProgram.programId
+      })
+      .rpc();
+
+    await program.methods
+      .updateContextVault('ipfs://updated')
+      .accounts({
+        owner,
+        vault: vaultPda
+      })
+      .rpc();
+  });
+
   it('grant + revoke flow (smoke)', async () => {
     const owner = provider.wallet.publicKey;
     const grantee = anchor.web3.Keypair.generate().publicKey;

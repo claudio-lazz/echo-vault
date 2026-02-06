@@ -28,7 +28,7 @@
 - `revoke_access(owner, grant)` → creates `RevocationRegistry`
 
 ## Tests (WIP)
-- `tests/echovault.ts` covers PDA derivation and grant→revoke smoke flow (Anchor).
+- `tests/echovault.ts` covers PDA derivation, init/update vault, and grant→revoke smoke flows (Anchor).
 
 ## Notes
 - Use append-only context events off-chain; on-chain references latest context state.
