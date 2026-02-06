@@ -32,6 +32,11 @@ export ECHOVAULT_ENCRYPTED_BLOB=ENCRYPTED_BLOB_PLACEHOLDER
 # Optional: enable filesystem storage adapter
 export ECHOVAULT_STORAGE_DIR=./echovault-storage
 
+# Optional: enforce on-chain validation (requires RPC + program id)
+export ECHOVAULT_ONCHAIN_RPC=https://api.devnet.solana.com
+export ECHOVAULT_PROGRAM_ID=Ech0VaulT11111111111111111111111111111111
+export ECHOVAULT_ONCHAIN_STRICT=true
+
 # Encrypt a blob locally (writes JSON to stdout)
 export ECHOVAULT_SECRET=dev-secret
 node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
