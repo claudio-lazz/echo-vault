@@ -23,6 +23,16 @@ app.get('/status', (_, res) => {
   });
 });
 
+// Dev reset (dangerous; clears in-memory + store)
+app.post('/dev/reset', (_, res) => {
+  vaults.clear();
+  grants.clear();
+  revoked.clear();
+  blobs.clear();
+  saveStore();
+  res.json({ ok: true });
+});
+
 // In-memory stores (dev stub)
 const vaults = new Map();
 const grants = new Map();

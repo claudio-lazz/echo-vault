@@ -5,6 +5,14 @@ Base URL: `http://localhost:8787`
 ## GET /status
 Returns dev store counts.
 
+## POST /dev/reset
+Clears dev in-memory + persisted store (dangerous).
+
+**Response**
+```json
+{ "ok": true }
+```
+
 **Response**
 ```json
 {

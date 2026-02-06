@@ -19,6 +19,9 @@ node scripts/e2e-demo.js
 # Run validation script (optional)
 node scripts/validate-e2e.js
 
+# Reset dev store (optional)
+curl -X POST http://localhost:8787/dev/reset
+
 # Init vault (stub)
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
 export ECHOVAULT_ENCRYPTED_BLOB=ENCRYPTED_BLOB_PLACEHOLDER
