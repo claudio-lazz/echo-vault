@@ -190,6 +190,14 @@ Request context. If payment is required, a 402 is returned.
 }
 ```
 
+## SDK Helpers (Dev Stub)
+The core SDK wraps these endpoints and provides a few helpers:
+- `previewContext` → POST `/context/preview`
+- `requestContext` → POST `/context/request`
+- `fetchContext` → request + `unwrapOrThrow`
+- `decryptBlob` → stub decrypt hook (pass your decryptor)
+- `unwrapOrThrow` → throws on non-OK responses
+
 ## Error Codes
 All 400/403/404/402 error responses include `reason` and `code`.
 
