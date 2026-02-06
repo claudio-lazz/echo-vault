@@ -29,6 +29,16 @@ echovault status
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
 export ECHOVAULT_ENCRYPTED_BLOB=ENCRYPTED_BLOB_PLACEHOLDER
 
+# Optional: enable filesystem storage adapter
+export ECHOVAULT_STORAGE_DIR=./echovault-storage
+
+# Encrypt a blob locally (writes JSON to stdout)
+export ECHOVAULT_SECRET=dev-secret
+node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
+
+# Use encrypted blob for init
+export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
+
 echovault init
 
 # Grant access (stub)
@@ -85,6 +95,7 @@ console.log('preview', preview.status, preview.json);
 // Example: encrypt locally before init
 const secret = process.env.ECHOVAULT_SECRET || 'dev-secret';
 const encrypted = encryptBlob({ plaintext: JSON.stringify({ hello: 'world' }), secret });
+// pass encrypted to /vault/init as encrypted_blob
 
 // Optional: revoke grant and observe error handling
 await revokeAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
