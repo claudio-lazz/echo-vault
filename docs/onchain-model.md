@@ -27,6 +27,9 @@
 - `grant_access(owner, grantee, scope_hash, expires_at)`
 - `revoke_access(owner, grant)` → creates `RevocationRegistry`
 
+## Tests (WIP)
+- `tests/echovault.ts` covers PDA derivation and grant→revoke smoke flow (Anchor).
+
 ## Notes
 - Use append-only context events off-chain; on-chain references latest context state.
 - Optional payment receipt link (x402) stored off-chain, verified by API.
