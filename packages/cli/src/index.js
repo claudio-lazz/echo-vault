@@ -5,7 +5,7 @@ const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
 if (!cmd) {
-  console.log('echovault <init|grant|revoke|request>');
+  console.log('echovault <init|grant|revoke|preview|request>');
   process.exit(0);
 }
 
@@ -30,6 +30,13 @@ if (!cmd) {
     const grantee = process.env.ECHOVAULT_GRANTEE || 'GRANTEE';
     const scope_hash = process.env.ECHOVAULT_SCOPE_HASH || 'SCOPE_HASH';
     const { status, json } = await postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
+    if (json?.code) console.error('error', json.code);
+    console.log(status, json);
+  } else if (cmd === 'preview') {
+    const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
+    const grantee = process.env.ECHOVAULT_GRANTEE || 'GRANTEE';
+    const scope_hash = process.env.ECHOVAULT_SCOPE_HASH || 'SCOPE_HASH';
+    const { status, json } = await postJson(`${api}/context/preview`, { owner, grantee, scope_hash });
     if (json?.code) console.error('error', json.code);
     console.log(status, json);
   } else if (cmd === 'request') {

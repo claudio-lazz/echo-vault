@@ -24,8 +24,22 @@ async function revokeAccess({ owner, grantee, scope_hash, api = defaultApi }) {
   return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
 }
 
+async function previewContext({ owner, grantee, scope_hash, api = defaultApi }) {
+  return postJson(`${api}/context/preview`, { owner, grantee, scope_hash });
+}
+
 async function requestContext({ owner, grantee, scope_hash, payment, api = defaultApi }) {
   return postJson(`${api}/context/request`, { owner, grantee, scope_hash, payment });
+}
+
+async function fetchContext({ owner, grantee, scope_hash, payment, api = defaultApi }) {
+  const result = await requestContext({ owner, grantee, scope_hash, payment, api });
+  return unwrapOrThrow(result);
+}
+
+function decryptBlob({ encrypted_blob, decryptor }) {
+  if (typeof decryptor === 'function') return decryptor(encrypted_blob);
+  return encrypted_blob;
 }
 
 function unwrapOrThrow(result) {
@@ -40,4 +54,13 @@ function unwrapOrThrow(result) {
   return result.json;
 }
 
-module.exports = { initVault, grantAccess, revokeAccess, requestContext, unwrapOrThrow };
+module.exports = {
+  initVault,
+  grantAccess,
+  revokeAccess,
+  previewContext,
+  requestContext,
+  fetchContext,
+  decryptBlob,
+  unwrapOrThrow
+};
