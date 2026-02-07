@@ -82,6 +82,11 @@ export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
 # init vault + encrypted blob
 npx echovault init
 
+# (optional) load context URI + encrypted blob from files
+export ECHOVAULT_CONTEXT_URI_PATH=/tmp/context-uri.txt
+export ECHOVAULT_ENCRYPTED_BLOB_PATH=/tmp/echovault-encrypted.json
+npx echovault init
+
 # fetch vault + list grants
 npx echovault vault
 npx echovault grants

@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'node:fs';
 import { postJson, getJson } from './http';
 
 type ApiError = { code?: string };
+
+function readEnvPath(key: string): string | undefined {
+  const path = process.env[key];
+  if (!path) return undefined;
+  return readFileSync(path, 'utf8').trim();
+}
 
 const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
@@ -19,8 +26,14 @@ if (!cmd) {
     console.log(status, json);
   } else if (cmd === 'init') {
     const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
-    const context_uri = process.env.ECHOVAULT_CONTEXT_URI || 'ipfs://encrypted-context-placeholder';
-    const encrypted_blob = process.env.ECHOVAULT_ENCRYPTED_BLOB || 'ENCRYPTED_BLOB_PLACEHOLDER';
+    const context_uri =
+      process.env.ECHOVAULT_CONTEXT_URI ||
+      readEnvPath('ECHOVAULT_CONTEXT_URI_PATH') ||
+      'ipfs://encrypted-context-placeholder';
+    const encrypted_blob =
+      process.env.ECHOVAULT_ENCRYPTED_BLOB ||
+      readEnvPath('ECHOVAULT_ENCRYPTED_BLOB_PATH') ||
+      'ENCRYPTED_BLOB_PLACEHOLDER';
     const { status, json } = await postJson<ApiError>(`${api}/vault/init`, { owner, context_uri, encrypted_blob });
     if (json?.code) console.error('error', json.code);
     console.log(status, json);
