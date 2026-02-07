@@ -70,6 +70,11 @@ Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` fo
 node scripts/e2e-demo.js
 ```
 
+One‑shot helper (starts API, waits for `/status`, runs encrypted demo, saves logs):
+```bash
+./scripts/demo-record.sh
+```
+
 ### Encrypted demo (AES‑GCM)
 ```bash
 export ECHOVAULT_SECRET=dev-secret
