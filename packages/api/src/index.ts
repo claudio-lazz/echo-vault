@@ -6,7 +6,7 @@ import { build402Challenge, verify402Payment } from './x402';
 import { validateOnchainGrant } from './solana';
 import { storeBlob, fetchBlob } from './storage';
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
 type Vault = {
@@ -272,4 +272,6 @@ app.post('/context/request', async (req: Request<{}, {}, ContextRequestBody>, re
 });
 
 const port = process.env.PORT || 8787;
-app.listen(port, () => console.log(`EchoVault API listening on ${port}`));
+if (require.main === module) {
+  app.listen(port, () => console.log(`EchoVault API listening on ${port}`));
+}
