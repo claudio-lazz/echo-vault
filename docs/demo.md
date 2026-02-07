@@ -1,5 +1,11 @@
 # EchoVault Demo (Draft)
 
+## One-shot recording helper
+```bash
+# Start API, run encrypted demo, save logs to demo-output/
+./scripts/demo-record.sh
+```
+
 ## Local API
 ```
 cd packages/api
