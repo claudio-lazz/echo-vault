@@ -21,10 +21,46 @@ export const mockAlerts = [
 ];
 
 export const mockRecords = [
-  { id: 'RC-901', owner: 'alpha-user', scope: 'profile:email', status: 'active', updated: '2m ago' },
-  { id: 'RC-883', owner: 'gpt-agent', scope: 'memory:long', status: 'active', updated: '8m ago' },
-  { id: 'RC-866', owner: 'vault-runner', scope: 'policy:grant', status: 'revoked', updated: '14m ago' }
+  {
+    id: 'RC-901',
+    owner: 'alpha-user',
+    scope: 'profile:email',
+    status: 'active',
+    updated: '2m ago',
+    grantee: 'vault-summarizer'
+  },
+  {
+    id: 'RC-883',
+    owner: 'gpt-agent',
+    scope: 'memory:long',
+    status: 'active',
+    updated: '8m ago',
+    grantee: 'insight-bot'
+  },
+  {
+    id: 'RC-866',
+    owner: 'vault-runner',
+    scope: 'policy:grant',
+    status: 'revoked',
+    updated: '14m ago',
+    grantee: 'policy-engine'
+  }
 ];
+
+export const mockRecordDetails = {
+  'RC-901': {
+    policyNote: 'PII encrypted at rest. Access limited to redact pipeline + audit bot.',
+    activity: ['Grant validated · 2m ago', 'Accessed by agent: vault-summarizer · 6m ago', 'Rotation check · 14m ago']
+  },
+  'RC-883': {
+    policyNote: 'Long-term memory shard guarded by threshold signatures.',
+    activity: ['Grant validated · 8m ago', 'Accessed by agent: insight-bot · 12m ago', 'Policy attestation · 28m ago']
+  },
+  'RC-866': {
+    policyNote: 'Revoked after policy drift. Pending reissue on owner approval.',
+    activity: ['Revoked by policy-engine · 14m ago', 'Alert sent to owner · 18m ago', 'Audit logged · 26m ago']
+  }
+};
 
 export const mockVaults = [
   { id: 'VA-102', owner: 'alpha-user', region: 'us-east', storageGB: 42, status: 'healthy' },

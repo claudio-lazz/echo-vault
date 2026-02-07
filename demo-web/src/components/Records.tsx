@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { mockRecords } from '../lib/mockData';
+import { mockRecordDetails, mockRecords } from '../lib/mockData';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
@@ -18,6 +18,11 @@ type StatusFilter = (typeof statusOptions)[number];
 type SortKey = (typeof sortOptions)[number]['value'];
 type RecordItem = (typeof mockRecords)[number] & { grantee?: string };
 
+type RecordDetail = {
+  policyNote: string;
+  activity: string[];
+};
+
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
 export function Records() {
@@ -27,6 +32,7 @@ export function Records() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   const liveRecords = useMemo<RecordItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -47,6 +53,50 @@ export function Records() {
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
   const records: RecordItem[] = usingLive && liveRecords.length ? liveRecords : (mockRecords as RecordItem[]);
+
+  const selectedDetail = useMemo<RecordDetail | null>(() => {
+    if (!selectedRecord) return null;
+    const detailMap = mockRecordDetails as Record<string, RecordDetail>;
+    return (
+      detailMap[selectedRecord.id] ?? {
+        policyNote: usingLive
+          ? 'Live grants are synced from the API. Policy notes will appear once attestation metadata is available.'
+          : 'Policy notes unavailable for this record.',
+        activity: [
+          `Grant status synced · ${selectedRecord.updated}`,
+          'Audit trail entry created · just now',
+          'Policy attestation pending'
+        ]
+      }
+    );
+  }, [selectedRecord, usingLive]);
+
+  const handleCopy = async (label: string, value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopyStatus(`${label} copied`);
+    } catch (error) {
+      console.error(error);
+      setCopyStatus('Copy unavailable');
+    } finally {
+      window.setTimeout(() => setCopyStatus(null), 1800);
+    }
+  };
+
+  const handleDownloadMetadata = (record: RecordItem) => {
+    const payload = {
+      generated_at: new Date().toISOString(),
+      record
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `echovault-record-${record.id.toLowerCase()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const filtered = useMemo(() => {
     const lowered = query.trim().toLowerCase();
@@ -203,37 +253,76 @@ export function Records() {
             </div>
 
             <div className="mt-6 space-y-4 text-sm">
-              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
-                <div className="text-xs text-[#9AA4B2]">Scope</div>
-                <div className="font-semibold text-white">{selectedRecord.scope}</div>
-              </div>
-              <div className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
-                <div>
-                  <div className="text-xs text-[#9AA4B2]">Status</div>
-                  <div className="text-white">{selectedRecord.status}</div>
+              {copyStatus && (
+                <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+                  {copyStatus}
                 </div>
-                <StatusPill label={selectedRecord.status} tone={selectedRecord.status === 'active' ? 'success' : 'danger'} />
-              </div>
+              )}
               <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
-                <div className="text-xs text-[#9AA4B2]">Last updated</div>
-                <div className="text-white">{selectedRecord.updated}</div>
+                <div className="text-xs text-[#9AA4B2]">Metadata</div>
+                <div className="mt-3 space-y-2 text-xs text-[#9AA4B2]">
+                  <div className="flex items-center justify-between">
+                    <span>Owner</span>
+                    <span className="text-white">{selectedRecord.owner}</span>
+                  </div>
+                  {selectedRecord.grantee && (
+                    <div className="flex items-center justify-between">
+                      <span>Grantee</span>
+                      <span className="text-white">{selectedRecord.grantee}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span>Scope</span>
+                    <span className="text-white">{selectedRecord.scope}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Status</span>
+                    <StatusPill label={selectedRecord.status} tone={selectedRecord.status === 'active' ? 'success' : 'danger'} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Last updated</span>
+                    <span className="text-white">{selectedRecord.updated}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Quick actions</div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleCopy('Owner', selectedRecord.owner)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Copy owner
+                  </button>
+                  <button
+                    onClick={() => handleCopy('Scope', selectedRecord.scope)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Copy scope
+                  </button>
+                  <button
+                    onClick={() => handleDownloadMetadata(selectedRecord)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Download metadata
+                  </button>
+                </div>
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Policy notes</div>
-                <div className="text-sm text-white">Encrypted with x402 payment guardrail. Auto-revokes on policy drift.</div>
+                <div className="text-sm text-white">{selectedDetail?.policyNote}</div>
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Recent activity</div>
                 <ul className="mt-2 space-y-2 text-xs text-[#9AA4B2]">
-                  <li>Grant validated · 2m ago</li>
-                  <li>Accessed by agent: vault-runner · 6m ago</li>
-                  <li>Policy checked · 9m ago</li>
+                  {selectedDetail?.activity.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
                 </ul>
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
-                <div className="text-xs text-[#9AA4B2]">Actions</div>
+                <div className="text-xs text-[#9AA4B2]">Governance</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Export metadata</button>
                   <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Rotate keys</button>
                   <button className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Revoke</button>
                 </div>
