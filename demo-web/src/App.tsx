@@ -16,6 +16,66 @@ const kpis = [
   { label: 'Ingestion Rate', value: '4.2k/min' }
 ]
 
+const grants = [
+  {
+    subject: 'alpha-agent',
+    scope: 'vault:product-design',
+    expires: '4h 12m',
+    status: 'Active'
+  },
+  {
+    subject: 'pilot-researcher',
+    scope: 'vault:market-intel',
+    expires: '11h 04m',
+    status: 'Expiring'
+  },
+  {
+    subject: 'sync-bot',
+    scope: 'vault:ops',
+    expires: '—',
+    status: 'Revoked'
+  }
+]
+
+const policies = [
+  {
+    title: 'PII redaction before export',
+    detail: 'Strip user identifiers from outbound summaries.'
+  },
+  {
+    title: 'Consent gate for cross-org reads',
+    detail: 'Require on-chain signature for every external request.'
+  },
+  {
+    title: 'Anomaly quarantine',
+    detail: 'Freeze grants on 3+ failed decrypt attempts.'
+  }
+]
+
+const auditEvents = [
+  {
+    action: 'Grant issued to alpha-agent',
+    detail: 'Scope: vault:product-design',
+    time: '2m ago'
+  },
+  {
+    action: 'Encrypted bundle sealed',
+    detail: 'Vault: market-intel',
+    time: '9m ago'
+  },
+  {
+    action: 'Revocation recorded',
+    detail: 'Sync-bot removed from ops vault',
+    time: '21m ago'
+  }
+]
+
+const statusStyles: Record<string, string> = {
+  Active: 'bg-emerald-500/20 text-emerald-200 border-emerald-500/30',
+  Expiring: 'bg-amber-500/20 text-amber-200 border-amber-500/30',
+  Revoked: 'bg-rose-500/20 text-rose-200 border-rose-500/30'
+}
+
 function App() {
   return (
     <div className="min-h-screen bg-[#0f1117] text-[#f4f6fa]">
@@ -99,6 +159,89 @@ function App() {
                   <button className="w-full rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-left">Encrypt payload</button>
                   <button className="w-full rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-left">Grant access</button>
                   <button className="w-full rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-left">Request context</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <div className="col-span-2 rounded-2xl border border-[#2A3040] bg-[#171B24] p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-[#9AA4B2]">Access grants</div>
+                    <div className="text-xs text-[#6B7280]">Live permissions with expiry tracking</div>
+                  </div>
+                  <button className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#9AA4B2]">
+                    Export
+                  </button>
+                </div>
+                <div className="mt-4 space-y-2 text-sm">
+                  {grants.map((grant) => (
+                    <div
+                      key={grant.subject}
+                      className="flex flex-col gap-2 rounded-xl border border-[#2A3040] bg-[#11141c] px-3 py-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-[#f4f6fa]">{grant.subject}</div>
+                        <div className="text-xs text-[#9AA4B2]">{grant.scope}</div>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-[#9AA4B2]">
+                        <span>Expires {grant.expires}</span>
+                        <span
+                          className={`rounded-full border px-2 py-1 text-[11px] ${statusStyles[grant.status]}`}
+                        >
+                          {grant.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#2A3040] bg-[#171B24] p-6">
+                <div className="text-sm text-[#9AA4B2]">Policy guardrails</div>
+                <div className="mt-4 space-y-3">
+                  {policies.map((policy) => (
+                    <div key={policy.title} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3">
+                      <div className="text-sm font-semibold text-[#f4f6fa]">{policy.title}</div>
+                      <div className="mt-1 text-xs text-[#9AA4B2]">{policy.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <div className="col-span-2 rounded-2xl border border-[#2A3040] bg-[#171B24] p-6">
+                <div className="text-sm text-[#9AA4B2]">Audit trail</div>
+                <div className="mt-4 space-y-3">
+                  {auditEvents.map((event) => (
+                    <div key={event.action} className="flex items-start gap-3">
+                      <div className="mt-1 h-2 w-2 rounded-full bg-[#3B3FEE]" />
+                      <div className="flex-1 rounded-xl border border-[#2A3040] bg-[#11141c] px-3 py-2 text-sm">
+                        <div className="font-semibold text-[#f4f6fa]">{event.action}</div>
+                        <div className="text-xs text-[#9AA4B2]">{event.detail}</div>
+                      </div>
+                      <div className="text-xs text-[#9AA4B2]">{event.time}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#2A3040] bg-[#171B24] p-6">
+                <div className="text-sm text-[#9AA4B2]">Pipeline health</div>
+                <div className="mt-4 space-y-3 text-sm">
+                  <div className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-3 py-2">
+                    <span>Decrypt latency</span>
+                    <span className="text-[#f4f6fa]">48ms</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-3 py-2">
+                    <span>Indexer lag</span>
+                    <span className="text-[#f4f6fa]">0.9 blocks</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-3 py-2">
+                    <span>Proof sync</span>
+                    <span className="text-[#f4f6fa]">Synced</span>
+                  </div>
                 </div>
               </div>
             </div>
