@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
 
@@ -46,6 +46,13 @@ const blobs = new Map<string, unknown>();
 const vaultKey = (owner: string) => owner;
 const grantKey = ({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: string }) => `${owner}:${grantee}:${scope_hash}`;
 const blobKey = ({ owner, context_uri }: { owner: string; context_uri: string }) => `${owner}:${context_uri}`;
+
+const grantStatus = (grant: Grant) => {
+  const key = grantKey(grant);
+  if (revoked.has(key)) return 'revoked';
+  if (grant.expires_at && Date.now() / 1000 > grant.expires_at) return 'expired';
+  return 'active';
+};
 
 const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
 
@@ -132,8 +139,9 @@ app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: st
 });
 
 // Vault fetch (dev stub)
-app.get('/vault/:owner', (req: Request<{ owner: string }>, res: Response) => {
+app.get('/vault/:owner', (req: Request<{ owner: string }>, res: Response, next: NextFunction) => {
   const owner = req.params.owner;
+  if (owner === 'grants') return next();
   const vault = vaults.get(vaultKey(owner));
   if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
   res.status(200).json({ ok: true, vault });
@@ -162,17 +170,47 @@ app.post('/vault/revoke', (req: Request<{}, {}, { owner?: string; grantee?: stri
   res.status(200).json({ ok: true, revoked: true });
 });
 
-// List grants (dev stub)
-app.get('/vault/grants', (req: Request<{}, {}, {}, { owner?: string; grantee?: string }>, res: Response) => {
+// Grant summary (dev stub)
+app.get('/vault/grants/summary', (req: Request<{}, {}, {}, { owner?: string; grantee?: string }>, res: Response) => {
   const { owner, grantee } = req.query || {};
   const list = Array.from(grants.values()).filter((grant) => {
     if (owner && grant.owner !== owner) return false;
     if (grantee && grant.grantee !== grantee) return false;
     return true;
-  }).map((grant) => ({
-    ...grant,
-    revoked: revoked.has(grantKey(grant))
-  }));
+  });
+  const counts = list.reduce(
+    (acc, grant) => {
+      const status = grantStatus(grant);
+      acc[status] += 1;
+      return acc;
+    },
+    { active: 0, revoked: 0, expired: 0 }
+  );
+  res.status(200).json({ ok: true, total: list.length, counts });
+});
+
+// List grants (dev stub)
+app.get('/vault/grants', (req: Request<{}, {}, {}, { owner?: string; grantee?: string; status?: string }>, res: Response) => {
+  const { owner, grantee, status } = req.query || {};
+  const allowedStatuses = new Set(['active', 'revoked', 'expired', 'all']);
+  if (status && !allowedStatuses.has(status)) {
+    return res.status(400).json({ ok: false, reason: 'invalid_status', code: 'invalid_status' });
+  }
+  const list = Array.from(grants.values())
+    .filter((grant) => {
+      if (owner && grant.owner !== owner) return false;
+      if (grantee && grant.grantee !== grantee) return false;
+      return true;
+    })
+    .map((grant) => ({
+      ...grant,
+      revoked: revoked.has(grantKey(grant)),
+      status: grantStatus(grant)
+    }))
+    .filter((grant) => {
+      if (!status || status === 'all') return true;
+      return grant.status === status;
+    });
   res.status(200).json({ ok: true, grants: list });
 });
 

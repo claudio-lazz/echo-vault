@@ -69,6 +69,56 @@ describe('api basic flow', () => {
     expect(revokedReq.status).toBe(403);
   });
 
+  it('filters grants by status and returns summary counts', async () => {
+    const owner = 'OWNER_STATUS';
+    const grantee = 'GRANTEE_STATUS';
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_ACTIVE', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_REVOKED', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_EXPIRED', expires_at: Math.floor(Date.now() / 1000) - 10 });
+
+    await request(server)
+      .post('/vault/revoke')
+      .send({ owner, grantee, scope_hash: 'SCOPE_REVOKED' });
+
+    const activeRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, status: 'active' });
+    expect(activeRes.status).toBe(200);
+    expect(activeRes.body?.grants?.length).toBe(1);
+    expect(activeRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_ACTIVE');
+
+    const revokedRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, status: 'revoked' });
+    expect(revokedRes.status).toBe(200);
+    expect(revokedRes.body?.grants?.length).toBe(1);
+    expect(revokedRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_REVOKED');
+
+    const expiredRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, status: 'expired' });
+    expect(expiredRes.status).toBe(200);
+    expect(expiredRes.body?.grants?.length).toBe(1);
+    expect(expiredRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_EXPIRED');
+
+    const summaryRes = await request(server)
+      .get('/vault/grants/summary')
+      .query({ owner });
+    expect(summaryRes.status).toBe(200);
+    expect(summaryRes.body?.counts?.active).toBe(1);
+    expect(summaryRes.body?.counts?.revoked).toBe(1);
+    expect(summaryRes.body?.counts?.expired).toBe(1);
+  });
+
   it('validates missing fields', async () => {
     const initRes = await request(server).post('/vault/init').send({ owner: 'O' });
     expect(initRes.status).toBe(400);

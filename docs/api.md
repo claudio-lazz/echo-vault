@@ -93,11 +93,13 @@ Grant access to a grantee.
 Revoke an access grant.
 
 ## GET /vault/grants
-List grants (filter by `owner` or `grantee`).
+List grants (filter by `owner`, `grantee`, or `status`).
+
+`status` values: `active`, `revoked`, `expired`, `all`.
 
 Example:
 ```
-GET /vault/grants?owner=OWNER
+GET /vault/grants?owner=OWNER&status=active
 ```
 
 **Response**
@@ -110,7 +112,8 @@ GET /vault/grants?owner=OWNER
       "grantee": "GRANTEE",
       "scope_hash": "SCOPE_HASH",
       "expires_at": 1730000000,
-      "revoked": false
+      "revoked": false,
+      "status": "active"
     }
   ]
 }
@@ -122,6 +125,27 @@ GET /vault/grants?owner=OWNER
   "owner": "OWNER",
   "grantee": "GRANTEE",
   "scope_hash": "SCOPE_HASH"
+}
+```
+
+## GET /vault/grants/summary
+Summarize grant counts by status (optional `owner`/`grantee` filters).
+
+Example:
+```
+GET /vault/grants/summary?owner=OWNER
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "total": 3,
+  "counts": {
+    "active": 1,
+    "revoked": 1,
+    "expired": 1
+  }
 }
 ```
 

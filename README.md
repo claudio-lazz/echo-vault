@@ -91,6 +91,11 @@ npx echovault init
 npx echovault vault
 npx echovault grants
 
+# filter grants + summarize
+export ECHOVAULT_GRANT_STATUS=active
+npx echovault grants
+npx echovault grants-summary
+
 # grant + preview + request
 npx echovault grant
 npx echovault preview
