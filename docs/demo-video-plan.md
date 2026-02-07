@@ -1,5 +1,7 @@
 # EchoVault Demo Video Plan (Draft)
 
+Tip: set `DEMO_OUTPUT_DIR` or `KEEP_API=true` when running `scripts/demo-record.sh` if you want custom log paths or to keep the API running after the demo.
+
 Goal: 2–3 minute walkthrough showing end-to-end encrypted context flow + on-chain grant checks.
 
 ## Outline

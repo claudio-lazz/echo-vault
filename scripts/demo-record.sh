@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUTPUT_DIR="${ROOT_DIR}/demo-output"
+OUTPUT_DIR=${DEMO_OUTPUT_DIR:-"${ROOT_DIR}/demo-output"}
 
 export ECHOVAULT_API=${ECHOVAULT_API:-http://localhost:8787}
 export ECHOVAULT_SECRET=${ECHOVAULT_SECRET:-dev-secret}
@@ -17,6 +17,9 @@ API_LOG="${OUTPUT_DIR}/api.log"
 DEMO_LOG="${OUTPUT_DIR}/demo.log"
 
 cleanup() {
+  if [[ "${KEEP_API:-}" == "true" ]]; then
+    return
+  fi
   if [[ -n "${API_PID:-}" ]] && kill -0 "$API_PID" 2>/dev/null; then
     kill "$API_PID"
   fi
