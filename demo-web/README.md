@@ -16,6 +16,18 @@ npm install
 npm run dev
 ```
 
+## Env options
+
+```bash
+# API base for live mode
+VITE_ECHOVAULT_API=https://your-api
+
+# Optional demo asset links for Demo Flow
+VITE_DEMO_LOGS_URL=https://your-demo-logs
+VITE_DEMO_OUTPUT_URL=https://your-demo-output
+VITE_DEMO_VIDEO_URL=https://your-demo-video
+```
+
 ## Build
 
 ```bash

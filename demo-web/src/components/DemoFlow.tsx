@@ -7,6 +7,9 @@ import { useVaultGrants } from '../lib/useVaultGrants';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 const apiRoot = apiBase?.replace(/\/$/, '');
+const demoLogsUrl = import.meta.env.VITE_DEMO_LOGS_URL as string | undefined;
+const demoOutputUrl = import.meta.env.VITE_DEMO_OUTPUT_URL as string | undefined;
+const demoVideoUrl = import.meta.env.VITE_DEMO_VIDEO_URL as string | undefined;
 
 type Step = {
   id: string;
@@ -71,6 +74,33 @@ const apiActions = apiRoot
       }
     ]
   : [];
+
+const demoAssets = [
+  demoLogsUrl
+    ? {
+        id: 'logs',
+        label: 'Demo logs',
+        description: 'Raw output from scripts/demo-record.sh or demo runs.',
+        url: demoLogsUrl
+      }
+    : null,
+  demoOutputUrl
+    ? {
+        id: 'output',
+        label: 'Demo output',
+        description: 'Recording artifacts, screenshots, or exported notes.',
+        url: demoOutputUrl
+      }
+    : null,
+  demoVideoUrl
+    ? {
+        id: 'video',
+        label: 'Demo video',
+        description: 'Latest recording for sharing and review.',
+        url: demoVideoUrl
+      }
+    : null
+].filter(Boolean) as Array<{ id: string; label: string; description: string; url: string }>;
 
 export function DemoFlow() {
   const { mode } = useDataMode();
@@ -169,7 +199,11 @@ export function DemoFlow() {
       .map((step) => `- ${step.title}: ${step.hint}`)
       .join('\n');
 
-    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Commands\n${commands || '- (none)'}\n\n## Notes\n- \n`;
+    const assets = demoAssets.length
+      ? demoAssets.map((asset) => `- ${asset.label}: ${asset.url}`).join('\n')
+      : '- (none)';
+
+    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Commands\n${commands || '- (none)'}\n\n## Demo assets\n${assets}\n\n## Notes\n- \n`;
   };
 
   const report = useMemo(buildReport, [completed, grants.error, grants.grants.length, grants.loading, mode, status.error, status.loading, status.status?.version]);
@@ -387,6 +421,47 @@ export function DemoFlow() {
                 </div>
                 <div className="mt-2 rounded-md border border-[#1c2333] bg-[#0b0f17] px-2 py-1 font-mono text-[11px] text-[#6AE4FF]">
                   {action.url}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {demoAssets.length > 0 && (
+        <SectionCard title="Demo assets" subtitle="Quick links to recordings and run artifacts">
+          <div className="grid gap-3 lg:grid-cols-3">
+            {demoAssets.map((asset) => (
+              <div
+                key={asset.id}
+                className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-semibold text-white">{asset.label}</div>
+                    <div className="mt-1 text-[#9AA4B2]">{asset.description}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="rounded-lg border border-[#2A3040] px-2 py-1 text-[11px] text-[#9AA4B2]"
+                      onClick={() => window.open(asset.url, '_blank', 'noopener,noreferrer')}
+                    >
+                      Open
+                    </button>
+                    <button
+                      className="rounded-lg border border-[#2A3040] px-2 py-1 text-[11px] text-[#9AA4B2]"
+                      onClick={() => copyCommand(asset.url, asset.id)}
+                    >
+                      {commandCopy === asset.id
+                        ? 'Copied'
+                        : commandCopy === 'error'
+                          ? 'Copy failed'
+                          : 'Copy link'}
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 rounded-md border border-[#1c2333] bg-[#0b0f17] px-2 py-1 font-mono text-[11px] text-[#6AE4FF]">
+                  {asset.url}
                 </div>
               </div>
             ))}
