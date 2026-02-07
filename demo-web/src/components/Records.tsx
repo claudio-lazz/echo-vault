@@ -38,7 +38,7 @@ export function Records() {
     if (!grantsState.grants.length) return [];
     return grantsState.grants.map((grant, index) => {
       const expired = grant.expires_at ? grant.expires_at * 1000 < Date.now() : false;
-      const status = grant.revoked || expired ? 'revoked' : 'active';
+      const status = grant.status ?? (grant.revoked || expired ? 'revoked' : 'active');
       const updated = grant.expires_at ? `expires ${new Date(grant.expires_at * 1000).toLocaleDateString()}` : 'live';
       return {
         id: `GR-${String(index + 1).padStart(3, '0')}`,

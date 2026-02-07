@@ -4,12 +4,14 @@ import { StatCard } from './StatCard';
 import { StatusPill } from './StatusPill';
 import { useDataMode } from '../lib/dataMode';
 import { useApiStatus } from '../lib/useApiStatus';
+import { useGrantSummary } from '../lib/useGrantSummary';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
 export function Overview() {
   const { mode } = useDataMode();
   const status = useApiStatus(apiBase, mode === 'live');
+  const grantSummary = useGrantSummary(apiBase, mode === 'live');
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -28,6 +30,32 @@ export function Overview() {
               {status.loading && 'Checking...'}
               {!status.loading && status.error && `Unavailable (${status.error})`}
               {!status.loading && status.status && `OK ${status.status.version ?? ''}`.trim()}
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
+      {mode === 'live' && (
+        <SectionCard title="Live grant summary" subtitle="/vault/grants/summary">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'VITE_ECHOVAULT_API not set.'}</div>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white">
+              {grantSummary.loading && (
+                <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Loading…</div>
+              )}
+              {!grantSummary.loading && grantSummary.error && (
+                <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">
+                  Unavailable ({grantSummary.error})
+                </div>
+              )}
+              {!grantSummary.loading && grantSummary.summary && (
+                <>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Active: {grantSummary.summary.counts.active}</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Revoked: {grantSummary.summary.counts.revoked}</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Expired: {grantSummary.summary.counts.expired}</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Total: {grantSummary.summary.total}</div>
+                </>
+              )}
             </div>
           </div>
         </SectionCard>

@@ -6,6 +6,7 @@ type Grant = {
   scope_hash: string;
   expires_at: number | null;
   revoked?: boolean;
+  status?: 'active' | 'revoked' | 'expired';
 };
 
 type GrantState = {
