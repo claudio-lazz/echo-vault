@@ -131,5 +131,26 @@ export const mockUsage = {
     { label: 'Nov', spend: 61.7 },
     { label: 'Dec', spend: 63.9 },
     { label: 'Jan', spend: 64.2 }
+  ],
+  forecast: [
+    { label: 'Feb', spend: 66.1, risk: 'steady' },
+    { label: 'Mar', spend: 68.4, risk: 'warning' },
+    { label: 'Apr', spend: 71.2, risk: 'warning' }
+  ],
+  anomalies: [
+    {
+      id: 'AN-7',
+      title: 'Egress spike on Riven Capital',
+      detail: 'Usage jumped 38% after nightly batch window.',
+      impact: 'Est. +$4.8k/month',
+      status: 'investigating'
+    },
+    {
+      id: 'AN-9',
+      title: 'Atlas Studio retention drift',
+      detail: 'Retention policy exceeded 210 days on EU vaults.',
+      impact: 'Compliance risk',
+      status: 'needs review'
+    }
   ]
 };

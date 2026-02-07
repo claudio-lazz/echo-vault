@@ -13,6 +13,7 @@ export function Usage() {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const maxTrend = Math.max(...mockUsage.trend.map((item) => item.spend));
+  const maxForecast = Math.max(...mockUsage.forecast.map((item) => item.spend));
 
   const report = useMemo(() => {
     const now = new Date().toISOString();
@@ -26,6 +27,12 @@ export function Usage() {
       .map((item) => `- ${item.title} [${item.priority}] — ${item.detail}`)
       .join('\n');
     const trend = mockUsage.trend.map((item) => `- ${item.label}: $${item.spend}k`).join('\n');
+    const forecast = mockUsage.forecast
+      .map((item) => `- ${item.label}: $${item.spend}k (${item.risk})`)
+      .join('\n');
+    const anomalies = mockUsage.anomalies
+      .map((item) => `- ${item.title} · ${item.impact} · ${item.status}`)
+      .join('\n');
     const statusLine = mode === 'live'
       ? status.loading
         ? 'API status: checking'
@@ -36,7 +43,7 @@ export function Usage() {
             : 'API status: unknown'
       : 'API status: mock';
 
-    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'not set'}\n- ${statusLine}\n- Monthly burn: $${mockUsage.monthlyBurn}k\n- Edge egress: ${mockUsage.egressTB} TB\n- Retention policy: ${mockUsage.retentionDays} days\n- Active tenants: ${mockUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
+    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'not set'}\n- ${statusLine}\n- Monthly burn: $${mockUsage.monthlyBurn}k\n- Edge egress: ${mockUsage.egressTB} TB\n- Retention policy: ${mockUsage.retentionDays} days\n- Active tenants: ${mockUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Forecast (next 3 months)\n${forecast}\n\n## Anomaly watch\n${anomalies}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
   }, [apiBase, mode, status.error, status.loading, status.status?.version]);
 
   const copyReport = async () => {
@@ -149,6 +156,44 @@ export function Usage() {
           ))}
         </div>
       </SectionCard>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <SectionCard title="Spend forecast" subtitle="Projected burn next quarter">
+          <div className="flex flex-wrap items-end gap-3">
+            {mockUsage.forecast.map((item) => {
+              const tone = item.risk === 'warning' ? 'warning' : 'success';
+              return (
+                <div key={item.label} className="flex flex-col items-center gap-2 text-xs text-[#9AA4B2]">
+                  <div className="flex h-24 w-10 items-end rounded-lg bg-[#1c2230]">
+                    <div
+                      className="w-full rounded-lg bg-[#6AE4FF]/70"
+                      style={{ height: `${Math.max(8, Math.round((item.spend / maxForecast) * 100))}%` }}
+                    />
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wide">{item.label}</div>
+                  <div className="text-[10px] text-[#6b7280]">${item.spend}k</div>
+                  <StatusPill label={item.risk} tone={tone} />
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Anomaly watch" subtitle="Spend or policy deviations needing attention">
+          <div className="space-y-3">
+            {mockUsage.anomalies.map((item) => (
+              <div key={item.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-white">{item.title}</span>
+                  <StatusPill label={item.status} tone={item.status === 'investigating' ? 'warning' : 'info'} />
+                </div>
+                <div className="mt-2 text-xs text-[#9AA4B2]">{item.detail}</div>
+                <div className="mt-2 text-xs text-[#8B95A7]">Impact: {item.impact}</div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      </div>
 
       <SectionCard title="Usage report" subtitle="Copy or download a markdown snapshot for updates">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
