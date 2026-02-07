@@ -27,6 +27,7 @@ cleanup() {
 trap cleanup EXIT
 
 printf "Starting API...\n"
+printf "Logs: %s (override with DEMO_OUTPUT_DIR). KEEP_API=%s\n" "$OUTPUT_DIR" "${KEEP_API:-false}"
 node "${ROOT_DIR}/packages/api/src/index.js" >"${API_LOG}" 2>&1 &
 API_PID=$!
 
