@@ -18,6 +18,7 @@ export function Alerts() {
   const [query, setQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [selectedAlert, setSelectedAlert] = useState<AlertItem | null>(null);
+  const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
 
   const liveAlerts = useMemo<AlertItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -64,6 +65,32 @@ export function Alerts() {
     }
     return acc;
   }, {});
+
+  const buildAlertSummary = (alert: AlertItem) => {
+    const now = new Date().toISOString();
+    return `# EchoVault alert briefing\n\n- Generated: ${now}\n- Mode: ${usingLive ? 'Live' : 'Mock'}\n- Alert ID: ${alert.id}\n- Title: ${alert.title}\n- Severity: ${alert.severity}\n- Time: ${alert.time}\n\n## System context\nPolicy engine detected a delta between scope hash and current on-chain grant.\n\n## Recommended response\n- Notify grant owner and request re-auth.\n- Inspect access trail for repeated anomalies.\n- Rotate vault key if anomaly persists.\n\n## Notes\n- `;
+  };
+
+  const copyAlertSummary = async (alert: AlertItem) => {
+    try {
+      await navigator.clipboard.writeText(buildAlertSummary(alert));
+      setDrawerNotice('Alert summary copied');
+    } catch {
+      setDrawerNotice('Copy failed');
+    } finally {
+      window.setTimeout(() => setDrawerNotice(null), 1600);
+    }
+  };
+
+  const downloadAlertSummary = (alert: AlertItem) => {
+    const blob = new Blob([buildAlertSummary(alert)], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `echovault-alert-${alert.id.toLowerCase()}.md`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -170,6 +197,26 @@ export function Alerts() {
                   <li>Inspect access trail for repeated anomalies.</li>
                   <li>Rotate vault key if anomaly persists.</li>
                 </ul>
+              </div>
+              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-[#9AA4B2]">Alert report</div>
+                  {drawerNotice && <span className="text-[11px] text-[#9AA4B2]">{drawerNotice}</span>}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => copyAlertSummary(selectedAlert)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Copy summary
+                  </button>
+                  <button
+                    onClick={() => downloadAlertSummary(selectedAlert)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Download markdown
+                  </button>
+                </div>
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Actions</div>
