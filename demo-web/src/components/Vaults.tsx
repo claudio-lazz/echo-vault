@@ -1,26 +1,156 @@
+import { useMemo, useState } from 'react';
+import { useDataMode } from '../lib/dataMode';
 import { mockVaults } from '../lib/mockData';
+import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
+const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
+
+type VaultItem = (typeof mockVaults)[number] & {
+  grants?: number;
+  lastActivity?: string;
+};
+
 export function Vaults() {
+  const { mode } = useDataMode();
+  const grantsState = useVaultGrants(apiBase, mode === 'live');
+  const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
+
+  const liveVaults = useMemo<VaultItem[]>(() => {
+    if (!grantsState.grants.length) return [];
+    const grouped = new Map<string, { count: number; revoked: number; latestExpiry?: number | null }>();
+    grantsState.grants.forEach((grant) => {
+      const entry = grouped.get(grant.owner) || { count: 0, revoked: 0, latestExpiry: null };
+      entry.count += 1;
+      if (grant.revoked) entry.revoked += 1;
+      if (grant.expires_at && (!entry.latestExpiry || grant.expires_at > entry.latestExpiry)) {
+        entry.latestExpiry = grant.expires_at;
+      }
+      grouped.set(grant.owner, entry);
+    });
+
+    return Array.from(grouped.entries()).map(([owner, stats], index) => {
+      const storageGB = Math.max(12, stats.count * 6);
+      const status = stats.revoked > 0 ? 'degraded' : 'healthy';
+      const expiry = stats.latestExpiry ? new Date(stats.latestExpiry * 1000).toLocaleDateString() : 'no expiry';
+      return {
+        id: `VA-L${String(index + 1).padStart(2, '0')}`,
+        owner,
+        region: 'multi-region',
+        storageGB,
+        status,
+        grants: stats.count,
+        lastActivity: `latest expiry ${expiry}`
+      };
+    });
+  }, [grantsState.grants]);
+
+  const usingLive = mode === 'live' && !grantsState.error && apiBase;
+  const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : mockVaults;
+
   return (
     <section className="space-y-6 px-8 py-6">
       <SectionCard title="Vault inventory" subtitle="Active vaults across regions">
+        {mode === 'live' && (
+          <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+            {grantsState.loading && 'Loading live vault summaries...'}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${vaults.length} vaults).`}
+            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+          </div>
+        )}
         <div className="space-y-3 text-sm">
-          {mockVaults.map((vault) => (
-            <div key={vault.id} className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+          {vaults.map((vault) => (
+            <div key={vault.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
               <div>
                 <div className="font-semibold text-white">{vault.id}</div>
                 <div className="text-xs text-[#9AA4B2]">{vault.owner} · {vault.region}</div>
+                {vault.lastActivity && (
+                  <div className="text-xs text-[#6E7683]">{vault.lastActivity}</div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-xs text-[#9AA4B2]">{vault.storageGB} GB</div>
                 <StatusPill label={vault.status} tone={vault.status === 'healthy' ? 'success' : 'warning'} />
+                <button
+                  onClick={() => setSelectedVault(vault)}
+                  className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-2.5 py-1 text-[11px] text-white"
+                >
+                  View
+                </button>
               </div>
             </div>
           ))}
         </div>
       </SectionCard>
+
+      {selectedVault && (
+        <div className="fixed inset-0 z-40">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setSelectedVault(null)}
+          />
+          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-[#9AA4B2]">Vault</div>
+                <div className="text-xl font-semibold text-white">{selectedVault.id}</div>
+                <div className="text-xs text-[#9AA4B2]">Owner: {selectedVault.owner}</div>
+                <div className="text-xs text-[#9AA4B2]">Region: {selectedVault.region}</div>
+              </div>
+              <button
+                onClick={() => setSelectedVault(null)}
+                className="rounded-lg border border-[#2A3040] bg-[#11141c] px-2.5 py-1 text-xs"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4 text-sm">
+              <div className="flex items-center justify-between rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div>
+                  <div className="text-xs text-[#9AA4B2]">Status</div>
+                  <div className="text-white">{selectedVault.status}</div>
+                </div>
+                <StatusPill label={selectedVault.status} tone={selectedVault.status === 'healthy' ? 'success' : 'warning'} />
+              </div>
+              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Storage usage</div>
+                <div className="text-white">{selectedVault.storageGB} GB</div>
+              </div>
+              {selectedVault.grants !== undefined && (
+                <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                  <div className="text-xs text-[#9AA4B2]">Active grants</div>
+                  <div className="text-white">{selectedVault.grants}</div>
+                </div>
+              )}
+              {selectedVault.lastActivity && (
+                <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                  <div className="text-xs text-[#9AA4B2]">Latest activity</div>
+                  <div className="text-white">{selectedVault.lastActivity}</div>
+                </div>
+              )}
+              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Integrity signals</div>
+                <ul className="mt-2 space-y-2 text-xs text-[#9AA4B2]">
+                  <li>Attestation checks passing</li>
+                  <li>Storage adapter: filesystem</li>
+                  <li>On-chain strict mode: enabled</li>
+                </ul>
+              </div>
+              <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Actions</div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Run integrity scan</button>
+                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Rotate encryption keys</button>
+                  <button className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Quarantine vault</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
