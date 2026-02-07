@@ -3,9 +3,16 @@ import { SectionCard } from './SectionCard';
 import { StatCard } from './StatCard';
 import { StatusPill } from './StatusPill';
 import { mockUsage } from '../lib/mockData';
+import { useDataMode } from '../lib/dataMode';
+import { useApiStatus } from '../lib/useApiStatus';
 
 export function Usage() {
+  const { mode } = useDataMode();
+  const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
+  const status = useApiStatus(apiBase, mode === 'live');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  const maxTrend = Math.max(...mockUsage.trend.map((item) => item.spend));
 
   const report = useMemo(() => {
     const now = new Date().toISOString();
@@ -18,9 +25,19 @@ export function Usage() {
     const optimizations = mockUsage.optimization
       .map((item) => `- ${item.title} [${item.priority}] — ${item.detail}`)
       .join('\n');
+    const trend = mockUsage.trend.map((item) => `- ${item.label}: $${item.spend}k`).join('\n');
+    const statusLine = mode === 'live'
+      ? status.loading
+        ? 'API status: checking'
+        : status.error
+          ? `API status: unavailable (${status.error})`
+          : status.status
+            ? `API status: ok${status.status.version ? ` (${status.status.version})` : ''}`
+            : 'API status: unknown'
+      : 'API status: mock';
 
-    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Monthly burn: $${mockUsage.monthlyBurn}k\n- Edge egress: ${mockUsage.egressTB} TB\n- Retention policy: ${mockUsage.retentionDays} days\n- Active tenants: ${mockUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
-  }, []);
+    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'not set'}\n- ${statusLine}\n- Monthly burn: $${mockUsage.monthlyBurn}k\n- Edge egress: ${mockUsage.egressTB} TB\n- Retention policy: ${mockUsage.retentionDays} days\n- Active tenants: ${mockUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
+  }, [apiBase, mode, status.error, status.loading, status.status?.version]);
 
   const copyReport = async () => {
     try {
@@ -51,6 +68,19 @@ export function Usage() {
         <StatCard label="Retention" value={`${mockUsage.retentionDays} days`} subLabel="Policy default" />
         <StatCard label="Active Tenants" value={mockUsage.topTenants.length} subLabel="Top spenders" />
       </div>
+
+      {mode === 'live' && (
+        <div className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-xs text-[#9AA4B2]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span>Live usage metrics are not available yet. Showing mock data.</span>
+            <span>
+              {status.loading && 'Checking /status...'}
+              {!status.loading && status.error && `API unavailable (${status.error}).`}
+              {!status.loading && status.status && `API ok${status.status.version ? ` (${status.status.version})` : ''}.`}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SectionCard title="Spend breakdown" subtitle="Where the burn lands">
@@ -102,6 +132,23 @@ export function Usage() {
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard title="Spend trend" subtitle="Last 6 months burn">
+        <div className="flex flex-wrap items-end gap-3">
+          {mockUsage.trend.map((item) => (
+            <div key={item.label} className="flex flex-col items-center gap-1 text-xs text-[#9AA4B2]">
+              <div className="flex h-24 w-8 items-end rounded-lg bg-[#1c2230]">
+                <div
+                  className="w-full rounded-lg bg-[#3B3FEE]/70"
+                  style={{ height: `${Math.max(8, Math.round((item.spend / maxTrend) * 100))}%` }}
+                />
+              </div>
+              <div className="text-[10px] uppercase tracking-wide">{item.label}</div>
+              <div className="text-[10px] text-[#6b7280]">${item.spend}k</div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
 
       <SectionCard title="Usage report" subtitle="Copy or download a markdown snapshot for updates">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">

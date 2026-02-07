@@ -123,5 +123,13 @@ export const mockUsage = {
     { id: 'OP-9', title: 'Cache hot vault slices', priority: 'critical', detail: 'Projected 12% savings on edge egress.' },
     { id: 'OP-11', title: 'Tier cold vaults', priority: 'warning', detail: 'Move 4 tenants to glacier tier after 45 days.' },
     { id: 'OP-15', title: 'Batch grant sync', priority: 'warning', detail: 'Reduce attestation overhead by 18%.' }
+  ],
+  trend: [
+    { label: 'Aug', spend: 52.4 },
+    { label: 'Sep', spend: 56.8 },
+    { label: 'Oct', spend: 59.3 },
+    { label: 'Nov', spend: 61.7 },
+    { label: 'Dec', spend: 63.9 },
+    { label: 'Jan', spend: 64.2 }
   ]
 };
