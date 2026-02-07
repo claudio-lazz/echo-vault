@@ -1,5 +1,6 @@
 const navItems = [
   { label: 'Overview', id: 'overview' },
+  { label: 'Demo Flow', id: 'demo' },
   { label: 'Vaults', id: 'vaults' },
   { label: 'Records', id: 'records' },
   { label: 'Alerts', id: 'alerts' },

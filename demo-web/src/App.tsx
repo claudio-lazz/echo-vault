@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { Overview } from './components/Overview';
+import { DemoFlow } from './components/DemoFlow';
 import { Vaults } from './components/Vaults';
 import { Records } from './components/Records';
 import { Alerts } from './components/Alerts';
@@ -15,7 +16,8 @@ import { DataModeProvider } from './lib/dataMode';
 
 const pages: Record<string, React.ReactNode> = {
   overview: <Overview />,
-  vaults: <Vaults />,
+  demo: <DemoFlow />,
+  vaults: <Vaults />, 
   records: <Records />,
   alerts: <Alerts />,
   audit: <Audit />,
@@ -26,6 +28,7 @@ const pages: Record<string, React.ReactNode> = {
 
 const pageTitles: Record<string, string> = {
   overview: 'Overview',
+  demo: 'Demo Flow',
   vaults: 'Vaults',
   records: 'Records',
   alerts: 'Alerts',
