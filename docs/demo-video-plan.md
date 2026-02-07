@@ -26,10 +26,10 @@ Goal: 2–3 minute walkthrough showing end-to-end encrypted context flow + on-ch
 ## Recording checklist
 - [ ] Terminal zoomed (font size 16–18)
 - [ ] Environment variables pre-set in `.env`
-- [ ] `node packages/api/src/index.js` running
-- [ ] `node scripts/e2e-encrypt-demo.js` ready
+- [ ] API + demo run via `scripts/demo-record.sh`
 - [ ] Short slide/diagram (optional) for PDAs
 - [ ] Capture output showing encrypted blob + decrypted plaintext
+- [ ] Keep `demo-output/demo.log` handy for quick replays
 
 ## Key commands
 ```bash
@@ -40,6 +40,6 @@ export ECHOVAULT_GRANTEE=GRANTEE
 export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
 export ECHOVAULT_STORAGE_DIR=./echovault-storage
 
-node packages/api/src/index.js
-node scripts/e2e-encrypt-demo.js
+# one-shot run (starts API, waits, runs demo, saves logs)
+./scripts/demo-record.sh
 ```
