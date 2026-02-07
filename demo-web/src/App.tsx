@@ -10,6 +10,7 @@ import { Alerts } from './components/Alerts';
 import { Audit } from './components/Audit';
 import { Settings } from './components/Settings';
 import { AccessGrants } from './components/AccessGrants';
+import { Playbooks } from './components/Playbooks';
 import { DataModeProvider } from './lib/dataMode';
 
 const pages: Record<string, React.ReactNode> = {
@@ -19,6 +20,7 @@ const pages: Record<string, React.ReactNode> = {
   alerts: <Alerts />,
   audit: <Audit />,
   grants: <AccessGrants />,
+  playbooks: <Playbooks />,
   settings: <Settings />
 };
 
@@ -29,6 +31,7 @@ const pageTitles: Record<string, string> = {
   alerts: 'Alerts',
   audit: 'Audit Trail',
   grants: 'Access Grants',
+  playbooks: 'Playbooks',
   settings: 'Settings'
 };
 

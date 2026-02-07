@@ -5,6 +5,7 @@ const navItems = [
   { label: 'Alerts', id: 'alerts' },
   { label: 'Audit', id: 'audit' },
   { label: 'Access Grants', id: 'grants' },
+  { label: 'Playbooks', id: 'playbooks' },
   { label: 'Settings', id: 'settings' }
 ];
 

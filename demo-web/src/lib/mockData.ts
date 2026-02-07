@@ -37,3 +37,33 @@ export const mockAudit = [
   { id: 'AU-772', actor: 'vault-service', action: 'vault_initialized', detail: 'owner: alpha-user', time: '12m ago' },
   { id: 'AU-773', actor: 'policy-engine', action: 'grant_revoked', detail: 'scope_hash: policy:grant', time: '32m ago' }
 ];
+
+export const mockPlaybooks = [
+  {
+    id: 'PB-204',
+    name: 'Grant leakage containment',
+    trigger: 'Risk score > 0.82',
+    owner: 'policy-engine',
+    status: 'healthy',
+    lastRun: '11m ago',
+    steps: ['Quarantine grant', 'Snapshot vault', 'Notify owner']
+  },
+  {
+    id: 'PB-207',
+    name: 'Vault integrity check',
+    trigger: 'Integrity drift > 2%',
+    owner: 'vault-service',
+    status: 'healthy',
+    lastRun: '24m ago',
+    steps: ['Run attestation', 'Rotate keys', 'Escalate if failed']
+  },
+  {
+    id: 'PB-211',
+    name: 'API throttle guard',
+    trigger: 'Burst > 4k/min',
+    owner: 'edge-router',
+    status: 'warning',
+    lastRun: '45m ago',
+    steps: ['Apply rate limit', 'Warm standby', 'Open incident']
+  }
+];
