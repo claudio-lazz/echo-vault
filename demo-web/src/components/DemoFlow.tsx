@@ -53,6 +53,7 @@ export function DemoFlow() {
   const grants = useVaultGrants(apiBase, mode === 'live');
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const [commandCopy, setCommandCopy] = useState<string | null>(null);
 
   const completionCount = useMemo(
     () => steps.filter((step) => completed[step.id]).length,
@@ -97,7 +98,12 @@ export function DemoFlow() {
       })
       .join('\n');
 
-    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Notes\n- \n`;
+    const commands = steps
+      .filter((step) => step.hint)
+      .map((step) => `- ${step.title}: ${step.hint}`)
+      .join('\n');
+
+    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Commands\n${commands || '- (none)'}\n\n## Notes\n- \n`;
   };
 
   const report = useMemo(buildReport, [completed, grants.error, grants.grants.length, grants.loading, mode, status.error, status.loading, status.status?.version]);
@@ -122,6 +128,26 @@ export function DemoFlow() {
     anchor.click();
     URL.revokeObjectURL(url);
   };
+
+  const copyCommand = async (value: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCommandCopy(id);
+      window.setTimeout(() => setCommandCopy(null), 1400);
+    } catch {
+      setCommandCopy('error');
+      window.setTimeout(() => setCommandCopy(null), 1400);
+    }
+  };
+
+  const allCommands = useMemo(
+    () =>
+      steps
+        .filter((step) => step.hint)
+        .map((step) => step.hint)
+        .join('\n'),
+    []
+  );
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -204,6 +230,44 @@ export function DemoFlow() {
               </button>
             );
           })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Demo commands" subtitle="One-click copy for the core demo scripts">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
+          <div>Use these in order during the live walkthrough.</div>
+          <button
+            className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-white"
+            onClick={() => copyCommand(allCommands, 'all')}
+            disabled={!allCommands}
+          >
+            {commandCopy === 'all' ? 'Copied' : commandCopy === 'error' ? 'Copy failed' : 'Copy all'}
+          </button>
+        </div>
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {steps.map((step) => (
+            <div
+              key={`cmd-${step.id}`}
+              className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="font-semibold text-white">{step.title}</div>
+                  <div className="mt-1 text-[#9AA4B2]">{step.description}</div>
+                </div>
+                <button
+                  className="rounded-lg border border-[#2A3040] px-2 py-1 text-[11px] text-[#9AA4B2]"
+                  onClick={() => step.hint && copyCommand(step.hint, step.id)}
+                  disabled={!step.hint}
+                >
+                  {commandCopy === step.id ? 'Copied' : commandCopy === 'error' ? 'Copy failed' : 'Copy'}
+                </button>
+              </div>
+              <div className="mt-2 rounded-md border border-[#1c2333] bg-[#0b0f17] px-2 py-1 font-mono text-[11px] text-[#6AE4FF]">
+                {step.hint ?? 'No command specified'}
+              </div>
+            </div>
+          ))}
         </div>
       </SectionCard>
 
