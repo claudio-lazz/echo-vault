@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { mockAlerts } from '../lib/mockData';
+import { useDataMode } from '../lib/dataMode';
+import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -8,25 +10,57 @@ const severityOptions = ['all', 'danger', 'warning', 'info'] as const;
 type SeverityFilter = (typeof severityOptions)[number];
 type AlertItem = (typeof mockAlerts)[number];
 
+const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
+
 export function Alerts() {
+  const { mode } = useDataMode();
+  const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [query, setQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [selectedAlert, setSelectedAlert] = useState<AlertItem | null>(null);
 
+  const liveAlerts = useMemo<AlertItem[]>(() => {
+    if (!grantsState.grants.length) return [];
+    const now = Date.now() / 1000;
+    const alerts: AlertItem[] = [];
+    grantsState.grants.forEach((grant, index) => {
+      const expired = grant.expires_at ? grant.expires_at < now : false;
+      if (grant.revoked || expired) {
+        alerts.push({
+          id: `AL-REV-${String(index + 1).padStart(3, '0')}`,
+          title: `Grant revoked for ${grant.grantee}`,
+          severity: 'danger',
+          time: 'just now'
+        });
+      } else if (grant.expires_at && grant.expires_at - now < 24 * 3600) {
+        alerts.push({
+          id: `AL-EXP-${String(index + 1).padStart(3, '0')}`,
+          title: `Grant expiring for ${grant.grantee}`,
+          severity: 'warning',
+          time: 'within 24h'
+        });
+      }
+    });
+    return alerts;
+  }, [grantsState.grants]);
+
+  const usingLive = mode === 'live' && !grantsState.error && apiBase;
+  const alerts = usingLive && liveAlerts.length ? liveAlerts : mockAlerts;
+
   const filtered = useMemo(() => {
     const lowered = query.trim().toLowerCase();
-    return mockAlerts.filter((alert) => {
+    return alerts.filter((alert) => {
       const matchesQuery = lowered
         ? [alert.title, alert.id].some((field) => field.toLowerCase().includes(lowered))
         : true;
       const matchesSeverity = severityFilter === 'all' ? true : alert.severity === severityFilter;
       return matchesQuery && matchesSeverity;
     });
-  }, [query, severityFilter]);
+  }, [alerts, query, severityFilter]);
 
   const counts = severityOptions.reduce<Record<string, number>>((acc, option) => {
     if (option !== 'all') {
-      acc[option] = mockAlerts.filter((alert) => alert.severity === option).length;
+      acc[option] = alerts.filter((alert) => alert.severity === option).length;
     }
     return acc;
   }, {});
@@ -60,6 +94,14 @@ export function Alerts() {
             </select>
           </div>
         </div>
+        {mode === 'live' && (
+          <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+            {grantsState.loading && 'Loading live alerts...'}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock alerts.`}
+            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${alerts.length} alerts).`}
+            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+          </div>
+        )}
         <div className="space-y-3 text-sm">
           {filtered.map((alert) => (
             <div key={alert.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">

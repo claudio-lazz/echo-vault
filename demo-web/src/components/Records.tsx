@@ -1,31 +1,57 @@
 import { useMemo, useState } from 'react';
 import { mockRecords } from '../lib/mockData';
+import { useDataMode } from '../lib/dataMode';
+import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
 const statusOptions = ['all', 'active', 'revoked'] as const;
 
 type StatusFilter = (typeof statusOptions)[number];
-type RecordItem = (typeof mockRecords)[number];
+type RecordItem = (typeof mockRecords)[number] & { grantee?: string };
+
+const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
 export function Records() {
+  const { mode } = useDataMode();
+  const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
 
+  const liveRecords = useMemo<RecordItem[]>(() => {
+    if (!grantsState.grants.length) return [];
+    return grantsState.grants.map((grant, index) => {
+      const expired = grant.expires_at ? grant.expires_at * 1000 < Date.now() : false;
+      const status = grant.revoked || expired ? 'revoked' : 'active';
+      const updated = grant.expires_at ? `expires ${new Date(grant.expires_at * 1000).toLocaleDateString()}` : 'live';
+      return {
+        id: `GR-${String(index + 1).padStart(3, '0')}`,
+        owner: grant.owner,
+        grantee: grant.grantee,
+        scope: grant.scope_hash,
+        status,
+        updated
+      };
+    });
+  }, [grantsState.grants]);
+
+  const usingLive = mode === 'live' && !grantsState.error && apiBase;
+  const records: RecordItem[] = usingLive && liveRecords.length ? liveRecords : (mockRecords as RecordItem[]);
+
   const filtered = useMemo(() => {
     const lowered = query.trim().toLowerCase();
-    return mockRecords.filter((record) => {
+    return records.filter((record) => {
       const matchesQuery = lowered
-        ? [record.id, record.owner, record.scope].some((field) => field.toLowerCase().includes(lowered))
+        ? [record.id, record.owner, record.scope, record.grantee || ''].some((field) => field.toLowerCase().includes(lowered))
         : true;
       const matchesStatus = statusFilter === 'all' ? true : record.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
-  }, [query, statusFilter]);
+  }, [query, records, statusFilter]);
 
-  const activeCount = mockRecords.filter((record) => record.status === 'active').length;
-  const revokedCount = mockRecords.filter((record) => record.status !== 'active').length;
+  const activeCount = records.filter((record) => record.status === 'active').length;
+  const revokedCount = records.filter((record) => record.status !== 'active').length;
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -34,7 +60,7 @@ export function Records() {
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#9AA4B2]">
             <span>Active: <span className="text-white">{activeCount}</span></span>
             <span>Revoked: <span className="text-white">{revokedCount}</span></span>
-            <span>Total: <span className="text-white">{mockRecords.length}</span></span>
+            <span>Total: <span className="text-white">{records.length}</span></span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
@@ -56,6 +82,14 @@ export function Records() {
             </select>
           </div>
         </div>
+        {mode === 'live' && (
+          <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+            {grantsState.loading && 'Loading live grants...'}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${records.length} grants).`}
+            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+          </div>
+        )}
         <div className="space-y-3 text-sm">
           {filtered.map((record) => (
             <div key={record.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
@@ -95,6 +129,9 @@ export function Records() {
                 <div className="text-xs uppercase tracking-[0.2em] text-[#9AA4B2]">Record</div>
                 <div className="text-xl font-semibold text-white">{selectedRecord.id}</div>
                 <div className="text-xs text-[#9AA4B2]">Owner: {selectedRecord.owner}</div>
+                {selectedRecord.grantee && (
+                  <div className="text-xs text-[#9AA4B2]">Grantee: {selectedRecord.grantee}</div>
+                )}
               </div>
               <button
                 onClick={() => setSelectedRecord(null)}
