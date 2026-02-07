@@ -14,6 +14,11 @@ type Step = {
   hint?: string;
 };
 
+type LiveSignal = {
+  state: 'ready' | 'checking' | 'blocked' | 'pending';
+  label: string;
+};
+
 const steps: Step[] = [
   {
     id: 'bootstrap',
@@ -54,6 +59,47 @@ export function DemoFlow() {
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [commandCopy, setCommandCopy] = useState<string | null>(null);
+
+  const liveSignals = useMemo<Record<string, LiveSignal>>(() => {
+    if (mode !== 'live') return {} as Record<string, LiveSignal>;
+
+    const apiReady = !status.loading && !status.error && Boolean(status.status);
+    const grantsReady = !grants.loading && !grants.error;
+    const activeGrants = grants.grants.filter((grant) => !grant.revoked).length;
+    const revokedGrants = grants.grants.filter((grant) => grant.revoked).length;
+
+    const apiSignal: LiveSignal = apiReady
+      ? { state: 'ready', label: 'API OK' }
+      : status.loading
+        ? { state: 'checking', label: 'Checking API' }
+        : status.error
+          ? { state: 'blocked', label: 'API unavailable' }
+          : { state: 'pending', label: 'API pending' };
+
+    const grantSignal: LiveSignal = grantsReady
+      ? activeGrants > 0
+        ? { state: 'ready', label: `${activeGrants} active grants` }
+        : { state: 'pending', label: 'No active grants' }
+      : grants.loading
+        ? { state: 'checking', label: 'Loading grants' }
+        : { state: 'blocked', label: grants.error ? `Grants error: ${grants.error}` : 'Grants error' };
+
+    const revokeSignal: LiveSignal = grantsReady
+      ? revokedGrants > 0
+        ? { state: 'ready', label: `${revokedGrants} revoked grants` }
+        : { state: 'pending', label: 'No revocations yet' }
+      : grants.loading
+        ? { state: 'checking', label: 'Loading revocations' }
+        : { state: 'blocked', label: grants.error ? `Grants error: ${grants.error}` : 'Grants error' };
+
+    return {
+      bootstrap: apiSignal,
+      vault: grantSignal,
+      grant: grantSignal,
+      fetch: apiReady && activeGrants > 0 ? { state: 'ready', label: 'Payload ready' } : apiSignal,
+      revoke: revokeSignal
+    };
+  }, [grants.error, grants.grants, grants.loading, mode, status.error, status.loading, status.status]);
 
   const completionCount = useMemo(
     () => steps.filter((step) => completed[step.id]).length,
@@ -206,6 +252,16 @@ export function DemoFlow() {
         <div className="mt-4 space-y-3">
           {steps.map((step, index) => {
             const done = Boolean(completed[step.id]);
+            const liveSignal = liveSignals[step.id];
+            const liveTone = liveSignal
+              ? liveSignal.state === 'ready'
+                ? 'success'
+                : liveSignal.state === 'blocked'
+                  ? 'danger'
+                  : liveSignal.state === 'checking'
+                    ? 'info'
+                    : 'warning'
+              : 'info';
             return (
               <button
                 key={step.id}
@@ -222,6 +278,12 @@ export function DemoFlow() {
                   <div className="mt-1 text-xs text-[#9AA4B2]">{step.description}</div>
                   {step.hint && (
                     <div className="mt-2 text-xs text-[#6AE4FF]">{step.hint}</div>
+                  )}
+                  {mode === 'live' && liveSignal && (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-[#9AA4B2]">
+                      <StatusPill tone={liveTone} label={liveSignal.label} />
+                      <span>Live signal</span>
+                    </div>
                   )}
                 </div>
                 <div className="pt-1">
