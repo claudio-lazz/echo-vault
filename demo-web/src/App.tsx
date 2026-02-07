@@ -9,6 +9,7 @@ import { Records } from './components/Records';
 import { Alerts } from './components/Alerts';
 import { Audit } from './components/Audit';
 import { Settings } from './components/Settings';
+import { AccessGrants } from './components/AccessGrants';
 
 const pages: Record<string, React.ReactNode> = {
   overview: <Overview />,
@@ -16,6 +17,7 @@ const pages: Record<string, React.ReactNode> = {
   records: <Records />,
   alerts: <Alerts />,
   audit: <Audit />,
+  grants: <AccessGrants />,
   settings: <Settings />
 };
 
