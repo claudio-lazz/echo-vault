@@ -16,6 +16,7 @@ export function Vaults() {
   const { mode } = useDataMode();
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const liveVaults = useMemo<VaultItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -48,6 +49,56 @@ export function Vaults() {
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
   const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : mockVaults;
+
+  const vaultReport = useMemo(() => {
+    if (!selectedVault) return '';
+    const now = new Date().toISOString();
+    const lines = [
+      `# EchoVault vault report`,
+      ``,
+      `- Timestamp: ${now}`,
+      `- Vault ID: ${selectedVault.id}`,
+      `- Owner: ${selectedVault.owner}`,
+      `- Region: ${selectedVault.region}`,
+      `- Status: ${selectedVault.status}`,
+      `- Storage: ${selectedVault.storageGB} GB`,
+      selectedVault.grants !== undefined ? `- Active grants: ${selectedVault.grants}` : null,
+      selectedVault.lastActivity ? `- Latest activity: ${selectedVault.lastActivity}` : null,
+      ``,
+      `## Integrity signals`,
+      `- Attestation checks passing`,
+      `- Storage adapter: filesystem`,
+      `- On-chain strict mode: enabled`,
+      ``,
+      `## Notes`,
+      `- `
+    ].filter(Boolean);
+
+    return lines.join('\n');
+  }, [selectedVault]);
+
+  const copyReport = async () => {
+    if (!vaultReport) return;
+    try {
+      await navigator.clipboard.writeText(vaultReport);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    }
+  };
+
+  const downloadReport = () => {
+    if (!vaultReport || !selectedVault) return;
+    const blob = new Blob([vaultReport], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `echovault-vault-${selectedVault.id.toLowerCase()}.md`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -138,6 +189,28 @@ export function Vaults() {
                   <li>Storage adapter: filesystem</li>
                   <li>On-chain strict mode: enabled</li>
                 </ul>
+              </div>
+              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Vault report</div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#9AA4B2]">
+                  <button
+                    onClick={copyReport}
+                    className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-1 text-xs text-white"
+                  >
+                    {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy report'}
+                  </button>
+                  <button
+                    onClick={downloadReport}
+                    className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-1 text-xs text-[#9AA4B2]"
+                  >
+                    Download .md
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  value={vaultReport}
+                  className="mt-3 h-36 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-[11px] text-[#9AA4B2]"
+                />
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Actions</div>

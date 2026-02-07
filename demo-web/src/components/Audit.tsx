@@ -16,6 +16,7 @@ export function Audit() {
   const { mode } = useDataMode();
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [selectedEntry, setSelectedEntry] = useState<AuditItem | null>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const liveAudit = useMemo<AuditItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -38,6 +39,51 @@ export function Audit() {
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
   const auditEntries: AuditItem[] = usingLive && liveAudit.length ? liveAudit : mockAudit;
+
+  const auditReport = useMemo(() => {
+    if (!selectedEntry) return '';
+    const now = new Date().toISOString();
+    const lines = [
+      `# EchoVault audit event`,
+      ``,
+      `- Timestamp: ${now}`,
+      `- Event: ${selectedEntry.action}`,
+      `- Actor: ${selectedEntry.actor}`,
+      `- Detail: ${selectedEntry.detail}`,
+      `- Observed: ${selectedEntry.time}`,
+      selectedEntry.owner ? `- Owner: ${selectedEntry.owner}` : null,
+      selectedEntry.grantee ? `- Grantee: ${selectedEntry.grantee}` : null,
+      selectedEntry.scope ? `- Scope hash: ${selectedEntry.scope}` : null,
+      ``,
+      `## Follow-ups`,
+      `- `
+    ].filter(Boolean);
+
+    return lines.join('\n');
+  }, [selectedEntry]);
+
+  const copyReport = async () => {
+    if (!auditReport) return;
+    try {
+      await navigator.clipboard.writeText(auditReport);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    }
+  };
+
+  const downloadReport = () => {
+    if (!auditReport || !selectedEntry) return;
+    const blob = new Blob([auditReport], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `echovault-audit-${selectedEntry.id.toLowerCase()}.md`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -121,6 +167,28 @@ export function Audit() {
                   <div className="text-white">{selectedEntry.scope}</div>
                 </div>
               )}
+              <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div className="text-xs text-[#9AA4B2]">Audit report</div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#9AA4B2]">
+                  <button
+                    onClick={copyReport}
+                    className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-1 text-xs text-white"
+                  >
+                    {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy report'}
+                  </button>
+                  <button
+                    onClick={downloadReport}
+                    className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-1 text-xs text-[#9AA4B2]"
+                  >
+                    Download .md
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  value={auditReport}
+                  className="mt-3 h-36 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-[11px] text-[#9AA4B2]"
+                />
+              </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Follow-ups</div>
                 <div className="mt-3 flex flex-wrap gap-2">
