@@ -6,8 +6,16 @@ import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
 const statusOptions = ['all', 'active', 'revoked'] as const;
+const sortOptions = [
+  { value: 'default', label: 'Default order' },
+  { value: 'owner', label: 'Owner (A → Z)' },
+  { value: 'scope', label: 'Scope (A → Z)' },
+  { value: 'status', label: 'Status (active first)' },
+  { value: 'id', label: 'Record ID (A → Z)' }
+] as const;
 
 type StatusFilter = (typeof statusOptions)[number];
+type SortKey = (typeof sortOptions)[number]['value'];
 type RecordItem = (typeof mockRecords)[number] & { grantee?: string };
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
@@ -17,6 +25,7 @@ export function Records() {
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('default');
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
 
   const liveRecords = useMemo<RecordItem[]>(() => {
@@ -50,6 +59,37 @@ export function Records() {
     });
   }, [query, records, statusFilter]);
 
+  const sorted = useMemo(() => {
+    const data = [...filtered];
+    switch (sortKey) {
+      case 'owner':
+        return data.sort((a, b) => a.owner.localeCompare(b.owner));
+      case 'scope':
+        return data.sort((a, b) => a.scope.localeCompare(b.scope));
+      case 'status':
+        return data.sort((a, b) => a.status.localeCompare(b.status));
+      case 'id':
+        return data.sort((a, b) => a.id.localeCompare(b.id));
+      default:
+        return data;
+    }
+  }, [filtered, sortKey]);
+
+  const handleExport = () => {
+    const payload = {
+      generated_at: new Date().toISOString(),
+      total: sorted.length,
+      records: sorted
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `echovault-records-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const activeCount = records.filter((record) => record.status === 'active').length;
   const revokedCount = records.filter((record) => record.status !== 'active').length;
 
@@ -61,6 +101,7 @@ export function Records() {
             <span>Active: <span className="text-white">{activeCount}</span></span>
             <span>Revoked: <span className="text-white">{revokedCount}</span></span>
             <span>Total: <span className="text-white">{records.length}</span></span>
+            <span>Results: <span className="text-white">{filtered.length}</span></span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
@@ -80,6 +121,23 @@ export function Records() {
                 </option>
               ))}
             </select>
+            <select
+              value={sortKey}
+              onChange={(event) => setSortKey(event.target.value as SortKey)}
+              className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleExport}
+              className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white"
+            >
+              Export JSON
+            </button>
           </div>
         </div>
         {mode === 'live' && (
@@ -91,11 +149,14 @@ export function Records() {
           </div>
         )}
         <div className="space-y-3 text-sm">
-          {filtered.map((record) => (
+          {sorted.map((record) => (
             <div key={record.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
               <div>
                 <div className="font-semibold text-white">{record.id}</div>
                 <div className="text-xs text-[#9AA4B2]">{record.owner} · {record.scope}</div>
+                {record.grantee && (
+                  <div className="text-xs text-[#6E7683]">Grantee: {record.grantee}</div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-xs text-[#9AA4B2]">{record.updated}</div>
