@@ -13,7 +13,7 @@
 ```
 cd packages/api
 npm install
-node src/index.js
+npx tsx src/index.ts
 ```
 
 ## CLI
@@ -24,9 +24,9 @@ export ECHOVAULT_API=http://localhost:8787
 export ECHOVAULT_STORE_PATH=/tmp/echovault-store.json
 
 # Run e2e script (optional)
-node scripts/e2e-demo.js
+npx tsx scripts/e2e-demo.ts
 # Run validation script (optional)
-node scripts/validate-e2e.js
+npx tsx scripts/validate-e2e.ts
 
 # Reset dev store (optional)
 curl -X POST http://localhost:8787/dev/reset
@@ -48,13 +48,13 @@ export ECHOVAULT_ONCHAIN_STRICT=true
 
 # Encrypt a blob locally (writes JSON to stdout)
 export ECHOVAULT_SECRET=dev-secret
-node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
+npx tsx scripts/encrypt-blob.ts '{"hello":"world"}' > /tmp/echovault-encrypted.json
 
 # Use encrypted blob for init
 export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
 
 # End-to-end demo with encryption
-node scripts/e2e-encrypt-demo.js
+npx tsx scripts/e2e-encrypt-demo.ts
 
 echovault init
 

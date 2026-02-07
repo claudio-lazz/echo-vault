@@ -2,6 +2,8 @@
   "name": "@echovault/cli",
   "version": "0.0.2",
   "private": true,
-  "bin": { "echovault": "src/index.js" },
-  "dependencies": { "node-fetch": "^3.3.2" }
+  "bin": { "echovault": "dist/index.js" },
+  "scripts": {
+    "build": "tsc -p ."
+  }
 }

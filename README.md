@@ -67,7 +67,7 @@ Agent
 Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` for the end‑to‑end walkthrough, or run:
 
 ```bash
-node scripts/e2e-demo.js
+npx tsx scripts/e2e-demo.ts
 ```
 
 One‑shot helper (starts API, waits for `/status`, runs encrypted demo, saves logs):
@@ -78,9 +78,9 @@ One‑shot helper (starts API, waits for `/status`, runs encrypted demo, saves l
 ### Encrypted demo (AES‑GCM)
 ```bash
 export ECHOVAULT_SECRET=dev-secret
-node scripts/encrypt-blob.js '{"hello":"world"}' > /tmp/echovault-encrypted.json
+npx tsx scripts/encrypt-blob.ts '{"hello":"world"}' > /tmp/echovault-encrypted.json
 export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
-node scripts/e2e-encrypt-demo.js
+npx tsx scripts/e2e-encrypt-demo.ts
 ```
 
 See `docs/demo-video-plan.md` for the recording checklist.

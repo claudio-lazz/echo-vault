@@ -1,15 +1,24 @@
 #!/usr/bin/env node
 
-const { encryptBlob, decryptBlobPayload } = require('../packages/core-sdk/src/crypto');
+import { encryptBlob, decryptBlobPayload } from '../packages/core-sdk/src/crypto';
 
-async function postJson(url, body) {
+type JsonResult<T = unknown> = { status: number; json: T };
+
+type EncryptedPayload = {
+  ciphertext: string;
+  iv: string;
+  tag: string;
+  algorithm: 'aes-256-gcm';
+};
+
+async function postJson<T = unknown>(url: string, body?: unknown): Promise<JsonResult<T>> {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {})
   });
   const json = await res.json().catch(() => ({}));
-  return { status: res.status, json };
+  return { status: res.status, json: json as T };
 }
 
 async function run() {
@@ -32,7 +41,7 @@ async function run() {
   console.log(init.status, init.json);
 
   console.log('grant');
-  const grant = await postJson(`${api}/vault/grant`, { owner, grantee, scope_hash, expires_at: Math.floor(Date.now()/1000)+3600 });
+  const grant = await postJson(`${api}/vault/grant`, { owner, grantee, scope_hash, expires_at: Math.floor(Date.now() / 1000) + 3600 });
   console.log(grant.status, grant.json);
 
   console.log('request (expect 402)');
@@ -40,7 +49,7 @@ async function run() {
   console.log(request.status, request.json);
 
   console.log('request with stub payment');
-  const paid = await postJson(`${api}/context/request`, {
+  const paid = await postJson<{ encrypted_blob?: EncryptedPayload }>(`${api}/context/request`, {
     owner,
     grantee,
     scope_hash,
@@ -53,7 +62,8 @@ async function run() {
       const decrypted = decryptBlobPayload({ secret, ...paid.json.encrypted_blob });
       console.log('decrypted', decrypted);
     } catch (e) {
-      console.warn('decrypt_failed', e.message);
+      const err = e as Error;
+      console.warn('decrypt_failed', err.message);
     }
   }
 }

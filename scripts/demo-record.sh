@@ -28,7 +28,7 @@ trap cleanup EXIT
 
 printf "Starting API...\n"
 printf "Logs: %s (override with DEMO_OUTPUT_DIR). KEEP_API=%s\n" "$OUTPUT_DIR" "${KEEP_API:-false}"
-node "${ROOT_DIR}/packages/api/src/index.js" >"${API_LOG}" 2>&1 &
+npx tsx "${ROOT_DIR}/packages/api/src/index.ts" >"${API_LOG}" 2>&1 &
 API_PID=$!
 
 printf "Waiting for API on %s...\n" "$ECHOVAULT_API"
@@ -44,6 +44,6 @@ for i in {1..20}; do
 done
 
 printf "Running encrypted demo...\n"
-node "${ROOT_DIR}/scripts/e2e-encrypt-demo.js" | tee "${DEMO_LOG}"
+npx tsx "${ROOT_DIR}/scripts/e2e-encrypt-demo.ts" | tee "${DEMO_LOG}"
 
 printf "\nDemo logs saved:\n- %s\n- %s\n" "$API_LOG" "$DEMO_LOG"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { postJson } = require('../packages/cli/src/http');
+import { postJson } from '../packages/cli/src/http';
 
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 const owner = process.env.ECHOVAULT_OWNER || 'OWNER';

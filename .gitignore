@@ -2,3 +2,6 @@
 .env.local
 demo-output/
 echovault-storage/
+node_modules/
+**/dist/
+**/*.tsbuildinfo

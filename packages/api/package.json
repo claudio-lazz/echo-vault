@@ -3,8 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "node src/index.js"
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p ."
   },
   "dependencies": {
     "express": "^4.19.2",

@@ -1,62 +1,70 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express, { Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
+
+import { build402Challenge, verify402Payment } from './x402';
+import { validateOnchainGrant } from './solana';
+import { storeBlob, fetchBlob } from './storage';
 
 const app = express();
 app.use(express.json());
-const { build402Challenge, verify402Payment } = require('./x402');
-const { validateOnchainGrant } = require('./solana');
-const { storeBlob, fetchBlob } = require('./storage');
 
-// Health
-app.get('/health', (_, res) => res.json({ ok: true }));
+type Vault = {
+  owner: string;
+  context_uri: string;
+  encrypted_blob: unknown;
+};
 
-// Status (dev)
-app.get('/status', (_, res) => {
-  res.json({
-    ok: true,
-    counts: {
-      vaults: vaults.size,
-      grants: grants.size,
-      revoked: revoked.size,
-      blobs: blobs.size
-    },
-    storePath
-  });
-});
+type Grant = {
+  owner: string;
+  grantee: string;
+  scope_hash: string;
+  expires_at: number | null;
+};
 
-// Dev reset (dangerous; clears in-memory + store)
-app.post('/dev/reset', (_, res) => {
-  vaults.clear();
-  grants.clear();
-  revoked.clear();
-  blobs.clear();
-  saveStore();
-  res.json({ ok: true });
-});
+type PaymentPayload = {
+  txSig?: string;
+  mint?: string;
+  amount?: string | number;
+  payer?: string;
+  recipient?: string;
+};
+
+type ContextRequestBody = {
+  owner?: string;
+  grantee?: string;
+  scope_hash?: string;
+  payment?: PaymentPayload | null;
+};
 
 // In-memory stores (dev stub)
-const vaults = new Map();
-const grants = new Map();
-const revoked = new Set();
-const blobs = new Map();
+const vaults = new Map<string, Vault>();
+const grants = new Map<string, Grant>();
+const revoked = new Set<string>();
+const blobs = new Map<string, unknown>();
 
-const vaultKey = (owner) => owner;
-const grantKey = ({ owner, grantee, scope_hash }) => `${owner}:${grantee}:${scope_hash}`;
-const blobKey = ({ owner, context_uri }) => `${owner}:${context_uri}`;
+const vaultKey = (owner: string) => owner;
+const grantKey = ({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: string }) => `${owner}:${grantee}:${scope_hash}`;
+const blobKey = ({ owner, context_uri }: { owner: string; context_uri: string }) => `${owner}:${context_uri}`;
 
 const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
 
 function loadStore() {
   try {
     if (!fs.existsSync(storePath)) return;
-    const data = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(storePath, 'utf8')) as {
+      vaults?: Vault[];
+      grants?: Grant[];
+      revoked?: string[];
+      blobs?: { key: string; value: unknown }[];
+    };
     (data.vaults || []).forEach((vault) => vaults.set(vaultKey(vault.owner), vault));
     (data.grants || []).forEach((grant) => grants.set(grantKey(grant), grant));
     (data.revoked || []).forEach((key) => revoked.add(key));
     (data.blobs || []).forEach(({ key, value }) => blobs.set(key, value));
   } catch (e) {
-    console.warn('store_load_failed', e.message);
+    const err = e as Error;
+    console.warn('store_load_failed', err.message);
   }
 }
 
@@ -72,13 +80,40 @@ function saveStore() {
 
 loadStore();
 
+// Health
+app.get('/health', (_: Request, res: Response) => res.json({ ok: true }));
+
+// Status (dev)
+app.get('/status', (_: Request, res: Response) => {
+  res.json({
+    ok: true,
+    counts: {
+      vaults: vaults.size,
+      grants: grants.size,
+      revoked: revoked.size,
+      blobs: blobs.size
+    },
+    storePath
+  });
+});
+
+// Dev reset (dangerous; clears in-memory + store)
+app.post('/dev/reset', (_: Request, res: Response) => {
+  vaults.clear();
+  grants.clear();
+  revoked.clear();
+  blobs.clear();
+  saveStore();
+  res.json({ ok: true });
+});
+
 // Vault init (dev stub)
-app.post('/vault/init', (req, res) => {
+app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: string; encrypted_blob?: unknown }>, res: Response) => {
   const { owner, context_uri, encrypted_blob } = req.body || {};
   if (!owner) return res.status(400).json({ ok: false, reason: 'missing_owner', code: 'missing_owner' });
   if (!context_uri) return res.status(400).json({ ok: false, reason: 'missing_context_uri', code: 'missing_context_uri' });
   if (!encrypted_blob) return res.status(400).json({ ok: false, reason: 'missing_encrypted_blob', code: 'missing_encrypted_blob' });
-  const vault = {
+  const vault: Vault = {
     owner,
     context_uri: context_uri || 'ipfs://encrypted-context-placeholder',
     encrypted_blob: encrypted_blob || 'ENCRYPTED_BLOB_PLACEHOLDER'
@@ -97,7 +132,7 @@ app.post('/vault/init', (req, res) => {
 });
 
 // Vault fetch (dev stub)
-app.get('/vault/:owner', (req, res) => {
+app.get('/vault/:owner', (req: Request<{ owner: string }>, res: Response) => {
   const owner = req.params.owner;
   const vault = vaults.get(vaultKey(owner));
   if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
@@ -105,10 +140,10 @@ app.get('/vault/:owner', (req, res) => {
 });
 
 // Grant access (dev stub)
-app.post('/vault/grant', (req, res) => {
+app.post('/vault/grant', (req: Request<{}, {}, { owner?: string; grantee?: string; scope_hash?: string; expires_at?: string | number }>, res: Response) => {
   const { owner, grantee, scope_hash, expires_at } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
-  const grant = { owner, grantee, scope_hash, expires_at: Number(expires_at) || null };
+  const grant: Grant = { owner, grantee, scope_hash, expires_at: Number(expires_at) || null };
   const key = grantKey(grant);
   grants.set(key, grant);
   revoked.delete(key);
@@ -117,7 +152,7 @@ app.post('/vault/grant', (req, res) => {
 });
 
 // Revoke access (dev stub)
-app.post('/vault/revoke', (req, res) => {
+app.post('/vault/revoke', (req: Request<{}, {}, { owner?: string; grantee?: string; scope_hash?: string }>, res: Response) => {
   const { owner, grantee, scope_hash } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
   const key = grantKey({ owner, grantee, scope_hash });
@@ -128,7 +163,7 @@ app.post('/vault/revoke', (req, res) => {
 });
 
 // List grants (dev stub)
-app.get('/vault/grants', (req, res) => {
+app.get('/vault/grants', (req: Request<{}, {}, {}, { owner?: string; grantee?: string }>, res: Response) => {
   const { owner, grantee } = req.query || {};
   const list = Array.from(grants.values()).filter((grant) => {
     if (owner && grant.owner !== owner) return false;
@@ -142,7 +177,7 @@ app.get('/vault/grants', (req, res) => {
 });
 
 // Context preview (dev stub + optional on-chain validation)
-app.post('/context/preview', async (req, res) => {
+app.post('/context/preview', async (req: Request<{}, {}, { owner?: string; grantee?: string; scope_hash?: string }>, res: Response) => {
   const { owner, grantee, scope_hash } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
 
@@ -192,7 +227,7 @@ app.post('/context/preview', async (req, res) => {
 });
 
 // Context request endpoint (dev stub + optional on-chain validation)
-app.post('/context/request', async (req, res) => {
+app.post('/context/request', async (req: Request<{}, {}, ContextRequestBody>, res: Response) => {
   const { owner, grantee, scope_hash, payment } = req.body || {};
   if (!owner || !grantee || !scope_hash) return res.status(400).json({ ok: false, reason: 'missing_fields', code: 'missing_fields' });
 

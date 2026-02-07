@@ -1,39 +1,63 @@
-const { Connection, PublicKey } = require('@solana/web3.js');
+import { Connection, PublicKey } from '@solana/web3.js';
 
 const DEFAULT_PROGRAM_ID = 'Ech0VaulT11111111111111111111111111111111';
 
-function getProgramId() {
+type ScopeInput = string | number[] | Buffer | Uint8Array | null | undefined;
+
+type AccessGrant = {
+  owner: string;
+  grantee: string;
+  scope_hash: string;
+  expires_at: number;
+  revoked: boolean;
+  created_at: number;
+};
+
+type RevocationRegistry = {
+  grant: string;
+  revoked_at: number;
+};
+
+type ValidateResult =
+  | { ok: true; grant: AccessGrant }
+  | { ok: false; reason: string };
+
+function getProgramId(): PublicKey {
   return new PublicKey(process.env.ECHOVAULT_PROGRAM_ID || DEFAULT_PROGRAM_ID);
 }
 
-function getConnection() {
+function getConnection(): Connection | null {
   const rpc = process.env.ECHOVAULT_ONCHAIN_RPC;
   if (!rpc) return null;
   return new Connection(rpc, 'confirmed');
 }
 
-function parseScopeHash(scope_hash) {
+export function parseScopeHash(scope_hash: ScopeInput): Buffer | null {
   if (!scope_hash) return null;
   if (Array.isArray(scope_hash) && scope_hash.length === 32) return Buffer.from(scope_hash);
+  if (Buffer.isBuffer(scope_hash)) return Buffer.from(scope_hash);
+  if (scope_hash instanceof Uint8Array && scope_hash.length === 32) return Buffer.from(scope_hash);
   if (typeof scope_hash !== 'string') return null;
   const hex = scope_hash.startsWith('0x') ? scope_hash.slice(2) : scope_hash;
   if (/^[0-9a-fA-F]{64}$/.test(hex)) return Buffer.from(hex, 'hex');
   try {
-    const decoded = PublicKey.tryFromBase58 ? PublicKey.tryFromBase58(scope_hash) : new PublicKey(scope_hash);
+    const decoded = (PublicKey as unknown as { tryFromBase58?: (v: string) => PublicKey }).tryFromBase58
+      ? (PublicKey as unknown as { tryFromBase58: (v: string) => PublicKey }).tryFromBase58(scope_hash)
+      : new PublicKey(scope_hash);
     const bytes = decoded.toBytes();
     return Buffer.from(bytes);
-  } catch (_) {
+  } catch {
     return null;
   }
 }
 
-function readI64LE(buffer, offset) {
+function readI64LE(buffer: Buffer, offset: number): number {
   const view = buffer.subarray(offset, offset + 8);
   const value = view.readBigInt64LE(0);
   return Number(value);
 }
 
-function decodeAccessGrant(data) {
+function decodeAccessGrant(data: Buffer | Uint8Array): AccessGrant {
   const buf = Buffer.from(data);
   let offset = 8; // discriminator
   const owner = new PublicKey(buf.subarray(offset, offset + 32));
@@ -57,7 +81,7 @@ function decodeAccessGrant(data) {
   };
 }
 
-function decodeRevocationRegistry(data) {
+function decodeRevocationRegistry(data: Buffer | Uint8Array): RevocationRegistry {
   const buf = Buffer.from(data);
   let offset = 8;
   const grant = new PublicKey(buf.subarray(offset, offset + 32));
@@ -66,7 +90,7 @@ function decodeRevocationRegistry(data) {
   return { grant: grant.toBase58(), revoked_at };
 }
 
-function deriveGrantPda({ owner, grantee, scope_hash }) {
+function deriveGrantPda({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: ScopeInput }) {
   const programId = getProgramId();
   const scope = parseScopeHash(scope_hash);
   if (!scope) return null;
@@ -77,7 +101,7 @@ function deriveGrantPda({ owner, grantee, scope_hash }) {
   return pda;
 }
 
-function deriveRevokePda({ grantPda }) {
+function deriveRevokePda({ grantPda }: { grantPda: PublicKey }) {
   const programId = getProgramId();
   const [pda] = PublicKey.findProgramAddressSync(
     [Buffer.from('revoke'), grantPda.toBuffer()],
@@ -86,7 +110,7 @@ function deriveRevokePda({ grantPda }) {
   return pda;
 }
 
-async function fetchAccessGrant({ owner, grantee, scope_hash }) {
+async function fetchAccessGrant({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: ScopeInput }) {
   const conn = getConnection();
   if (!conn) return null;
   const grantPda = deriveGrantPda({ owner, grantee, scope_hash });
@@ -97,7 +121,7 @@ async function fetchAccessGrant({ owner, grantee, scope_hash }) {
   return { grant, grantPda };
 }
 
-async function fetchRevocation({ grantPda }) {
+async function fetchRevocation({ grantPda }: { grantPda: PublicKey }) {
   const conn = getConnection();
   if (!conn) return null;
   const revokePda = deriveRevokePda({ grantPda });
@@ -106,7 +130,7 @@ async function fetchRevocation({ grantPda }) {
   return decodeRevocationRegistry(account.data);
 }
 
-async function validateOnchainGrant({ owner, grantee, scope_hash }) {
+export async function validateOnchainGrant({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: ScopeInput }): Promise<ValidateResult> {
   const conn = getConnection();
   if (!conn) return { ok: false, reason: 'onchain_not_configured' };
   const fetched = await fetchAccessGrant({ owner, grantee, scope_hash });
@@ -119,8 +143,3 @@ async function validateOnchainGrant({ owner, grantee, scope_hash }) {
   if (revocation) return { ok: false, reason: 'grant_revoked' };
   return { ok: true, grant };
 }
-
-module.exports = {
-  validateOnchainGrant,
-  parseScopeHash
-};
