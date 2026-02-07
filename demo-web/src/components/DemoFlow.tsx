@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 import { useDataMode } from '../lib/dataMode';
@@ -10,6 +10,7 @@ const apiRoot = apiBase?.replace(/\/$/, '');
 const demoLogsUrl = import.meta.env.VITE_DEMO_LOGS_URL as string | undefined;
 const demoOutputUrl = import.meta.env.VITE_DEMO_OUTPUT_URL as string | undefined;
 const demoVideoUrl = import.meta.env.VITE_DEMO_VIDEO_URL as string | undefined;
+const completionStorageKey = 'echovault.demoFlow.completed';
 
 type Step = {
   id: string;
@@ -110,6 +111,27 @@ export function DemoFlow() {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [commandCopy, setCommandCopy] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(completionStorageKey);
+      if (!raw) return;
+      const stored = JSON.parse(raw) as Record<string, boolean> | null;
+      if (stored && typeof stored === 'object') {
+        setCompleted(stored);
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(completionStorageKey, JSON.stringify(completed));
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [completed]);
+
   const liveSignals = useMemo<Record<string, LiveSignal>>(() => {
     if (mode !== 'live') return {} as Record<string, LiveSignal>;
 
@@ -167,6 +189,16 @@ export function DemoFlow() {
         return acc;
       }, {})
     );
+  const markReady = () =>
+    setCompleted((prev) => {
+      const updated = { ...prev };
+      steps.forEach((step) => {
+        if (liveSignals[step.id]?.state === 'ready') {
+          updated[step.id] = true;
+        }
+      });
+      return updated;
+    });
 
   const buildReport = () => {
     const now = new Date().toISOString();
@@ -289,6 +321,14 @@ export function DemoFlow() {
             Completed {completionCount} / {steps.length}
           </div>
           <div className="flex items-center gap-2">
+            {mode === 'live' && (
+              <button
+                className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#9AA4B2]"
+                onClick={markReady}
+              >
+                Mark ready
+              </button>
+            )}
             <button
               className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#9AA4B2]"
               onClick={reset}
