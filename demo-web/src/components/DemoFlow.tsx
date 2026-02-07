@@ -52,6 +52,7 @@ export function DemoFlow() {
   const status = useApiStatus(apiBase, mode === 'live');
   const grants = useVaultGrants(apiBase, mode === 'live');
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const completionCount = useMemo(
     () => steps.filter((step) => completed[step.id]).length,
@@ -69,6 +70,58 @@ export function DemoFlow() {
         return acc;
       }, {})
     );
+
+  const buildReport = () => {
+    const now = new Date().toISOString();
+    const apiLine =
+      mode === 'live'
+        ? status.loading
+          ? 'API status: checking /status'
+          : status.error
+            ? `API status: unavailable (${status.error})`
+            : `API status: OK ${status.status?.version ?? ''}`.trim()
+        : 'API status: mock mode';
+    const grantsLine =
+      mode === 'live'
+        ? grants.loading
+          ? 'Live grants: loading'
+          : grants.error
+            ? `Live grants: error (${grants.error})`
+            : `Live grants: ${grants.grants.length}`
+        : 'Live grants: mock mode';
+
+    const checklist = steps
+      .map((step, index) => {
+        const done = completed[step.id] ? 'x' : ' ';
+        return `- [${done}] ${index + 1}. ${step.title}`;
+      })
+      .join('\n');
+
+    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Notes\n- \n`;
+  };
+
+  const report = useMemo(buildReport, [completed, grants.error, grants.grants.length, grants.loading, mode, status.error, status.loading, status.status?.version]);
+
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(report);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 1800);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState('idle'), 1800);
+    }
+  };
+
+  const downloadReport = () => {
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'echovault-demo-report.md';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <section className="space-y-6 px-8 py-6">
@@ -152,6 +205,31 @@ export function DemoFlow() {
             );
           })}
         </div>
+      </SectionCard>
+
+      <SectionCard title="Demo run notes" subtitle="Copy or download a markdown summary after each run">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
+          <div>Quick report based on current checklist + live status.</div>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-white"
+              onClick={copyReport}
+            >
+              {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy report'}
+            </button>
+            <button
+              className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#9AA4B2]"
+              onClick={downloadReport}
+            >
+              Download .md
+            </button>
+          </div>
+        </div>
+        <textarea
+          readOnly
+          value={report}
+          className="mt-3 h-44 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-xs text-[#9AA4B2]"
+        />
       </SectionCard>
 
       <SectionCard title="Narrative beats" subtitle="Talking points during the walkthrough">
