@@ -12,17 +12,19 @@ import { Audit } from './components/Audit';
 import { Settings } from './components/Settings';
 import { AccessGrants } from './components/AccessGrants';
 import { Playbooks } from './components/Playbooks';
+import { Usage } from './components/Usage';
 import { DataModeProvider } from './lib/dataMode';
 
 const pages: Record<string, React.ReactNode> = {
   overview: <Overview />,
   demo: <DemoFlow />,
-  vaults: <Vaults />, 
+  vaults: <Vaults />,
   records: <Records />,
   alerts: <Alerts />,
   audit: <Audit />,
   grants: <AccessGrants />,
   playbooks: <Playbooks />,
+  usage: <Usage />,
   settings: <Settings />
 };
 
@@ -35,6 +37,7 @@ const pageTitles: Record<string, string> = {
   audit: 'Audit Trail',
   grants: 'Access Grants',
   playbooks: 'Playbooks',
+  usage: 'Usage & Spend',
   settings: 'Settings'
 };
 

@@ -67,3 +67,25 @@ export const mockPlaybooks = [
     steps: ['Apply rate limit', 'Warm standby', 'Open incident']
   }
 ];
+
+export const mockUsage = {
+  monthlyBurn: 64.2,
+  egressTB: 19.4,
+  retentionDays: 180,
+  breakdown: [
+    { label: 'Encrypted storage', cost: 28.5, share: 0.44 },
+    { label: 'Vector sync + compute', cost: 21.7, share: 0.34 },
+    { label: 'Edge relay + CDN', cost: 9.4, share: 0.15 },
+    { label: 'On-chain attestations', cost: 4.6, share: 0.07 }
+  ],
+  topTenants: [
+    { id: 'TN-44', name: 'Helios Labs', scope: 'cross-agent memory', region: 'us-east', spend: 18.2, storageTB: 5.4 },
+    { id: 'TN-29', name: 'Riven Capital', scope: 'market analytics', region: 'eu-west', spend: 14.9, storageTB: 4.1 },
+    { id: 'TN-31', name: 'Orbit Health', scope: 'clinical triage', region: 'ap-south', spend: 11.6, storageTB: 3.2 }
+  ],
+  optimization: [
+    { id: 'OP-9', title: 'Cache hot vault slices', priority: 'critical', detail: 'Projected 12% savings on edge egress.' },
+    { id: 'OP-11', title: 'Tier cold vaults', priority: 'warning', detail: 'Move 4 tenants to glacier tier after 45 days.' },
+    { id: 'OP-15', title: 'Batch grant sync', priority: 'warning', detail: 'Reduce attestation overhead by 18%.' }
+  ]
+};
