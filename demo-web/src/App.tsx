@@ -10,6 +10,7 @@ import { Alerts } from './components/Alerts';
 import { Audit } from './components/Audit';
 import { Settings } from './components/Settings';
 import { AccessGrants } from './components/AccessGrants';
+import { DataModeProvider } from './lib/dataMode';
 
 const pages: Record<string, React.ReactNode> = {
   overview: <Overview />,
@@ -21,19 +22,31 @@ const pages: Record<string, React.ReactNode> = {
   settings: <Settings />
 };
 
+const pageTitles: Record<string, string> = {
+  overview: 'Overview',
+  vaults: 'Vaults',
+  records: 'Records',
+  alerts: 'Alerts',
+  audit: 'Audit Trail',
+  grants: 'Access Grants',
+  settings: 'Settings'
+};
+
 function App() {
   const [active, setActive] = useState('overview');
 
   return (
-    <div className="min-h-screen bg-[#0f1117] text-[#f4f6fa]">
-      <div className="flex h-screen">
-        <Sidebar active={active} onSelect={setActive} />
-        <main className="flex-1 overflow-auto">
-          <TopBar />
-          {pages[active]}
-        </main>
+    <DataModeProvider>
+      <div className="min-h-screen bg-[#0f1117] text-[#f4f6fa]">
+        <div className="flex h-screen">
+          <Sidebar active={active} onSelect={setActive} />
+          <main className="flex-1 overflow-auto">
+            <TopBar title={pageTitles[active]} />
+            {pages[active]}
+          </main>
+        </div>
       </div>
-    </div>
+    </DataModeProvider>
   );
 }
 

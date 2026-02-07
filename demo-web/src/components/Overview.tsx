@@ -2,8 +2,15 @@ import { mockAlerts, mockMetrics, mockRecords } from '../lib/mockData';
 import { SectionCard } from './SectionCard';
 import { StatCard } from './StatCard';
 import { StatusPill } from './StatusPill';
+import { useDataMode } from '../lib/dataMode';
+import { useApiStatus } from '../lib/useApiStatus';
+
+const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
 export function Overview() {
+  const { mode } = useDataMode();
+  const status = useApiStatus(apiBase, mode === 'live');
+
   return (
     <section className="space-y-6 px-8 py-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -12,6 +19,19 @@ export function Overview() {
         <StatCard label="Alerts Open" value={mockAlerts.length} subLabel="Last 24h" />
         <StatCard label="Ingestion Rate" value="4.2k/min" subLabel="Avg 5m" />
       </div>
+
+      {mode === 'live' && (
+        <SectionCard title="Live API status" subtitle="/status health check">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'VITE_ECHOVAULT_API not set.'}</div>
+            <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white">
+              {status.loading && 'Checking...'}
+              {!status.loading && status.error && `Unavailable (${status.error})`}
+              {!status.loading && status.status && `OK ${status.status.version ?? ''}`.trim()}
+            </div>
+          </div>
+        </SectionCard>
+      )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SectionCard title="Vault usage" subtitle="Encrypted blobs by day">
