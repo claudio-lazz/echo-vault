@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
@@ -72,6 +72,7 @@ const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 export function AccessGrants() {
   const { mode } = useDataMode();
   const grantsState = useVaultGrants(apiBase, mode === 'live');
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const liveActive = useMemo<ActiveGrant[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -97,6 +98,42 @@ export function AccessGrants() {
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
   const grants = usingLive && liveActive.length ? liveActive : activeGrants;
+
+  const report = useMemo(() => {
+    const now = new Date().toISOString();
+    const activeLines = grants
+      .map((grant) => `- ${grant.recipient} · ${grant.scope} · ${grant.status ?? 'Active'} · expires ${grant.expires}`)
+      .join('\n');
+    const pendingLines = pendingApprovals
+      .map((request) => `- ${request.requester} · ${request.scope} · TTL ${request.ttl} · ${request.reason}`)
+      .join('\n');
+    const revokeLines = revocations
+      .map((revocation) => `- ${revocation.recipient} · ${revocation.scope} · ${revocation.status} @ ${revocation.when}`)
+      .join('\n');
+
+    return `# EchoVault access grants snapshot\n\n- Timestamp: ${now}\n- Mode: ${usingLive ? 'Live' : 'Mock'}\n- Active grants: ${grants.length}\n- Pending approvals: ${pendingApprovals.length}\n- Recent revocations: ${revocations.length}\n\n## Active grants\n${activeLines || '- None'}\n\n## Pending approvals\n${pendingLines || '- None'}\n\n## Recent revocations\n${revokeLines || '- None'}\n\n## Notes\n- `;
+  }, [grants, usingLive]);
+
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(report);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    }
+  };
+
+  const downloadReport = () => {
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'echovault-access-grants.md';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6 p-8">
@@ -184,6 +221,31 @@ export function AccessGrants() {
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard title="Access grants report" subtitle="Copy or download a markdown snapshot for updates">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
+          <div>Auto-generated summary of active grants, approvals, and revocations.</div>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-white"
+              onClick={copyReport}
+            >
+              {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy report'}
+            </button>
+            <button
+              className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#9AA4B2]"
+              onClick={downloadReport}
+            >
+              Download .md
+            </button>
+          </div>
+        </div>
+        <textarea
+          readOnly
+          value={report}
+          className="mt-3 h-44 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-xs text-[#9AA4B2]"
+        />
+      </SectionCard>
     </div>
   );
 }
