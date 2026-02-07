@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useDataMode } from '../lib/dataMode';
+import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -7,21 +10,24 @@ const activeGrants = [
     recipient: 'Orchid Labs',
     scope: 'Health data / 24h retention',
     expires: 'Feb 10, 2026 · 14:00 UTC',
-    usage: '132 reads'
+    usage: '132 reads',
+    status: 'Active'
   },
   {
     id: 'ev-2191',
     recipient: 'Atlas Studio',
     scope: 'Context NFT #884 · read-only',
     expires: 'Feb 08, 2026 · 09:30 UTC',
-    usage: '41 reads'
+    usage: '41 reads',
+    status: 'Active'
   },
   {
     id: 'ev-2212',
     recipient: 'Kairos AI',
     scope: 'Vault: Financial planning',
     expires: 'Feb 12, 2026 · 17:00 UTC',
-    usage: '78 reads'
+    usage: '78 reads',
+    status: 'Active'
   }
 ];
 
@@ -59,7 +65,39 @@ const revocations = [
   }
 ];
 
+type ActiveGrant = (typeof activeGrants)[number] & { status?: 'Active' | 'Revoked' };
+
+const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
+
 export function AccessGrants() {
+  const { mode } = useDataMode();
+  const grantsState = useVaultGrants(apiBase, mode === 'live');
+
+  const liveActive = useMemo<ActiveGrant[]>(() => {
+    if (!grantsState.grants.length) return [];
+    return grantsState.grants.map((grant, index) => {
+      const expires = grant.expires_at
+        ? new Date(grant.expires_at * 1000).toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            timeZone: 'UTC'
+          })
+        : 'No expiry';
+      const revoked = grant.revoked === true;
+      return {
+        id: `ev-live-${index + 1}`,
+        recipient: grant.grantee || grant.owner,
+        scope: grant.scope_hash,
+        expires: `${expires} UTC`,
+        usage: revoked ? 'revoked' : 'live',
+        status: revoked ? 'Revoked' : 'Active'
+      };
+    });
+  }, [grantsState.grants]);
+
+  const usingLive = mode === 'live' && !grantsState.error && apiBase;
+  const grants = usingLive && liveActive.length ? liveActive : activeGrants;
+
   return (
     <div className="space-y-6 p-8">
       <div className="flex flex-col gap-2">
@@ -78,12 +116,23 @@ export function AccessGrants() {
           </button>
         }
       >
+        {mode === 'live' && (
+          <div className="mb-4 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+            {grantsState.loading && 'Loading live grants...'}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${grants.length} grants).`}
+            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+          </div>
+        )}
         <div className="space-y-4">
-          {activeGrants.map((grant) => (
+          {grants.map((grant) => (
             <div key={grant.id} className="flex flex-col gap-2 rounded-xl border border-[#242B3A] bg-[#11151f] p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="text-sm font-semibold">{grant.recipient}</div>
-                <StatusPill label="Active" tone="success" />
+                <StatusPill
+                  label={grant.status ?? 'Active'}
+                  tone={grant.status === 'Revoked' ? 'danger' : 'success'}
+                />
               </div>
               <div className="text-xs text-[#9AA4B2]">{grant.scope}</div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-[#8B95A7]">
