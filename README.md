@@ -70,6 +70,33 @@ Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` fo
 npx tsx scripts/e2e-demo.ts
 ```
 
+## CLI (dev)
+Point at the API with `ECHOVAULT_API` and drive the flow:
+
+```bash
+export ECHOVAULT_API=http://localhost:8787
+export ECHOVAULT_OWNER=OWNER
+export ECHOVAULT_GRANTEE=GRANTEE
+export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
+
+# init vault + encrypted blob
+npx echovault init
+
+# fetch vault + list grants
+npx echovault vault
+npx echovault grants
+
+# grant + preview + request
+npx echovault grant
+npx echovault preview
+npx echovault request
+```
+
+Dangerous reset (dev store only):
+```bash
+ECHOVAULT_RESET_OK=yes npx echovault reset
+```
+
 One‑shot helper (starts API, waits for `/status`, runs encrypted demo, saves logs):
 ```bash
 ./scripts/demo-record.sh
