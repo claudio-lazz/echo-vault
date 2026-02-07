@@ -6,6 +6,7 @@ import { useApiStatus } from '../lib/useApiStatus';
 import { useVaultGrants } from '../lib/useVaultGrants';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
+const apiRoot = apiBase?.replace(/\/$/, '');
 
 type Step = {
   id: string;
@@ -51,6 +52,25 @@ const steps: Step[] = [
     hint: 'npm run demo:revoke'
   }
 ];
+
+const apiActions = apiRoot
+  ? [
+      {
+        id: 'status',
+        label: 'Check /status',
+        description: 'Confirm API readiness and version metadata.',
+        url: `${apiRoot}/status`,
+        curl: `curl -s ${apiRoot}/status`
+      },
+      {
+        id: 'grants',
+        label: 'List /vault/grants',
+        description: 'Review active + revoked grants in live mode.',
+        url: `${apiRoot}/vault/grants`,
+        curl: `curl -s ${apiRoot}/vault/grants`
+      }
+    ]
+  : [];
 
 export function DemoFlow() {
   const { mode } = useDataMode();
@@ -332,6 +352,47 @@ export function DemoFlow() {
           ))}
         </div>
       </SectionCard>
+
+      {apiActions.length > 0 && (
+        <SectionCard title="Live actions" subtitle="Quick checks for the running demo API">
+          <div className="grid gap-3 lg:grid-cols-2">
+            {apiActions.map((action) => (
+              <div
+                key={action.id}
+                className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-semibold text-white">{action.label}</div>
+                    <div className="mt-1 text-[#9AA4B2]">{action.description}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="rounded-lg border border-[#2A3040] px-2 py-1 text-[11px] text-[#9AA4B2]"
+                      onClick={() => window.open(action.url, '_blank', 'noopener,noreferrer')}
+                    >
+                      Open
+                    </button>
+                    <button
+                      className="rounded-lg border border-[#2A3040] px-2 py-1 text-[11px] text-[#9AA4B2]"
+                      onClick={() => copyCommand(action.curl, action.id)}
+                    >
+                      {commandCopy === action.id
+                        ? 'Copied'
+                        : commandCopy === 'error'
+                          ? 'Copy failed'
+                          : 'Copy curl'}
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 rounded-md border border-[#1c2333] bg-[#0b0f17] px-2 py-1 font-mono text-[11px] text-[#6AE4FF]">
+                  {action.url}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
 
       <SectionCard title="Demo run notes" subtitle="Copy or download a markdown summary after each run">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
