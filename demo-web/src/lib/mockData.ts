@@ -104,6 +104,42 @@ export const mockPlaybooks = [
   }
 ];
 
+export const mockPlaybookRuns = {
+  'PB-204': {
+    successRate: 0.98,
+    avgRuntime: '42s',
+    lastOutcome: 'success',
+    lastRunDuration: '38s',
+    recent: [
+      { id: 'RUN-9041', status: 'success', time: '11m ago', detail: 'Quarantined 2 grants, notified owner.' },
+      { id: 'RUN-9035', status: 'success', time: '38m ago', detail: 'Snapshot stored in vault VA-102.' },
+      { id: 'RUN-9028', status: 'success', time: '1h ago', detail: 'Containment completed with no escalations.' }
+    ]
+  },
+  'PB-207': {
+    successRate: 0.94,
+    avgRuntime: '2m 12s',
+    lastOutcome: 'success',
+    lastRunDuration: '2m 08s',
+    recent: [
+      { id: 'RUN-9012', status: 'success', time: '24m ago', detail: 'Integrity score 99.2%, keys rotated.' },
+      { id: 'RUN-9004', status: 'success', time: '1h ago', detail: 'Attestation passed on all regions.' },
+      { id: 'RUN-8999', status: 'warning', time: '2h ago', detail: 'One vault missed rotation window.' }
+    ]
+  },
+  'PB-211': {
+    successRate: 0.81,
+    avgRuntime: '1m 18s',
+    lastOutcome: 'warning',
+    lastRunDuration: '1m 31s',
+    recent: [
+      { id: 'RUN-8951', status: 'warning', time: '45m ago', detail: 'Rate limit applied, standby warmed.' },
+      { id: 'RUN-8942', status: 'success', time: '1h ago', detail: 'Burst contained without impact.' },
+      { id: 'RUN-8936', status: 'warning', time: '1h 22m ago', detail: 'Incident opened for edge saturation.' }
+    ]
+  }
+};
+
 export const mockUsage = {
   monthlyBurn: 64.2,
   egressTB: 19.4,
