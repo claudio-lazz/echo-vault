@@ -4,6 +4,9 @@
 ```bash
 # Start API, run encrypted demo, save logs to demo-output/
 ./scripts/demo-record.sh
+
+# Optional knobs
+# DEMO_OUTPUT_DIR=/tmp/ev-demo KEEP_API=true ./scripts/demo-record.sh
 ```
 
 ## Local API
