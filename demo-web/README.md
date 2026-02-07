@@ -19,6 +19,9 @@ npm run dev
 ## Env options
 
 ```bash
+# Data mode: mock (default) or live
+VITE_DATA_MODE=mock
+
 # API base for live mode
 VITE_ECHOVAULT_API=https://your-api
 
@@ -33,3 +36,11 @@ VITE_DEMO_VIDEO_URL=https://your-demo-video
 ```bash
 npm run build
 ```
+
+## Deploy (Vercel)
+
+1) Push the repo to GitHub.
+2) Import the repo into Vercel.
+3) Set env vars from `.env.example`.
+4) Build: `npm run build`
+5) Output: `dist/`
