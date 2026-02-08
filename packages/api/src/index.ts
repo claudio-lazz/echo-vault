@@ -222,20 +222,33 @@ app.post('/vault/revoke', (req: Request<{}, {}, { owner?: string; grantee?: stri
 });
 
 // Audit log (dev stub)
-app.get('/audit', (req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; limit?: string }>, res: Response) => {
-  const { owner, grantee, action, limit } = req.query || {};
-  const max = Math.min(Number(limit) || 100, 500);
-  const list = audits
-    .filter((event) => {
-      if (owner && event.owner !== owner) return false;
-      if (grantee && event.grantee !== grantee) return false;
-      if (action && event.action !== action) return false;
-      return true;
-    })
-    .slice(-max)
-    .reverse();
-  res.status(200).json({ ok: true, events: list });
-});
+app.get(
+  '/audit',
+  (req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; limit?: string; since?: string; until?: string }>, res: Response) => {
+    const { owner, grantee, action, limit, since, until } = req.query || {};
+    const max = Math.min(Number(limit) || 100, 500);
+    const sinceMs = since !== undefined ? Number(since) : undefined;
+    if (since !== undefined && Number.isNaN(sinceMs)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_since', code: 'invalid_since' });
+    }
+    const untilMs = until !== undefined ? Number(until) : undefined;
+    if (until !== undefined && Number.isNaN(untilMs)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_until', code: 'invalid_until' });
+    }
+    const list = audits
+      .filter((event) => {
+        if (owner && event.owner !== owner) return false;
+        if (grantee && event.grantee !== grantee) return false;
+        if (action && event.action !== action) return false;
+        if (sinceMs !== undefined && event.ts < sinceMs) return false;
+        if (untilMs !== undefined && event.ts > untilMs) return false;
+        return true;
+      })
+      .slice(-max)
+      .reverse();
+    res.status(200).json({ ok: true, events: list });
+  }
+);
 
 // Grant summary (dev stub)
 app.get('/vault/grants/summary', (req: Request<{}, {}, {}, { owner?: string; grantee?: string }>, res: Response) => {

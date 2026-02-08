@@ -108,6 +108,8 @@ export type ListAuditArgs = {
   grantee?: string;
   action?: AuditAction;
   limit?: number;
+  since?: number;
+  until?: number;
   api?: string;
 };
 
@@ -166,12 +168,14 @@ export async function listVaults({ owner, api = defaultApi }: ListVaultsArgs) {
   return getJson<{ ok: boolean; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
 }
 
-export async function listAudit({ owner, grantee, action, limit, api = defaultApi }: ListAuditArgs) {
+export async function listAudit({ owner, grantee, action, limit, since, until, api = defaultApi }: ListAuditArgs) {
   const query = buildQuery({
     owner,
     grantee,
     action,
-    limit: limit ? String(limit) : undefined
+    limit: limit ? String(limit) : undefined,
+    since: since !== undefined ? String(since) : undefined,
+    until: until !== undefined ? String(until) : undefined
   });
   return getJson<{ ok: boolean; events: AuditEvent[] }>(`${api}/audit${query}`);
 }

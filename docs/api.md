@@ -180,11 +180,13 @@ GET /vault/grants/summary?owner=OWNER
 ```
 
 ## GET /audit
-List audit events (optional `owner`, `grantee`, `action`, `limit`).
+List audit events (optional `owner`, `grantee`, `action`, `limit`, `since`, `until`).
+
+`since`/`until` are unix epoch milliseconds, useful for time-windowed audit queries.
 
 Example:
 ```
-GET /audit?action=grant&limit=20
+GET /audit?action=grant&limit=20&since=1730000000000
 ```
 
 **Response**

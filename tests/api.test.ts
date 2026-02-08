@@ -184,6 +184,23 @@ describe('api basic flow', () => {
     expect(grantRes.status).toBe(200);
     expect(grantRes.body?.events?.length).toBe(1);
     expect(grantRes.body?.events?.[0]?.action).toBe('grant');
+
+    const fullRes = await request(server).get('/audit').query({ owner });
+    expect(fullRes.status).toBe(200);
+    const events = fullRes.body?.events || [];
+    if (events.length > 0) {
+      const newestTs = events[0]?.ts;
+      const oldestTs = events[events.length - 1]?.ts;
+      const mid = Math.floor((newestTs + oldestTs) / 2);
+
+      const sinceRes = await request(server).get('/audit').query({ owner, since: mid });
+      expect(sinceRes.status).toBe(200);
+      expect(sinceRes.body?.events?.every((event: any) => event.ts >= mid)).toBe(true);
+
+      const untilRes = await request(server).get('/audit').query({ owner, until: mid });
+      expect(untilRes.status).toBe(200);
+      expect(untilRes.body?.events?.every((event: any) => event.ts <= mid)).toBe(true);
+    }
   });
 
   it('validates missing fields', async () => {

@@ -99,6 +99,9 @@ npx echovault grants-summary
 
 # audit log (optional filters)
 export ECHOVAULT_AUDIT_ACTION=grant
+export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
+# ...run a few actions...
+export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)
 npx echovault audit
 
 # grant + preview + request

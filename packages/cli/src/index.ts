@@ -85,11 +85,15 @@ if (!cmd) {
     const grantee = process.env.ECHOVAULT_GRANTEE;
     const action = process.env.ECHOVAULT_AUDIT_ACTION;
     const limit = process.env.ECHOVAULT_AUDIT_LIMIT;
+    const since = process.env.ECHOVAULT_AUDIT_SINCE;
+    const until = process.env.ECHOVAULT_AUDIT_UNTIL;
     const qs = new URLSearchParams();
     if (owner) qs.set('owner', owner);
     if (grantee) qs.set('grantee', grantee);
     if (action) qs.set('action', action);
     if (limit) qs.set('limit', limit);
+    if (since) qs.set('since', since);
+    if (until) qs.set('until', until);
     const url = qs.toString() ? `${api}/audit?${qs.toString()}` : `${api}/audit`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);
