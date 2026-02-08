@@ -127,6 +127,28 @@ ECHOVAULT_RESET_OK=yes npx echovault reset
 
 ---
 
+## 🧩 SDK (core)
+
+```ts
+import {
+  listVaults,
+  listGrants,
+  grantSummary,
+  auditSummary
+} from "@echovault/core-sdk";
+
+const api = "http://localhost:8787";
+
+const vaults = await listVaults({ owner: "OWNER", api });
+const grants = await listGrants({ owner: "OWNER", api, limit: 25, offset: 0 });
+const summary = await grantSummary({ owner: "OWNER", api, status: "active" });
+const audit = await auditSummary({ owner: "OWNER", api });
+
+console.log(vaults.data, grants.data, summary.data, audit.data);
+```
+
+---
+
 ## 📚 Docs
 
 | Doc | What it covers |
