@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { mockVaults } from '../lib/mockData';
 import { useVaultGrants } from '../lib/useVaultGrants';
+import { useVaults } from '../lib/useVaults';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -15,10 +16,33 @@ type VaultItem = (typeof mockVaults)[number] & {
 export function Vaults() {
   const { mode } = useDataMode();
   const grantsState = useVaultGrants(apiBase, mode === 'live');
+  const vaultsState = useVaults(apiBase, mode === 'live');
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const liveVaults = useMemo<VaultItem[]>(() => {
+    if (!vaultsState.vaults.length) return [];
+    return vaultsState.vaults.map((vault, index) => {
+      const total = vault.grants?.total ?? 0;
+      const counts = vault.grants?.counts ?? {};
+      const revoked = counts.revoked ?? 0;
+      const expired = counts.expired ?? 0;
+      const active = counts.active ?? Math.max(0, total - revoked - expired);
+      const status = revoked > 0 || expired > 0 ? 'degraded' : 'healthy';
+      const summary = `active ${active} · revoked ${revoked} · expired ${expired}`;
+      return {
+        id: `VA-L${String(index + 1).padStart(2, '0')}`,
+        owner: vault.owner,
+        region: vault.storage || 'multi-region',
+        storageGB: Math.max(12, total * 6),
+        status,
+        grants: total,
+        lastActivity: summary
+      };
+    });
+  }, [vaultsState.vaults]);
+
+  const fallbackVaults = useMemo<VaultItem[]>(() => {
     if (!grantsState.grants.length) return [];
     const grouped = new Map<string, { count: number; revoked: number; latestExpiry?: number | null }>();
     grantsState.grants.forEach((grant) => {
@@ -47,8 +71,8 @@ export function Vaults() {
     });
   }, [grantsState.grants]);
 
-  const usingLive = mode === 'live' && !grantsState.error && apiBase;
-  const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : mockVaults;
+  const usingLive = mode === 'live' && !vaultsState.error && apiBase;
+  const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : fallbackVaults.length ? fallbackVaults : mockVaults;
 
   const vaultReport = useMemo(() => {
     if (!selectedVault) return '';
@@ -105,9 +129,9 @@ export function Vaults() {
       <SectionCard title="Vault inventory" subtitle="Active vaults across regions">
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
-            {grantsState.loading && 'Loading live vault summaries...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
-            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${vaults.length} vaults).`}
+            {vaultsState.loading && 'Loading live vault summaries...'}
+            {!vaultsState.loading && vaultsState.error && `Live data unavailable (${vaultsState.error}). Showing mock data.`}
+            {!vaultsState.loading && !vaultsState.error && apiBase && `Live data connected (${vaults.length} vaults).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>
         )}
