@@ -93,6 +93,8 @@ echovault request
 const {
   grantAccess,
   revokeAccess,
+  listGrants,
+  grantSummary,
   previewContext,
   requestContext,
   fetchContext,
@@ -105,6 +107,12 @@ const {
 const api = 'http://localhost:8787';
 const grant = await grantAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
 console.log('grant', grant.status, grant.json);
+
+const grants = await listGrants({ owner: 'OWNER', status: 'active', api });
+console.log('grants', grants.status, grants.json);
+
+const summary = await grantSummary({ owner: 'OWNER', api });
+console.log('grant summary', summary.status, summary.json);
 
 const preview = await previewContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
 console.log('preview', preview.status, preview.json);

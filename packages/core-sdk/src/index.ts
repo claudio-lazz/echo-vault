@@ -6,6 +6,27 @@ export type ApiResult<T = unknown> = {
   json: T;
 };
 
+export type GrantStatus = 'active' | 'revoked' | 'expired';
+export type GrantStatusFilter = GrantStatus | 'all';
+
+export type Grant = {
+  owner: string;
+  grantee: string;
+  scope_hash: string;
+  expires_at: number | null;
+  revoked?: boolean;
+  status?: GrantStatus;
+};
+
+export type GrantSummary = {
+  total: number;
+  counts: {
+    active: number;
+    revoked: number;
+    expired: number;
+  };
+};
+
 export type InitVaultArgs = {
   owner: string;
   context_uri: string;
@@ -45,7 +66,30 @@ export type RequestContextArgs = {
 
 export type FetchContextArgs = RequestContextArgs;
 
+export type ListGrantsArgs = {
+  owner?: string;
+  grantee?: string;
+  status?: GrantStatusFilter;
+  api?: string;
+};
+
+export type GrantSummaryArgs = {
+  owner?: string;
+  grantee?: string;
+  api?: string;
+};
+
 export type Decryptor<T = unknown, R = unknown> = (blob: T) => R;
+
+function buildQuery(params: Record<string, string | undefined>) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (!value) return;
+    search.set(key, value);
+  });
+  const query = search.toString();
+  return query ? `?${query}` : '';
+}
 
 async function postJson<T = unknown>(url: string, body?: unknown): Promise<ApiResult<T>> {
   const res = await fetch(url, {
@@ -53,6 +97,12 @@ async function postJson<T = unknown>(url: string, body?: unknown): Promise<ApiRe
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {})
   });
+  const json = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, json: json as T };
+}
+
+async function getJson<T = unknown>(url: string): Promise<ApiResult<T>> {
+  const res = await fetch(url);
   const json = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, json: json as T };
 }
@@ -67,6 +117,16 @@ export async function grantAccess({ owner, grantee, scope_hash, expires_at, api 
 
 export async function revokeAccess({ owner, grantee, scope_hash, api = defaultApi }: RevokeAccessArgs) {
   return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
+}
+
+export async function listGrants({ owner, grantee, status, api = defaultApi }: ListGrantsArgs) {
+  const query = buildQuery({ owner, grantee, status });
+  return getJson<{ ok: boolean; grants: Grant[] }>(`${api}/vault/grants${query}`);
+}
+
+export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSummaryArgs) {
+  const query = buildQuery({ owner, grantee });
+  return getJson<{ ok: boolean; total: number; counts: GrantSummary['counts'] }>(`${api}/vault/grants/summary${query}`);
 }
 
 export async function previewContext({ owner, grantee, scope_hash, api = defaultApi }: PreviewContextArgs) {
