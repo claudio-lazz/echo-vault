@@ -1,55 +1,34 @@
-# EchoVault
+# EchoVault 🧬
+> **Composable, permissioned context for AI agents — on Solana.**
 
-**Composable Personal Context Layer for AI on Solana**
+[![Solana](https://img.shields.io/badge/Solana-000?logo=solana&logoColor=00D4AA)](https://solana.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![CLI](https://img.shields.io/badge/CLI-echovault-5E5CE6)](#cli)
+[![License](https://img.shields.io/badge/License-MIT-0A0A0A)](LICENSE)
 
-EchoVault makes AI context portable, permissioned, and user‑owned. Instead of every app trapping your preferences and history in a silo, EchoVault lets users hold their context as on‑chain assets and grant time‑boxed or paid access to agents — with revocation and auditability.
+**EchoVault** makes AI context **portable, user‑owned, and revocable**. Users hold encrypted context as on‑chain assets and grant scoped access to agents with **expiry**, **revocation**, and optional **x402 pay‑per‑read**.
 
-## The Problem (Why This Matters)
-AI agents are only as good as their context. Today that context is:
-- **Siloed** per app or vendor
-- **Non‑portable** across agents and workflows
-- **Non‑monetizable** for users who generated it
-- **Non‑revocable** once shared
+---
 
-This limits agent performance, creates lock‑in, and blocks a real market for high‑quality context.
+## ✨ Why EchoVault
 
-## The Approach
-EchoVault combines on‑chain ownership with off‑chain encryption:
+| Problem today | EchoVault fix |
+|---|---|
+| Context is siloed per app | **Portable** across agents and workflows |
+| Permissions are sticky | **Time‑boxed grants** + **revocation** |
+| Users can’t monetize context | **x402 pay‑per‑read** |
+| No audit trail | **On‑chain grant + audit logs** |
 
-- **Context as an asset**: Encrypted context lives off‑chain; on‑chain metadata points to it.
-- **Access grants**: Users authorize specific agents for specific scopes, with expiries.
-- **Revocation**: Grants can be revoked at any time.
-- **Payment gating (x402)**: Optional pay‑per‑read access for agents or apps.
+> **Thesis:** Context should be a user‑owned asset — not a vendor‑locked file.
 
-The goal is a simple, composable primitive: *portable context that respects user control*.
+---
 
-## What’s in the MVP
-**On‑chain primitives**
-- Context vault asset (cNFT / Token‑2022)
-- Access grant PDA
-- Revocation registry
+## 🧭 Architecture (at a glance)
 
-**Off‑chain services**
-- Encryption gateway + storage (IPFS/Arweave/S3)
-- Context API
-- Agent SDK + CLI
-
-**Payments**
-- x402 pay‑per‑read (mint/amount validation + payer/recipient checks)
-
-## Status (Current Dev Stub)
-- End‑to‑end flow: init → grant → request → payment verify → return encrypted blob
-- In‑memory grant + revocation store (dev stub)
-- In‑memory encrypted blob store (dev stub)
-- SDK helpers for init/grant/revoke/preview/request + fetch/decrypt + AES-GCM encrypt/decrypt helpers
-
-See `docs/demo.md` for the walkthrough.
-
-## Architecture at a Glance
 ```
 User (owner)
-  ├─ Encrypt context → Storage (IPFS/Arweave/S3)
-  ├─ Mint Context Asset (on‑chain)
+  ├─ Encrypt context → Storage (FS / IPFS / Arweave / S3)
+  ├─ Mint Context Asset (cNFT / Token-2022)
   └─ Grant access (PDA) / Revoke
 
 Agent
@@ -58,20 +37,45 @@ Agent
   └─ Receive encrypted blob pointer + metadata
 ```
 
-## Why Solana
-- **Cheap, fast primitives** for access grants and revocation
-- **Token‑2022 / cNFTs** for context ownership
-- **Composable** with agent payments and on‑chain reputation
+---
 
-## Demo
-Copy `.env.example` to `.env` and adjust values if needed. See `docs/demo.md` for the end‑to‑end walkthrough, or run:
+## ✅ What’s in the MVP
+
+**On‑chain primitives**
+- Context vault asset (cNFT / Token‑2022)
+- Access Grant PDA
+- Revocation registry
+
+**Off‑chain services**
+- Context API
+- Encryption helpers + storage adapters
+- Agent SDK + CLI
+
+**Payments**
+- x402 pay‑per‑read (mint/amount validation + payer/recipient checks)
+
+---
+
+## 🚀 Quick Start
 
 ```bash
+npm install
 npx tsx scripts/e2e-demo.ts
 ```
 
-## CLI (dev)
-Point at the API with `ECHOVAULT_API` and drive the flow:
+See `docs/demo.md` for the full walkthrough.
+
+### Encrypted demo (AES‑GCM)
+```bash
+export ECHOVAULT_SECRET=dev-secret
+npx tsx scripts/encrypt-blob.ts '{"hello":"world"}' > /tmp/echovault-encrypted.json
+export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
+npx tsx scripts/e2e-encrypt-demo.ts
+```
+
+---
+
+## 🧰 CLI
 
 ```bash
 export ECHOVAULT_API=http://localhost:8787
@@ -82,36 +86,10 @@ export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
 # init vault + encrypted blob
 npx echovault init
 
-# (optional) load context URI + encrypted blob from files
-export ECHOVAULT_CONTEXT_URI_PATH=/tmp/context-uri.txt
-export ECHOVAULT_ENCRYPTED_BLOB_PATH=/tmp/echovault-encrypted.json
-npx echovault init
-
 # fetch vault + list vaults/grants
 npx echovault vault
 npx echovault vaults
 npx echovault grants
-
-# paginate vault list
-export ECHOVAULT_VAULT_LIMIT=25
-export ECHOVAULT_VAULT_OFFSET=0
-npx echovault vaults
-
-# filter grants + paginate + summarize
-export ECHOVAULT_GRANT_STATUS=active
-export ECHOVAULT_GRANT_LIMIT=25
-export ECHOVAULT_GRANT_OFFSET=0
-npx echovault grants
-npx echovault grants-summary
-
-# audit log (optional filters + pagination)
-export ECHOVAULT_AUDIT_ACTION=grant
-export ECHOVAULT_AUDIT_LIMIT=25
-export ECHOVAULT_AUDIT_OFFSET=0
-export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
-# ...run a few actions...
-export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)
-npx echovault audit
 
 # grant + preview + request
 npx echovault grant
@@ -119,44 +97,63 @@ npx echovault preview
 npx echovault request
 ```
 
+**Pagination / filters**
+```bash
+export ECHOVAULT_VAULT_LIMIT=25
+export ECHOVAULT_VAULT_OFFSET=0
+npx echovault vaults
+
+export ECHOVAULT_GRANT_STATUS=active
+export ECHOVAULT_GRANT_LIMIT=25
+export ECHOVAULT_GRANT_OFFSET=0
+npx echovault grants
+npx echovault grants-summary
+
+export ECHOVAULT_AUDIT_ACTION=grant
+export ECHOVAULT_AUDIT_LIMIT=25
+export ECHOVAULT_AUDIT_OFFSET=0
+export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
+export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)
+npx echovault audit
+```
+
 Dangerous reset (dev store only):
 ```bash
 ECHOVAULT_RESET_OK=yes npx echovault reset
 ```
 
-One‑shot helper (starts API, waits for `/status`, runs encrypted demo, saves logs):
-```bash
-./scripts/demo-record.sh
+---
+
+## 📚 Docs
+
+| Doc | What it covers |
+|---|---|
+| `docs/api.md` | API requests, responses, error codes |
+| `docs/demo.md` | End‑to‑end demo walkthrough |
+| `docs/demo-video-plan.md` | Recording checklist |
+| `docs/forum.md` | Forum helper |
+
+---
+
+## 📦 Repo Layout
+
+```
+programs/     # Solana programs (Anchor)
+packages/     # SDK + API + CLI
+docs/         # Specs, architecture, flows
+scripts/      # Demo + helper scripts
+apps/         # App scaffolds
 ```
 
-### Encrypted demo (AES‑GCM)
-```bash
-export ECHOVAULT_SECRET=dev-secret
-npx tsx scripts/encrypt-blob.ts '{"hello":"world"}' > /tmp/echovault-encrypted.json
-export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
-npx tsx scripts/e2e-encrypt-demo.ts
-```
+---
 
-See `docs/demo-video-plan.md` for the recording checklist.
+## 🗺️ Roadmap (Short‑Term)
 
-## API Reference (Dev Stub)
-See `docs/api.md` for request/response examples and error codes.
-
-## Runtime toggles (dev)
-- `ECHOVAULT_ONCHAIN_RPC` + `ECHOVAULT_PROGRAM_ID` + `ECHOVAULT_ONCHAIN_STRICT=true` to enforce on-chain grant validation.
-- `ECHOVAULT_STORAGE_DIR` to persist encrypted blobs to disk (filesystem adapter).
-
-## Repo Layout
-- `programs/` — Solana programs (Anchor)
-- `packages/` — SDK + API + CLI
-- `docs/` — Specs, architecture, flows
-
-## Roadmap (Short‑Term)
-- Replace in‑memory stores with persistent storage
-- Encrypt/decrypt flow with real keys
+- Persistent storage adapters (IPFS / Arweave / S3)
 - On‑chain grant + revoke enforcement
+- Policy DSL + richer audit analytics
 - SDK ergonomics + agent integrations
 
 ---
 
-EchoVault is a foundation for **user‑owned, permissioned AI context** — portable across agents and apps, without sacrificing control or privacy.
+**EchoVault is the foundation for user‑owned, permissioned AI context — portable across agents and apps, without sacrificing control or privacy.**
