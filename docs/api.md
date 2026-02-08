@@ -123,19 +123,22 @@ Grant access to a grantee.
 Revoke an access grant.
 
 ## GET /vault/grants
-List grants (filter by `owner`, `grantee`, or `status`).
+List grants (filter by `owner`, `grantee`, or `status`). Supports pagination via `limit` and `offset`.
 
 `status` values: `active`, `revoked`, `expired`, `all`.
 
 Example:
 ```
-GET /vault/grants?owner=OWNER&status=active
+GET /vault/grants?owner=OWNER&status=active&limit=50&offset=0
 ```
 
 **Response**
 ```json
 {
   "ok": true,
+  "total": 1,
+  "offset": 0,
+  "limit": 50,
   "grants": [
     {
       "owner": "OWNER",

@@ -89,6 +89,8 @@ export type ListGrantsArgs = {
   owner?: string;
   grantee?: string;
   status?: GrantStatusFilter;
+  limit?: number;
+  offset?: number;
   api?: string;
 };
 
@@ -153,9 +155,15 @@ export async function revokeAccess({ owner, grantee, scope_hash, api = defaultAp
   return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
 }
 
-export async function listGrants({ owner, grantee, status, api = defaultApi }: ListGrantsArgs) {
-  const query = buildQuery({ owner, grantee, status });
-  return getJson<{ ok: boolean; grants: Grant[] }>(`${api}/vault/grants${query}`);
+export async function listGrants({ owner, grantee, status, limit, offset, api = defaultApi }: ListGrantsArgs) {
+  const query = buildQuery({
+    owner,
+    grantee,
+    status,
+    limit: limit !== undefined ? String(limit) : undefined,
+    offset: offset !== undefined ? String(offset) : undefined
+  });
+  return getJson<{ ok: boolean; total: number; offset: number; limit: number | null; grants: Grant[] }>(`${api}/vault/grants${query}`);
 }
 
 export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSummaryArgs) {

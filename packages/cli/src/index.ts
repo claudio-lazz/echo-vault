@@ -62,10 +62,14 @@ if (!cmd) {
     const owner = process.env.ECHOVAULT_OWNER;
     const grantee = process.env.ECHOVAULT_GRANTEE;
     const statusFilter = process.env.ECHOVAULT_GRANT_STATUS;
+    const limit = process.env.ECHOVAULT_GRANT_LIMIT;
+    const offset = process.env.ECHOVAULT_GRANT_OFFSET;
     const qs = new URLSearchParams();
     if (owner) qs.set('owner', owner);
     if (grantee) qs.set('grantee', grantee);
     if (statusFilter) qs.set('status', statusFilter);
+    if (limit) qs.set('limit', limit);
+    if (offset) qs.set('offset', offset);
     const url = qs.toString() ? `${api}/vault/grants?${qs.toString()}` : `${api}/vault/grants`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);

@@ -119,6 +119,34 @@ describe('api basic flow', () => {
     expect(summaryRes.body?.counts?.expired).toBe(1);
   });
 
+  it('paginates grant list with limit/offset', async () => {
+    const owner = 'OWNER_PAGING';
+    const grantee = 'GRANTEE_PAGING';
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_ONE', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_TWO', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_THREE', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    const pageRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, limit: 1, offset: 1 });
+
+    expect(pageRes.status).toBe(200);
+    expect(pageRes.body?.total).toBe(3);
+    expect(pageRes.body?.offset).toBe(1);
+    expect(pageRes.body?.limit).toBe(1);
+    expect(pageRes.body?.grants?.length).toBe(1);
+    expect(pageRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_TWO');
+  });
+
   it('lists vaults with grant summaries', async () => {
     await request(server)
       .post('/vault/init')

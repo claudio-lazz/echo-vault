@@ -296,29 +296,43 @@ app.get('/vault/grants/summary', (req: Request<{}, {}, {}, { owner?: string; gra
 });
 
 // List grants (dev stub)
-app.get('/vault/grants', (req: Request<{}, {}, {}, { owner?: string; grantee?: string; status?: string }>, res: Response) => {
-  const { owner, grantee, status } = req.query || {};
-  const allowedStatuses = new Set(['active', 'revoked', 'expired', 'all']);
-  if (status && !allowedStatuses.has(status)) {
-    return res.status(400).json({ ok: false, reason: 'invalid_status', code: 'invalid_status' });
+app.get(
+  '/vault/grants',
+  (req: Request<{}, {}, {}, { owner?: string; grantee?: string; status?: string; limit?: string; offset?: string }>, res: Response) => {
+    const { owner, grantee, status, limit, offset } = req.query || {};
+    const allowedStatuses = new Set(['active', 'revoked', 'expired', 'all']);
+    if (status && !allowedStatuses.has(status)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_status', code: 'invalid_status' });
+    }
+    const limitValue = limit !== undefined ? Number(limit) : undefined;
+    if (limit !== undefined && (Number.isNaN(limitValue) || limitValue < 0)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+    }
+    const offsetValue = offset !== undefined ? Number(offset) : 0;
+    if (offset !== undefined && (Number.isNaN(offsetValue) || offsetValue < 0)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_offset', code: 'invalid_offset' });
+    }
+    const cappedLimit = limitValue !== undefined ? Math.min(limitValue, 500) : undefined;
+    const list = Array.from(grants.values())
+      .filter((grant) => {
+        if (owner && grant.owner !== owner) return false;
+        if (grantee && grant.grantee !== grantee) return false;
+        return true;
+      })
+      .map((grant) => ({
+        ...grant,
+        revoked: revoked.has(grantKey(grant)),
+        status: grantStatus(grant)
+      }))
+      .filter((grant) => {
+        if (!status || status === 'all') return true;
+        return grant.status === status;
+      });
+    const total = list.length;
+    const sliced = list.slice(offsetValue, cappedLimit !== undefined ? offsetValue + cappedLimit : undefined);
+    res.status(200).json({ ok: true, total, offset: offsetValue, limit: cappedLimit ?? null, grants: sliced });
   }
-  const list = Array.from(grants.values())
-    .filter((grant) => {
-      if (owner && grant.owner !== owner) return false;
-      if (grantee && grant.grantee !== grantee) return false;
-      return true;
-    })
-    .map((grant) => ({
-      ...grant,
-      revoked: revoked.has(grantKey(grant)),
-      status: grantStatus(grant)
-    }))
-    .filter((grant) => {
-      if (!status || status === 'all') return true;
-      return grant.status === status;
-    });
-  res.status(200).json({ ok: true, grants: list });
-});
+);
 
 // Context preview (dev stub + optional on-chain validation)
 app.post('/context/preview', async (req: Request<{}, {}, { owner?: string; grantee?: string; scope_hash?: string }>, res: Response) => {
