@@ -87,8 +87,9 @@ export ECHOVAULT_CONTEXT_URI_PATH=/tmp/context-uri.txt
 export ECHOVAULT_ENCRYPTED_BLOB_PATH=/tmp/echovault-encrypted.json
 npx echovault init
 
-# fetch vault + list grants
+# fetch vault + list vaults/grants
 npx echovault vault
+npx echovault vaults
 npx echovault grants
 
 # filter grants + summarize

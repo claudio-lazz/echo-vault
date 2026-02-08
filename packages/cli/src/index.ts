@@ -15,7 +15,7 @@ const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
 if (!cmd) {
-  console.log('echovault <status|init|vault|grant|revoke|grants|grants-summary|preview|request|reset>');
+  console.log('echovault <status|init|vault|vaults|grant|revoke|grants|grants-summary|preview|request|reset>');
   process.exit(0);
 }
 
@@ -40,6 +40,14 @@ if (!cmd) {
   } else if (cmd === 'vault') {
     const owner = process.env.ECHOVAULT_OWNER || 'OWNER';
     const { status, json } = await getJson<ApiError>(`${api}/vault/${owner}`);
+    if (json?.code) console.error('error', json.code);
+    console.log(status, json);
+  } else if (cmd === 'vaults') {
+    const owner = process.env.ECHOVAULT_OWNER;
+    const qs = new URLSearchParams();
+    if (owner) qs.set('owner', owner);
+    const url = qs.toString() ? `${api}/vaults?${qs.toString()}` : `${api}/vaults`;
+    const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);
     console.log(status, json);
   } else if (cmd === 'grant') {

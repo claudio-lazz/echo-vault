@@ -76,6 +76,36 @@ Fetch a vault by owner.
 }
 ```
 
+## GET /vaults
+List vaults (optional `owner` filter). Returns grant counts per vault.
+
+Example:
+```
+GET /vaults?owner=OWNER
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "vaults": [
+    {
+      "owner": "OWNER",
+      "context_uri": "ipfs://...",
+      "storage": "memory",
+      "grants": {
+        "total": 2,
+        "counts": {
+          "active": 1,
+          "revoked": 1,
+          "expired": 0
+        }
+      }
+    }
+  ]
+}
+```
+
 ## POST /vault/grant
 Grant access to a grantee.
 

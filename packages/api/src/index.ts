@@ -54,6 +54,16 @@ const grantStatus = (grant: Grant) => {
   return 'active';
 };
 
+const summarizeGrants = (list: Grant[]) =>
+  list.reduce(
+    (acc, grant) => {
+      const status = grantStatus(grant);
+      acc[status] += 1;
+      return acc;
+    },
+    { active: 0, revoked: 0, expired: 0 }
+  );
+
 const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
 
 function loadStore() {
@@ -138,6 +148,25 @@ app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: st
     });
 });
 
+// Vault list (dev stub)
+app.get('/vaults', (req: Request<{}, {}, {}, { owner?: string }>, res: Response) => {
+  const { owner } = req.query || {};
+  const list = Array.from(vaults.values()).filter((vault) => !owner || vault.owner === owner);
+  const vaultList = list.map((vault) => {
+    const grantList = Array.from(grants.values()).filter((grant) => grant.owner === vault.owner);
+    return {
+      owner: vault.owner,
+      context_uri: vault.context_uri,
+      storage: process.env.ECHOVAULT_STORAGE_DIR ? 'filesystem' : 'memory',
+      grants: {
+        total: grantList.length,
+        counts: summarizeGrants(grantList)
+      }
+    };
+  });
+  res.status(200).json({ ok: true, vaults: vaultList });
+});
+
 // Vault fetch (dev stub)
 app.get('/vault/:owner', (req: Request<{ owner: string }>, res: Response, next: NextFunction) => {
   const owner = req.params.owner;
@@ -178,14 +207,7 @@ app.get('/vault/grants/summary', (req: Request<{}, {}, {}, { owner?: string; gra
     if (grantee && grant.grantee !== grantee) return false;
     return true;
   });
-  const counts = list.reduce(
-    (acc, grant) => {
-      const status = grantStatus(grant);
-      acc[status] += 1;
-      return acc;
-    },
-    { active: 0, revoked: 0, expired: 0 }
-  );
+  const counts = summarizeGrants(list);
   res.status(200).json({ ok: true, total: list.length, counts });
 });
 

@@ -119,6 +119,45 @@ describe('api basic flow', () => {
     expect(summaryRes.body?.counts?.expired).toBe(1);
   });
 
+  it('lists vaults with grant summaries', async () => {
+    await request(server)
+      .post('/vault/init')
+      .send({ owner: 'OWNER_A', context_uri: 'ipfs://a', encrypted_blob: { ok: true } });
+
+    await request(server)
+      .post('/vault/init')
+      .send({ owner: 'OWNER_B', context_uri: 'ipfs://b', encrypted_blob: { ok: true } });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner: 'OWNER_A', grantee: 'GRANTEE', scope_hash: 'SCOPE_ACTIVE', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner: 'OWNER_A', grantee: 'GRANTEE', scope_hash: 'SCOPE_REVOKED', expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/revoke')
+      .send({ owner: 'OWNER_A', grantee: 'GRANTEE', scope_hash: 'SCOPE_REVOKED' });
+
+    const listRes = await request(server).get('/vaults');
+    expect(listRes.status).toBe(200);
+    expect(listRes.body?.vaults?.length).toBe(2);
+
+    const ownerA = listRes.body?.vaults?.find((vault: any) => vault.owner === 'OWNER_A');
+    expect(ownerA?.grants?.total).toBe(2);
+    expect(ownerA?.grants?.counts?.active).toBe(1);
+    expect(ownerA?.grants?.counts?.revoked).toBe(1);
+
+    const ownerB = listRes.body?.vaults?.find((vault: any) => vault.owner === 'OWNER_B');
+    expect(ownerB?.grants?.total).toBe(0);
+
+    const filteredRes = await request(server).get('/vaults').query({ owner: 'OWNER_A' });
+    expect(filteredRes.status).toBe(200);
+    expect(filteredRes.body?.vaults?.length).toBe(1);
+    expect(filteredRes.body?.vaults?.[0]?.owner).toBe('OWNER_A');
+  });
+
   it('validates missing fields', async () => {
     const initRes = await request(server).post('/vault/init').send({ owner: 'O' });
     expect(initRes.status).toBe(400);

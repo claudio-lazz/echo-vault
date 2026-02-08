@@ -27,6 +27,13 @@ export type GrantSummary = {
   };
 };
 
+export type VaultSummary = {
+  owner: string;
+  context_uri: string;
+  storage: 'filesystem' | 'memory';
+  grants: GrantSummary;
+};
+
 export type InitVaultArgs = {
   owner: string;
   context_uri: string;
@@ -79,6 +86,11 @@ export type GrantSummaryArgs = {
   api?: string;
 };
 
+export type ListVaultsArgs = {
+  owner?: string;
+  api?: string;
+};
+
 export type Decryptor<T = unknown, R = unknown> = (blob: T) => R;
 
 function buildQuery(params: Record<string, string | undefined>) {
@@ -127,6 +139,11 @@ export async function listGrants({ owner, grantee, status, api = defaultApi }: L
 export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSummaryArgs) {
   const query = buildQuery({ owner, grantee });
   return getJson<{ ok: boolean; total: number; counts: GrantSummary['counts'] }>(`${api}/vault/grants/summary${query}`);
+}
+
+export async function listVaults({ owner, api = defaultApi }: ListVaultsArgs) {
+  const query = buildQuery({ owner });
+  return getJson<{ ok: boolean; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
 }
 
 export async function previewContext({ owner, grantee, scope_hash, api = defaultApi }: PreviewContextArgs) {
