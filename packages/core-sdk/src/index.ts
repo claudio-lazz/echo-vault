@@ -46,6 +46,12 @@ export type AuditEvent = {
   meta?: Record<string, unknown>;
 };
 
+export type AuditSummary = {
+  total: number;
+  counts: Partial<Record<AuditAction, number>>;
+  latest: AuditEvent | null;
+};
+
 export type InitVaultArgs = {
   owner: string;
   context_uri: string;
@@ -113,6 +119,15 @@ export type ListAuditArgs = {
   action?: AuditAction;
   limit?: number;
   offset?: number;
+  since?: number;
+  until?: number;
+  api?: string;
+};
+
+export type AuditSummaryArgs = {
+  owner?: string;
+  grantee?: string;
+  action?: AuditAction;
   since?: number;
   until?: number;
   api?: string;
@@ -194,6 +209,17 @@ export async function listAudit({ owner, grantee, action, limit, offset, since, 
     until: until !== undefined ? String(until) : undefined
   });
   return getJson<{ ok: boolean; total: number; offset: number; limit: number; events: AuditEvent[] }>(`${api}/audit${query}`);
+}
+
+export async function auditSummary({ owner, grantee, action, since, until, api = defaultApi }: AuditSummaryArgs) {
+  const query = buildQuery({
+    owner,
+    grantee,
+    action,
+    since: since !== undefined ? String(since) : undefined,
+    until: until !== undefined ? String(until) : undefined
+  });
+  return getJson<{ ok: boolean; total: number; counts: AuditSummary['counts']; latest: AuditSummary['latest'] }>(`${api}/audit/summary${query}`);
 }
 
 export async function previewContext({ owner, grantee, scope_hash, api = defaultApi }: PreviewContextArgs) {
