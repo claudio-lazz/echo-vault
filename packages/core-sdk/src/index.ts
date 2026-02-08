@@ -102,6 +102,8 @@ export type GrantSummaryArgs = {
 
 export type ListVaultsArgs = {
   owner?: string;
+  limit?: number;
+  offset?: number;
   api?: string;
 };
 
@@ -172,9 +174,13 @@ export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSu
   return getJson<{ ok: boolean; total: number; counts: GrantSummary['counts'] }>(`${api}/vault/grants/summary${query}`);
 }
 
-export async function listVaults({ owner, api = defaultApi }: ListVaultsArgs) {
-  const query = buildQuery({ owner });
-  return getJson<{ ok: boolean; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
+export async function listVaults({ owner, limit, offset, api = defaultApi }: ListVaultsArgs) {
+  const query = buildQuery({
+    owner,
+    limit: limit !== undefined ? String(limit) : undefined,
+    offset: offset !== undefined ? String(offset) : undefined
+  });
+  return getJson<{ ok: boolean; total: number; offset: number; limit: number | null; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
 }
 
 export async function listAudit({ owner, grantee, action, limit, offset, since, until, api = defaultApi }: ListAuditArgs) {

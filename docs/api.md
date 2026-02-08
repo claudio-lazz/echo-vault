@@ -77,17 +77,20 @@ Fetch a vault by owner.
 ```
 
 ## GET /vaults
-List vaults (optional `owner` filter). Returns grant counts per vault.
+List vaults (optional `owner` filter + `limit`/`offset`). Returns grant counts per vault.
 
 Example:
 ```
-GET /vaults?owner=OWNER
+GET /vaults?owner=OWNER&limit=25&offset=0
 ```
 
 **Response**
 ```json
 {
   "ok": true,
+  "total": 1,
+  "offset": 0,
+  "limit": 25,
   "vaults": [
     {
       "owner": "OWNER",

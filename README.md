@@ -92,6 +92,11 @@ npx echovault vault
 npx echovault vaults
 npx echovault grants
 
+# paginate vault list
+export ECHOVAULT_VAULT_LIMIT=25
+export ECHOVAULT_VAULT_OFFSET=0
+npx echovault vaults
+
 # filter grants + paginate + summarize
 export ECHOVAULT_GRANT_STATUS=active
 export ECHOVAULT_GRANT_LIMIT=25

@@ -169,10 +169,21 @@ app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: st
 });
 
 // Vault list (dev stub)
-app.get('/vaults', (req: Request<{}, {}, {}, { owner?: string }>, res: Response) => {
-  const { owner } = req.query || {};
+app.get('/vaults', (req: Request<{}, {}, {}, { owner?: string; limit?: string; offset?: string }>, res: Response) => {
+  const { owner, limit, offset } = req.query || {};
+  const limitValue = limit !== undefined ? Number(limit) : undefined;
+  if (limit !== undefined && (Number.isNaN(limitValue) || limitValue < 0)) {
+    return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+  }
+  const offsetValue = offset !== undefined ? Number(offset) : 0;
+  if (offset !== undefined && (Number.isNaN(offsetValue) || offsetValue < 0)) {
+    return res.status(400).json({ ok: false, reason: 'invalid_offset', code: 'invalid_offset' });
+  }
+  const cappedLimit = limitValue !== undefined ? Math.min(limitValue, 500) : undefined;
   const list = Array.from(vaults.values()).filter((vault) => !owner || vault.owner === owner);
-  const vaultList = list.map((vault) => {
+  const total = list.length;
+  const sliced = list.slice(offsetValue, cappedLimit !== undefined ? offsetValue + cappedLimit : undefined);
+  const vaultList = sliced.map((vault) => {
     const grantList = Array.from(grants.values()).filter((grant) => grant.owner === vault.owner);
     return {
       owner: vault.owner,
@@ -184,7 +195,7 @@ app.get('/vaults', (req: Request<{}, {}, {}, { owner?: string }>, res: Response)
       }
     };
   });
-  res.status(200).json({ ok: true, vaults: vaultList });
+  res.status(200).json({ ok: true, total, offset: offsetValue, limit: cappedLimit ?? null, vaults: vaultList });
 });
 
 // Vault fetch (dev stub)

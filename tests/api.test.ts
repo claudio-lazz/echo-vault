@@ -170,6 +170,9 @@ describe('api basic flow', () => {
 
     const listRes = await request(server).get('/vaults');
     expect(listRes.status).toBe(200);
+    expect(listRes.body?.total).toBe(2);
+    expect(listRes.body?.offset).toBe(0);
+    expect(listRes.body?.limit).toBeNull();
     expect(listRes.body?.vaults?.length).toBe(2);
 
     const ownerA = listRes.body?.vaults?.find((vault: any) => vault.owner === 'OWNER_A');
@@ -184,6 +187,13 @@ describe('api basic flow', () => {
     expect(filteredRes.status).toBe(200);
     expect(filteredRes.body?.vaults?.length).toBe(1);
     expect(filteredRes.body?.vaults?.[0]?.owner).toBe('OWNER_A');
+
+    const pagedRes = await request(server).get('/vaults').query({ limit: 1, offset: 1 });
+    expect(pagedRes.status).toBe(200);
+    expect(pagedRes.body?.total).toBe(2);
+    expect(pagedRes.body?.limit).toBe(1);
+    expect(pagedRes.body?.offset).toBe(1);
+    expect(pagedRes.body?.vaults?.length).toBe(1);
   });
 
   it('records audit events with filters', async () => {

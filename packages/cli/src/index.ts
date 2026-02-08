@@ -44,8 +44,12 @@ if (!cmd) {
     console.log(status, json);
   } else if (cmd === 'vaults') {
     const owner = process.env.ECHOVAULT_OWNER;
+    const limit = process.env.ECHOVAULT_VAULT_LIMIT;
+    const offset = process.env.ECHOVAULT_VAULT_OFFSET;
     const qs = new URLSearchParams();
     if (owner) qs.set('owner', owner);
+    if (limit) qs.set('limit', limit);
+    if (offset) qs.set('offset', offset);
     const url = qs.toString() ? `${api}/vaults?${qs.toString()}` : `${api}/vaults`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);
