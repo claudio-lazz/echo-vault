@@ -250,6 +250,39 @@ app.get(
   }
 );
 
+// Audit summary (dev stub)
+app.get(
+  '/audit/summary',
+  (req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; since?: string; until?: string }>, res: Response) => {
+    const { owner, grantee, action, since, until } = req.query || {};
+    const sinceMs = since !== undefined ? Number(since) : undefined;
+    if (since !== undefined && Number.isNaN(sinceMs)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_since', code: 'invalid_since' });
+    }
+    const untilMs = until !== undefined ? Number(until) : undefined;
+    if (until !== undefined && Number.isNaN(untilMs)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_until', code: 'invalid_until' });
+    }
+    const list = audits.filter((event) => {
+      if (owner && event.owner !== owner) return false;
+      if (grantee && event.grantee !== grantee) return false;
+      if (action && event.action !== action) return false;
+      if (sinceMs !== undefined && event.ts < sinceMs) return false;
+      if (untilMs !== undefined && event.ts > untilMs) return false;
+      return true;
+    });
+    const counts = list.reduce(
+      (acc, event) => {
+        acc[event.action] = (acc[event.action] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+    const latest = list.slice().sort((a, b) => b.ts - a.ts)[0];
+    res.status(200).json({ ok: true, total: list.length, counts, latest: latest || null });
+  }
+);
+
 // Grant summary (dev stub)
 app.get('/vault/grants/summary', (req: Request<{}, {}, {}, { owner?: string; grantee?: string }>, res: Response) => {
   const { owner, grantee } = req.query || {};

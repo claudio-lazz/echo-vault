@@ -201,6 +201,13 @@ describe('api basic flow', () => {
       expect(untilRes.status).toBe(200);
       expect(untilRes.body?.events?.every((event: any) => event.ts <= mid)).toBe(true);
     }
+
+    const summaryRes = await request(server).get('/audit/summary').query({ owner });
+    expect(summaryRes.status).toBe(200);
+    expect(summaryRes.body?.total).toBeGreaterThanOrEqual(3);
+    expect(summaryRes.body?.counts?.grant).toBe(1);
+    expect(summaryRes.body?.counts?.revoke).toBe(1);
+    expect(summaryRes.body?.latest?.action).toBe('revoke');
   });
 
   it('validates missing fields', async () => {

@@ -207,6 +207,35 @@ GET /audit?action=grant&limit=20&since=1730000000000
 }
 ```
 
+## GET /audit/summary
+Summarize audit events (optional `owner`, `grantee`, `action`, `since`, `until`).
+
+Example:
+```
+GET /audit/summary?owner=OWNER
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "total": 3,
+  "counts": {
+    "vault_init": 1,
+    "grant": 1,
+    "revoke": 1
+  },
+  "latest": {
+    "id": "evt_...",
+    "ts": 1730000000000,
+    "action": "revoke",
+    "owner": "OWNER",
+    "grantee": "GRANTEE",
+    "scope_hash": "SCOPE_HASH"
+  }
+}
+```
+
 ## POST /context/preview
 Returns a metadata-only preview if grant is valid.
 
