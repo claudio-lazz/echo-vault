@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { mockAlerts } from '../lib/mockData';
+import { demoAlerts } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
@@ -8,7 +8,7 @@ import { StatusPill } from './StatusPill';
 const severityOptions = ['all', 'danger', 'warning', 'info'] as const;
 
 type SeverityFilter = (typeof severityOptions)[number];
-type AlertItem = (typeof mockAlerts)[number];
+type AlertItem = (typeof demoAlerts)[number];
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
@@ -46,7 +46,7 @@ export function Alerts() {
   }, [grantsState.grants]);
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
-  const alerts = usingLive && liveAlerts.length ? liveAlerts : mockAlerts;
+  const alerts = usingLive && liveAlerts.length ? liveAlerts : demoAlerts;
 
   const filtered = useMemo(() => {
     const lowered = query.trim().toLowerCase();
@@ -68,7 +68,7 @@ export function Alerts() {
 
   const buildAlertSummary = (alert: AlertItem) => {
     const now = new Date().toISOString();
-    return `# EchoVault alert briefing\n\n- Generated: ${now}\n- Mode: ${usingLive ? 'Live' : 'Mock'}\n- Alert ID: ${alert.id}\n- Title: ${alert.title}\n- Severity: ${alert.severity}\n- Time: ${alert.time}\n\n## System context\nPolicy engine detected a delta between scope hash and current on-chain grant.\n\n## Recommended response\n- Notify grant owner and request re-auth.\n- Inspect access trail for repeated anomalies.\n- Rotate vault key if anomaly persists.\n\n## Notes\n- `;
+    return `# EchoVault alert briefing\n\n- Generated: ${now}\n- Mode: ${usingLive ? 'Live' : 'Local'}\n- Alert ID: ${alert.id}\n- Title: ${alert.title}\n- Severity: ${alert.severity}\n- Time: ${alert.time}\n\n## System context\nPolicy engine detected a delta between scope hash and current on-chain grant.\n\n## Recommended response\n- Notify grant owner and request re-auth.\n- Inspect access trail for repeated anomalies.\n- Rotate vault key if anomaly persists.\n\n## Notes\n- `;
   };
 
   const copyAlertSummary = async (alert: AlertItem) => {
@@ -124,7 +124,7 @@ export function Alerts() {
         {mode === 'live' && (
           <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live alerts...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock alerts.`}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample alerts.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${alerts.length} alerts).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>

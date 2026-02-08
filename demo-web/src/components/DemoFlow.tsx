@@ -209,7 +209,7 @@ export function DemoFlow() {
           : status.error
             ? `API status: unavailable (${status.error})`
             : `API status: OK ${status.status?.version ?? ''}`.trim()
-        : 'API status: mock mode';
+        : 'API status: local mode';
     const grantsLine =
       mode === 'live'
         ? grants.loading
@@ -217,7 +217,7 @@ export function DemoFlow() {
           : grants.error
             ? `Live grants: error (${grants.error})`
             : `Live grants: ${grants.grants.length}`
-        : 'Live grants: mock mode';
+        : 'Live grants: local mode';
 
     const checklist = steps
       .map((step, index) => {
@@ -290,7 +290,7 @@ export function DemoFlow() {
             <div className="mt-1 flex items-center gap-2">
               <StatusPill tone={mode === 'live' ? 'success' : 'info'} label={mode} />
               <span className="text-xs text-[#9AA4B2]">
-                {mode === 'live' ? 'Live API enabled' : 'Mock data only'}
+                {mode === 'live' ? 'Live API enabled' : 'Sample data only'}
               </span>
             </div>
           </div>

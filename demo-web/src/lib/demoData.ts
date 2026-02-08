@@ -1,4 +1,4 @@
-export const mockMetrics = {
+export const demoMetrics = {
   totalStorageGB: 842,
   activeVaults: 18,
   apiCallsPerDay: 132004,
@@ -14,13 +14,13 @@ export const mockMetrics = {
   ]
 };
 
-export const mockAlerts = [
+export const demoAlerts = [
   { id: 'AL-201', title: 'Grant expiring in 12 hours', severity: 'warning', time: '8m ago' },
   { id: 'AL-199', title: 'Unusual access pattern detected', severity: 'danger', time: '22m ago' },
   { id: 'AL-180', title: 'On-chain validator latency spike', severity: 'warning', time: '1h ago' }
 ];
 
-export const mockRecords = [
+export const demoRecords = [
   {
     id: 'RC-901',
     owner: 'alpha-user',
@@ -47,7 +47,7 @@ export const mockRecords = [
   }
 ];
 
-export const mockRecordDetails = {
+export const demoRecordDetails = {
   'RC-901': {
     policyNote: 'PII encrypted at rest. Access limited to redact pipeline + audit bot.',
     activity: ['Grant validated · 2m ago', 'Accessed by agent: vault-summarizer · 6m ago', 'Rotation check · 14m ago']
@@ -62,19 +62,19 @@ export const mockRecordDetails = {
   }
 };
 
-export const mockVaults = [
+export const demoVaults = [
   { id: 'VA-102', owner: 'alpha-user', region: 'us-east', storageGB: 42, status: 'healthy' },
   { id: 'VA-103', owner: 'beta-team', region: 'eu-west', storageGB: 78, status: 'healthy' },
   { id: 'VA-104', owner: 'agent-ops', region: 'ap-south', storageGB: 18, status: 'degraded' }
 ];
 
-export const mockAudit = [
+export const demoAudit = [
   { id: 'AU-771', actor: 'policy-engine', action: 'grant_created', detail: 'scope_hash: profile:email', time: '5m ago' },
   { id: 'AU-772', actor: 'vault-service', action: 'vault_initialized', detail: 'owner: alpha-user', time: '12m ago' },
   { id: 'AU-773', actor: 'policy-engine', action: 'grant_revoked', detail: 'scope_hash: policy:grant', time: '32m ago' }
 ];
 
-export const mockPlaybooks = [
+export const demoPlaybooks = [
   {
     id: 'PB-204',
     name: 'Grant leakage containment',
@@ -104,7 +104,7 @@ export const mockPlaybooks = [
   }
 ];
 
-export const mockPlaybookRuns = {
+export const demoPlaybookRuns = {
   'PB-204': {
     successRate: 0.98,
     avgRuntime: '42s',
@@ -140,7 +140,7 @@ export const mockPlaybookRuns = {
   }
 };
 
-export const mockUsage = {
+export const demoUsage = {
   monthlyBurn: 64.2,
   egressTB: 19.4,
   retentionDays: 180,

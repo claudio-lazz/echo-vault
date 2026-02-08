@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
-import { mockPlaybookRuns, mockPlaybooks } from '../lib/mockData';
+import { demoPlaybookRuns, demoPlaybooks } from '../lib/demoData';
 
-type PlaybookItem = (typeof mockPlaybooks)[number];
+type PlaybookItem = (typeof demoPlaybooks)[number];
 
 type PlaybookRun = {
   id: string;
@@ -26,7 +26,7 @@ export function Playbooks() {
 
   const detail = useMemo<PlaybookRunSummary | null>(() => {
     if (!selectedPlaybook) return null;
-    const detailMap = mockPlaybookRuns as Record<string, PlaybookRunSummary>;
+    const detailMap = demoPlaybookRuns as Record<string, PlaybookRunSummary>;
     return (
       detailMap[selectedPlaybook.id] ?? {
         successRate: 0.9,
@@ -93,7 +93,7 @@ export function Playbooks() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SectionCard title="Active playbooks" subtitle="Incident response automation">
           <div className="space-y-3">
-            {mockPlaybooks.map((playbook) => (
+            {demoPlaybooks.map((playbook) => (
               <div key={playbook.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-4 text-sm">
                 <div className="flex items-center justify-between gap-3">
                   <div>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { SectionCard } from './SectionCard';
 import { StatCard } from './StatCard';
 import { StatusPill } from './StatusPill';
-import { mockUsage } from '../lib/mockData';
+import { demoUsage } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useApiStatus } from '../lib/useApiStatus';
 
@@ -12,25 +12,25 @@ export function Usage() {
   const status = useApiStatus(apiBase, mode === 'live');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
-  const maxTrend = Math.max(...mockUsage.trend.map((item) => item.spend));
-  const maxForecast = Math.max(...mockUsage.forecast.map((item) => item.spend));
+  const maxTrend = Math.max(...demoUsage.trend.map((item) => item.spend));
+  const maxForecast = Math.max(...demoUsage.forecast.map((item) => item.spend));
 
   const report = useMemo(() => {
     const now = new Date().toISOString();
-    const breakdown = mockUsage.breakdown
+    const breakdown = demoUsage.breakdown
       .map((row) => `- ${row.label}: $${row.cost}k (${Math.round(row.share * 100)}%)`)
       .join('\n');
-    const tenants = mockUsage.topTenants
+    const tenants = demoUsage.topTenants
       .map((tenant) => `- ${tenant.name} (${tenant.scope}) — $${tenant.spend}k, ${tenant.storageTB} TB`)
       .join('\n');
-    const optimizations = mockUsage.optimization
+    const optimizations = demoUsage.optimization
       .map((item) => `- ${item.title} [${item.priority}] — ${item.detail}`)
       .join('\n');
-    const trend = mockUsage.trend.map((item) => `- ${item.label}: $${item.spend}k`).join('\n');
-    const forecast = mockUsage.forecast
+    const trend = demoUsage.trend.map((item) => `- ${item.label}: $${item.spend}k`).join('\n');
+    const forecast = demoUsage.forecast
       .map((item) => `- ${item.label}: $${item.spend}k (${item.risk})`)
       .join('\n');
-    const anomalies = mockUsage.anomalies
+    const anomalies = demoUsage.anomalies
       .map((item) => `- ${item.title} · ${item.impact} · ${item.status}`)
       .join('\n');
     const statusLine = mode === 'live'
@@ -41,9 +41,9 @@ export function Usage() {
           : status.status
             ? `API status: ok${status.status.version ? ` (${status.status.version})` : ''}`
             : 'API status: unknown'
-      : 'API status: mock';
+      : 'API status: local';
 
-    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'not set'}\n- ${statusLine}\n- Monthly burn: $${mockUsage.monthlyBurn}k\n- Edge egress: ${mockUsage.egressTB} TB\n- Retention policy: ${mockUsage.retentionDays} days\n- Active tenants: ${mockUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Forecast (next 3 months)\n${forecast}\n\n## Anomaly watch\n${anomalies}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
+    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'not set'}\n- ${statusLine}\n- Monthly burn: $${demoUsage.monthlyBurn}k\n- Edge egress: ${demoUsage.egressTB} TB\n- Retention policy: ${demoUsage.retentionDays} days\n- Active tenants: ${demoUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Forecast (next 3 months)\n${forecast}\n\n## Anomaly watch\n${anomalies}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
   }, [apiBase, mode, status.error, status.loading, status.status?.version]);
 
   const copyReport = async () => {
@@ -70,16 +70,16 @@ export function Usage() {
   return (
     <section className="space-y-6 px-8 py-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Monthly Burn" value={`$${mockUsage.monthlyBurn}k`} subLabel="Compute + storage" />
-        <StatCard label="Edge Egress" value={`${mockUsage.egressTB} TB`} subLabel="Last 30 days" />
-        <StatCard label="Retention" value={`${mockUsage.retentionDays} days`} subLabel="Policy default" />
-        <StatCard label="Active Tenants" value={mockUsage.topTenants.length} subLabel="Top spenders" />
+        <StatCard label="Monthly Burn" value={`$${demoUsage.monthlyBurn}k`} subLabel="Compute + storage" />
+        <StatCard label="Edge Egress" value={`${demoUsage.egressTB} TB`} subLabel="Last 30 days" />
+        <StatCard label="Retention" value={`${demoUsage.retentionDays} days`} subLabel="Policy default" />
+        <StatCard label="Active Tenants" value={demoUsage.topTenants.length} subLabel="Top spenders" />
       </div>
 
       {mode === 'live' && (
         <div className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-xs text-[#9AA4B2]">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Live usage metrics are not available yet. Showing mock data.</span>
+            <span>Live usage metrics are not available yet. Showing sample data.</span>
             <span>
               {status.loading && 'Checking /status...'}
               {!status.loading && status.error && `API unavailable (${status.error}).`}
@@ -92,7 +92,7 @@ export function Usage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SectionCard title="Spend breakdown" subtitle="Where the burn lands">
           <div className="space-y-3">
-            {mockUsage.breakdown.map((row) => (
+            {demoUsage.breakdown.map((row) => (
               <div key={row.label} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span>{row.label}</span>
@@ -108,7 +108,7 @@ export function Usage() {
 
         <SectionCard title="Top tenants" subtitle="Highest spend in 30d">
           <div className="space-y-3">
-            {mockUsage.topTenants.map((tenant) => (
+            {demoUsage.topTenants.map((tenant) => (
               <div key={tenant.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <div>
@@ -127,7 +127,7 @@ export function Usage() {
 
         <SectionCard title="Optimization queue" subtitle="Targets for next week">
           <div className="space-y-3">
-            {mockUsage.optimization.map((item) => (
+            {demoUsage.optimization.map((item) => (
               <div key={item.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span>{item.title}</span>
@@ -142,7 +142,7 @@ export function Usage() {
 
       <SectionCard title="Spend trend" subtitle="Last 6 months burn">
         <div className="flex flex-wrap items-end gap-3">
-          {mockUsage.trend.map((item) => (
+          {demoUsage.trend.map((item) => (
             <div key={item.label} className="flex flex-col items-center gap-1 text-xs text-[#9AA4B2]">
               <div className="flex h-24 w-8 items-end rounded-lg bg-[#1c2230]">
                 <div
@@ -160,7 +160,7 @@ export function Usage() {
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Spend forecast" subtitle="Projected burn next quarter">
           <div className="flex flex-wrap items-end gap-3">
-            {mockUsage.forecast.map((item) => {
+            {demoUsage.forecast.map((item) => {
               const tone = item.risk === 'warning' ? 'warning' : 'success';
               return (
                 <div key={item.label} className="flex flex-col items-center gap-2 text-xs text-[#9AA4B2]">
@@ -181,7 +181,7 @@ export function Usage() {
 
         <SectionCard title="Anomaly watch" subtitle="Spend or policy deviations needing attention">
           <div className="space-y-3">
-            {mockUsage.anomalies.map((item) => (
+            {demoUsage.anomalies.map((item) => (
               <div key={item.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-white">{item.title}</span>

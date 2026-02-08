@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
-import { mockAudit } from '../lib/mockData';
+import { demoAudit } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
-type AuditItem = (typeof mockAudit)[number] & {
+type AuditItem = (typeof demoAudit)[number] & {
   owner?: string;
   grantee?: string;
   scope?: string;
@@ -38,7 +38,7 @@ export function Audit() {
   }, [grantsState.grants]);
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
-  const auditEntries: AuditItem[] = usingLive && liveAudit.length ? liveAudit : mockAudit;
+  const auditEntries: AuditItem[] = usingLive && liveAudit.length ? liveAudit : demoAudit;
 
   const auditReport = useMemo(() => {
     if (!selectedEntry) return '';
@@ -91,7 +91,7 @@ export function Audit() {
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live audit events...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${auditEntries.length} events).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>

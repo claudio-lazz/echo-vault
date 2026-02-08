@@ -10,18 +10,18 @@ export function Settings() {
 
   return (
     <section className="space-y-6 px-8 py-6">
-      <SectionCard title="Environment" subtitle="Mock or live mode">
+      <SectionCard title="Environment" subtitle="Local or live mode">
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <div>
             <div className="font-semibold text-white">Data mode</div>
-            <div className="text-xs text-[#9AA4B2]">Switch between mock data and live API calls.</div>
+            <div className="text-xs text-[#9AA4B2]">Switch between sample data and live API calls.</div>
           </div>
           <div className="flex items-center gap-2">
             <button
-              className={`rounded-lg border px-3 py-2 text-xs ${mode === 'mock' ? 'border-[#3B3FEE] bg-[#1B1F2E] text-white' : 'border-[#2A3040] bg-[#11141c] text-[#9AA4B2]'}`}
-              onClick={() => setMode('mock')}
+              className={`rounded-lg border px-3 py-2 text-xs ${mode === 'local' ? 'border-[#3B3FEE] bg-[#1B1F2E] text-white' : 'border-[#2A3040] bg-[#11141c] text-[#9AA4B2]'}`}
+              onClick={() => setMode('local')}
             >
-              Mock
+              Local
             </button>
             <button
               className={`rounded-lg border px-3 py-2 text-xs ${mode === 'live' ? 'border-[#2BD4C8] bg-[#152026] text-white' : 'border-[#2A3040] bg-[#11141c] text-[#9AA4B2]'}`}

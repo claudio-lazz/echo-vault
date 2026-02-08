@@ -138,7 +138,7 @@ export function AccessGrants() {
       .map((revocation) => `- ${revocation.recipient} · ${revocation.scope} · ${revocation.status} @ ${revocation.when}`)
       .join('\n');
 
-    return `# EchoVault access grants snapshot\n\n- Timestamp: ${now}\n- Mode: ${usingLive ? 'Live' : 'Mock'}\n- Active grants: ${grants.length}\n- Pending approvals: ${pendingApprovals.length}\n- Recent revocations: ${revocations.length}\n\n## Active grants\n${activeLines || '- None'}\n\n## Pending approvals\n${pendingLines || '- None'}\n\n## Recent revocations\n${revokeLines || '- None'}\n\n## Notes\n- `;
+    return `# EchoVault access grants snapshot\n\n- Timestamp: ${now}\n- Mode: ${usingLive ? 'Live' : 'Local'}\n- Active grants: ${grants.length}\n- Pending approvals: ${pendingApprovals.length}\n- Recent revocations: ${revocations.length}\n\n## Active grants\n${activeLines || '- None'}\n\n## Pending approvals\n${pendingLines || '- None'}\n\n## Recent revocations\n${revokeLines || '- None'}\n\n## Notes\n- `;
   }, [grants, usingLive]);
 
   const buildGrantSummary = (grant: ActiveGrant) => {
@@ -146,7 +146,7 @@ export function AccessGrants() {
     const ownerLine = detail ? `- Owner: ${detail.owner}` : '- Owner: (live data)';
     const activityLines = detail?.activity?.map((item) => `- ${item}`).join('\n') ?? '- Live grant synced from API.';
 
-    return `# EchoVault grant briefing\n\n- Generated: ${new Date().toISOString()}\n- Mode: ${usingLive ? 'Live' : 'Mock'}\n- Recipient: ${grant.recipient}\n- Scope: ${grant.scope}\n- Status: ${grant.status ?? 'Active'}\n- Expires: ${grant.expires}\n- Usage: ${grant.usage}\n${ownerLine}\n\n## Notes\n${detail?.notes ?? 'Live grant details will enrich once attestation metadata is available.'}\n\n## Recent activity\n${activityLines}\n\n## Recommended follow-up\n- `;
+    return `# EchoVault grant briefing\n\n- Generated: ${new Date().toISOString()}\n- Mode: ${usingLive ? 'Live' : 'Local'}\n- Recipient: ${grant.recipient}\n- Scope: ${grant.scope}\n- Status: ${grant.status ?? 'Active'}\n- Expires: ${grant.expires}\n- Usage: ${grant.usage}\n${ownerLine}\n\n## Notes\n${detail?.notes ?? 'Live grant details will enrich once attestation metadata is available.'}\n\n## Recent activity\n${activityLines}\n\n## Recommended follow-up\n- `;
   };
 
   const copyReport = async () => {
@@ -212,7 +212,7 @@ export function AccessGrants() {
         {mode === 'live' && (
           <div className="mb-4 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live grants...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${grants.length} grants).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>

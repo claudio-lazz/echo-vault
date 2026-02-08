@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
-import { mockVaults } from '../lib/mockData';
+import { demoVaults } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { useVaults } from '../lib/useVaults';
 import { SectionCard } from './SectionCard';
@@ -8,7 +8,7 @@ import { StatusPill } from './StatusPill';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 
-type VaultItem = (typeof mockVaults)[number] & {
+type VaultItem = (typeof demoVaults)[number] & {
   grants?: number;
   lastActivity?: string;
 };
@@ -72,7 +72,7 @@ export function Vaults() {
   }, [grantsState.grants]);
 
   const usingLive = mode === 'live' && !vaultsState.error && apiBase;
-  const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : fallbackVaults.length ? fallbackVaults : mockVaults;
+  const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : fallbackVaults.length ? fallbackVaults : demoVaults;
 
   const vaultReport = useMemo(() => {
     if (!selectedVault) return '';
@@ -130,7 +130,7 @@ export function Vaults() {
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {vaultsState.loading && 'Loading live vault summaries...'}
-            {!vaultsState.loading && vaultsState.error && `Live data unavailable (${vaultsState.error}). Showing mock data.`}
+            {!vaultsState.loading && vaultsState.error && `Live data unavailable (${vaultsState.error}). Showing sample data.`}
             {!vaultsState.loading && !vaultsState.error && apiBase && `Live data connected (${vaults.length} vaults).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>

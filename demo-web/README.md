@@ -1,6 +1,6 @@
 # EchoVault Demo Web
 
-Mock UI for the EchoVault demo experience, built with React + Vite. The app is intentionally front-end only and uses local mock data to showcase how an operator dashboard could look.
+EchoVault demo console built with React + Vite. The app runs fully in the browser and can use local sample data or live API data to showcase the operator dashboard.
 
 ## Highlights
 
@@ -19,8 +19,8 @@ npm run dev
 ## Env options
 
 ```bash
-# Data mode: mock (default) or live
-VITE_DATA_MODE=mock
+# Data mode: local (default) or live
+VITE_DATA_MODE=local
 
 # API base for live mode
 VITE_ECHOVAULT_API=https://your-api

@@ -16,7 +16,7 @@ export function TopBar({ title, subtitle = 'Secure, permissioned context layer f
       </div>
       <div className="flex items-center gap-4">
         <div className="rounded-xl border border-[#2A3040] bg-[#171B24] px-4 py-2 text-xs text-[#9AA4B2]">
-          {mode === 'live' ? 'Live Mode' : 'Mock Mode'}
+          {mode === 'live' ? 'Live Mode' : 'Local Mode'}
         </div>
         <img
           src="/echovault-logo.svg"

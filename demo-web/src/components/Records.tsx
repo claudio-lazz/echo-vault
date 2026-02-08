@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { mockRecordDetails, mockRecords } from '../lib/mockData';
+import { demoRecordDetails, demoRecords } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
@@ -16,7 +16,7 @@ const sortOptions = [
 
 type StatusFilter = (typeof statusOptions)[number];
 type SortKey = (typeof sortOptions)[number]['value'];
-type RecordItem = (typeof mockRecords)[number] & { grantee?: string };
+type RecordItem = (typeof demoRecords)[number] & { grantee?: string };
 
 type RecordDetail = {
   policyNote: string;
@@ -52,11 +52,11 @@ export function Records() {
   }, [grantsState.grants]);
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
-  const records: RecordItem[] = usingLive && liveRecords.length ? liveRecords : (mockRecords as RecordItem[]);
+  const records: RecordItem[] = usingLive && liveRecords.length ? liveRecords : (demoRecords as RecordItem[]);
 
   const selectedDetail = useMemo<RecordDetail | null>(() => {
     if (!selectedRecord) return null;
-    const detailMap = mockRecordDetails as Record<string, RecordDetail>;
+    const detailMap = demoRecordDetails as Record<string, RecordDetail>;
     return (
       detailMap[selectedRecord.id] ?? {
         policyNote: usingLive
@@ -193,7 +193,7 @@ export function Records() {
         {mode === 'live' && (
           <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live grants...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing mock data.`}
+            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${records.length} grants).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>

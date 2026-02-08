@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-type DataMode = 'mock' | 'live';
+type DataMode = 'local' | 'live';
 
 type DataModeContextValue = {
   mode: DataMode;
@@ -12,11 +12,11 @@ const DataModeContext = createContext<DataModeContextValue | undefined>(undefine
 const STORAGE_KEY = 'echovault.dataMode';
 
 export function DataModeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<DataMode>('mock');
+  const [mode, setModeState] = useState<DataMode>('local');
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === 'mock' || stored === 'live') {
+    if (stored === 'local' || stored === 'live') {
       setModeState(stored);
     }
   }, []);
