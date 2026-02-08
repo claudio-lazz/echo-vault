@@ -106,6 +106,8 @@ npx echovault vaults
 export ECHOVAULT_GRANT_STATUS=active
 export ECHOVAULT_GRANT_LIMIT=25
 export ECHOVAULT_GRANT_OFFSET=0
+export ECHOVAULT_GRANT_EXPIRES_BEFORE=$(date +%s)
+export ECHOVAULT_GRANT_EXPIRES_AFTER=$(date +%s)
 npx echovault grants
 npx echovault grants-summary
 

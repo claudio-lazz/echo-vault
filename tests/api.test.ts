@@ -119,6 +119,45 @@ describe('api basic flow', () => {
     expect(summaryRes.body?.counts?.expired).toBe(1);
   });
 
+  it('filters grants by expiry window', async () => {
+    const owner = 'OWNER_EXPIRY';
+    const grantee = 'GRANTEE_EXPIRY';
+    const now = Math.floor(Date.now() / 1000);
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_SOON', expires_at: now + 30 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_LATER', expires_at: now + 300 });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash: 'SCOPE_NEVER' });
+
+    const beforeRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, expires_before: now + 60 });
+    expect(beforeRes.status).toBe(200);
+    expect(beforeRes.body?.grants?.length).toBe(1);
+    expect(beforeRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_SOON');
+
+    const afterRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, expires_after: now + 200 });
+    expect(afterRes.status).toBe(200);
+    expect(afterRes.body?.grants?.length).toBe(1);
+    expect(afterRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_LATER');
+
+    const summaryRes = await request(server)
+      .get('/vault/grants/summary')
+      .query({ owner, expires_before: now + 60 });
+    expect(summaryRes.status).toBe(200);
+    expect(summaryRes.body?.total).toBe(1);
+    expect(summaryRes.body?.counts?.active).toBe(1);
+  });
+
   it('paginates grant list with limit/offset', async () => {
     const owner = 'OWNER_PAGING';
     const grantee = 'GRANTEE_PAGING';

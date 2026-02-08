@@ -97,12 +97,16 @@ export type ListGrantsArgs = {
   status?: GrantStatusFilter;
   limit?: number;
   offset?: number;
+  expires_before?: number;
+  expires_after?: number;
   api?: string;
 };
 
 export type GrantSummaryArgs = {
   owner?: string;
   grantee?: string;
+  expires_before?: number;
+  expires_after?: number;
   api?: string;
 };
 
@@ -173,19 +177,26 @@ export async function revokeAccess({ owner, grantee, scope_hash, api = defaultAp
   return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
 }
 
-export async function listGrants({ owner, grantee, status, limit, offset, api = defaultApi }: ListGrantsArgs) {
+export async function listGrants({ owner, grantee, status, limit, offset, expires_before, expires_after, api = defaultApi }: ListGrantsArgs) {
   const query = buildQuery({
     owner,
     grantee,
     status,
     limit: limit !== undefined ? String(limit) : undefined,
-    offset: offset !== undefined ? String(offset) : undefined
+    offset: offset !== undefined ? String(offset) : undefined,
+    expires_before: expires_before !== undefined ? String(expires_before) : undefined,
+    expires_after: expires_after !== undefined ? String(expires_after) : undefined
   });
   return getJson<{ ok: boolean; total: number; offset: number; limit: number | null; grants: Grant[] }>(`${api}/vault/grants${query}`);
 }
 
-export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSummaryArgs) {
-  const query = buildQuery({ owner, grantee });
+export async function grantSummary({ owner, grantee, expires_before, expires_after, api = defaultApi }: GrantSummaryArgs) {
+  const query = buildQuery({
+    owner,
+    grantee,
+    expires_before: expires_before !== undefined ? String(expires_before) : undefined,
+    expires_after: expires_after !== undefined ? String(expires_after) : undefined
+  });
   return getJson<{ ok: boolean; total: number; counts: GrantSummary['counts'] }>(`${api}/vault/grants/summary${query}`);
 }
 
