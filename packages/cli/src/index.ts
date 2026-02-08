@@ -15,7 +15,7 @@ const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
 if (!cmd) {
-  console.log('echovault <status|init|vault|vaults|grant|revoke|grants|grants-summary|preview|request|reset>');
+  console.log('echovault <status|init|vault|vaults|grant|revoke|grants|grants-summary|audit|preview|request|reset>');
   process.exit(0);
 }
 
@@ -77,6 +77,20 @@ if (!cmd) {
     if (owner) qs.set('owner', owner);
     if (grantee) qs.set('grantee', grantee);
     const url = qs.toString() ? `${api}/vault/grants/summary?${qs.toString()}` : `${api}/vault/grants/summary`;
+    const { status, json } = await getJson<ApiError>(url);
+    if (json?.code) console.error('error', json.code);
+    console.log(status, json);
+  } else if (cmd === 'audit') {
+    const owner = process.env.ECHOVAULT_OWNER;
+    const grantee = process.env.ECHOVAULT_GRANTEE;
+    const action = process.env.ECHOVAULT_AUDIT_ACTION;
+    const limit = process.env.ECHOVAULT_AUDIT_LIMIT;
+    const qs = new URLSearchParams();
+    if (owner) qs.set('owner', owner);
+    if (grantee) qs.set('grantee', grantee);
+    if (action) qs.set('action', action);
+    if (limit) qs.set('limit', limit);
+    const url = qs.toString() ? `${api}/audit?${qs.toString()}` : `${api}/audit`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);
     console.log(status, json);

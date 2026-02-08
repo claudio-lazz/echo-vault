@@ -97,6 +97,10 @@ export ECHOVAULT_GRANT_STATUS=active
 npx echovault grants
 npx echovault grants-summary
 
+# audit log (optional filters)
+export ECHOVAULT_AUDIT_ACTION=grant
+npx echovault audit
+
 # grant + preview + request
 npx echovault grant
 npx echovault preview

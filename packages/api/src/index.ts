@@ -22,6 +22,16 @@ type Grant = {
   expires_at: number | null;
 };
 
+type AuditEvent = {
+  id: string;
+  ts: number;
+  action: 'vault_init' | 'grant' | 'revoke' | 'context_request';
+  owner?: string;
+  grantee?: string;
+  scope_hash?: string;
+  meta?: Record<string, unknown>;
+};
+
 type PaymentPayload = {
   txSig?: string;
   mint?: string;
@@ -42,6 +52,7 @@ const vaults = new Map<string, Vault>();
 const grants = new Map<string, Grant>();
 const revoked = new Set<string>();
 const blobs = new Map<string, unknown>();
+const audits: AuditEvent[] = [];
 
 const vaultKey = (owner: string) => owner;
 const grantKey = ({ owner, grantee, scope_hash }: { owner: string; grantee: string; scope_hash: string }) => `${owner}:${grantee}:${scope_hash}`;
@@ -66,6 +77,10 @@ const summarizeGrants = (list: Grant[]) =>
 
 const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
 
+function recordAudit(event: Omit<AuditEvent, 'id' | 'ts'>) {
+  audits.push({ id: `evt_${Date.now()}_${Math.random().toString(16).slice(2)}`, ts: Date.now(), ...event });
+}
+
 function loadStore() {
   try {
     if (!fs.existsSync(storePath)) return;
@@ -74,11 +89,13 @@ function loadStore() {
       grants?: Grant[];
       revoked?: string[];
       blobs?: { key: string; value: unknown }[];
+      audits?: AuditEvent[];
     };
     (data.vaults || []).forEach((vault) => vaults.set(vaultKey(vault.owner), vault));
     (data.grants || []).forEach((grant) => grants.set(grantKey(grant), grant));
     (data.revoked || []).forEach((key) => revoked.add(key));
     (data.blobs || []).forEach(({ key, value }) => blobs.set(key, value));
+    (data.audits || []).forEach((event) => audits.push(event));
   } catch (e) {
     const err = e as Error;
     console.warn('store_load_failed', err.message);
@@ -90,7 +107,8 @@ function saveStore() {
     vaults: Array.from(vaults.values()),
     grants: Array.from(grants.values()),
     revoked: Array.from(revoked),
-    blobs: Array.from(blobs.entries()).map(([key, value]) => ({ key, value }))
+    blobs: Array.from(blobs.entries()).map(([key, value]) => ({ key, value })),
+    audits
   };
   fs.writeFileSync(storePath, JSON.stringify(data, null, 2));
 }
@@ -120,6 +138,7 @@ app.post('/dev/reset', (_: Request, res: Response) => {
   grants.clear();
   revoked.clear();
   blobs.clear();
+  audits.length = 0;
   saveStore();
   res.json({ ok: true });
 });
@@ -137,6 +156,7 @@ app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: st
   };
   vaults.set(vaultKey(owner), vault);
   blobs.set(blobKey({ owner, context_uri: vault.context_uri }), vault.encrypted_blob);
+  recordAudit({ action: 'vault_init', owner, meta: { context_uri: vault.context_uri } });
   storeBlob({ owner, context_uri: vault.context_uri, encrypted_blob: vault.encrypted_blob })
     .then((stored) => {
       saveStore();
@@ -184,6 +204,7 @@ app.post('/vault/grant', (req: Request<{}, {}, { owner?: string; grantee?: strin
   const key = grantKey(grant);
   grants.set(key, grant);
   revoked.delete(key);
+  recordAudit({ action: 'grant', owner, grantee, scope_hash, meta: { expires_at: grant.expires_at } });
   saveStore();
   res.status(200).json({ ok: true, grant });
 });
@@ -195,8 +216,25 @@ app.post('/vault/revoke', (req: Request<{}, {}, { owner?: string; grantee?: stri
   const key = grantKey({ owner, grantee, scope_hash });
   if (!grants.has(key)) return res.status(404).json({ ok: false, reason: 'grant_not_found', code: 'grant_not_found' });
   revoked.add(key);
+  recordAudit({ action: 'revoke', owner, grantee, scope_hash });
   saveStore();
   res.status(200).json({ ok: true, revoked: true });
+});
+
+// Audit log (dev stub)
+app.get('/audit', (req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; limit?: string }>, res: Response) => {
+  const { owner, grantee, action, limit } = req.query || {};
+  const max = Math.min(Number(limit) || 100, 500);
+  const list = audits
+    .filter((event) => {
+      if (owner && event.owner !== owner) return false;
+      if (grantee && event.grantee !== grantee) return false;
+      if (action && event.action !== action) return false;
+      return true;
+    })
+    .slice(-max)
+    .reverse();
+  res.status(200).json({ ok: true, events: list });
 });
 
 // Grant summary (dev stub)
@@ -321,6 +359,8 @@ app.post('/context/request', async (req: Request<{}, {}, ContextRequestBody>, re
     if (!vault) return res.status(404).json({ ok: false, reason: 'vault_not_found', code: 'vault_not_found' });
     const stored = blobs.get(blobKey({ owner, context_uri: vault.context_uri }));
     fetchBlob({ owner, context_uri: vault.context_uri }).then((diskBlob) => {
+      recordAudit({ action: 'context_request', owner, grantee, scope_hash, meta: { payment: verified } });
+      saveStore();
       res.status(200).json({
         ok: true,
         context_uri: vault.context_uri,

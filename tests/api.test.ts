@@ -158,6 +158,34 @@ describe('api basic flow', () => {
     expect(filteredRes.body?.vaults?.[0]?.owner).toBe('OWNER_A');
   });
 
+  it('records audit events with filters', async () => {
+    const owner = 'OWNER_AUDIT';
+    const grantee = 'GRANTEE_AUDIT';
+    const scope_hash = 'SCOPE_AUDIT';
+
+    await request(server)
+      .post('/vault/init')
+      .send({ owner, context_uri: 'ipfs://audit', encrypted_blob: { ok: true } });
+
+    await request(server)
+      .post('/vault/grant')
+      .send({ owner, grantee, scope_hash, expires_at: Math.floor(Date.now() / 1000) + 600 });
+
+    await request(server)
+      .post('/vault/revoke')
+      .send({ owner, grantee, scope_hash });
+
+    const auditRes = await request(server).get('/audit').query({ owner });
+    expect(auditRes.status).toBe(200);
+    expect(auditRes.body?.events?.length).toBeGreaterThanOrEqual(3);
+    expect(auditRes.body?.events?.[0]?.action).toBe('revoke');
+
+    const grantRes = await request(server).get('/audit').query({ owner, action: 'grant' });
+    expect(grantRes.status).toBe(200);
+    expect(grantRes.body?.events?.length).toBe(1);
+    expect(grantRes.body?.events?.[0]?.action).toBe('grant');
+  });
+
   it('validates missing fields', async () => {
     const initRes = await request(server).post('/vault/init').send({ owner: 'O' });
     expect(initRes.status).toBe(400);

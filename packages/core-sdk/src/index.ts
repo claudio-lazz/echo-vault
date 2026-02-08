@@ -34,6 +34,18 @@ export type VaultSummary = {
   grants: GrantSummary;
 };
 
+export type AuditAction = 'vault_init' | 'grant' | 'revoke' | 'context_request';
+
+export type AuditEvent = {
+  id: string;
+  ts: number;
+  action: AuditAction;
+  owner?: string;
+  grantee?: string;
+  scope_hash?: string;
+  meta?: Record<string, unknown>;
+};
+
 export type InitVaultArgs = {
   owner: string;
   context_uri: string;
@@ -91,6 +103,14 @@ export type ListVaultsArgs = {
   api?: string;
 };
 
+export type ListAuditArgs = {
+  owner?: string;
+  grantee?: string;
+  action?: AuditAction;
+  limit?: number;
+  api?: string;
+};
+
 export type Decryptor<T = unknown, R = unknown> = (blob: T) => R;
 
 function buildQuery(params: Record<string, string | undefined>) {
@@ -144,6 +164,16 @@ export async function grantSummary({ owner, grantee, api = defaultApi }: GrantSu
 export async function listVaults({ owner, api = defaultApi }: ListVaultsArgs) {
   const query = buildQuery({ owner });
   return getJson<{ ok: boolean; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
+}
+
+export async function listAudit({ owner, grantee, action, limit, api = defaultApi }: ListAuditArgs) {
+  const query = buildQuery({
+    owner,
+    grantee,
+    action,
+    limit: limit ? String(limit) : undefined
+  });
+  return getJson<{ ok: boolean; events: AuditEvent[] }>(`${api}/audit${query}`);
 }
 
 export async function previewContext({ owner, grantee, scope_hash, api = defaultApi }: PreviewContextArgs) {

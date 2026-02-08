@@ -179,6 +179,32 @@ GET /vault/grants/summary?owner=OWNER
 }
 ```
 
+## GET /audit
+List audit events (optional `owner`, `grantee`, `action`, `limit`).
+
+Example:
+```
+GET /audit?action=grant&limit=20
+```
+
+**Response**
+```json
+{
+  "ok": true,
+  "events": [
+    {
+      "id": "evt_...",
+      "ts": 1730000000000,
+      "action": "grant",
+      "owner": "OWNER",
+      "grantee": "GRANTEE",
+      "scope_hash": "SCOPE_HASH",
+      "meta": { "expires_at": 1730000000 }
+    }
+  ]
+}
+```
+
 ## POST /context/preview
 Returns a metadata-only preview if grant is valid.
 
@@ -259,6 +285,7 @@ The core SDK wraps these endpoints and provides a few helpers:
 - `previewContext` → POST `/context/preview`
 - `requestContext` → POST `/context/request`
 - `fetchContext` → request + `unwrapOrThrow`
+- `listAudit` → GET `/audit`
 - `decryptBlob` → stub decrypt hook (pass your decryptor)
 - `unwrapOrThrow` → throws on non-OK responses
 
