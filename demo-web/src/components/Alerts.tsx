@@ -93,7 +93,7 @@ export function Alerts() {
   };
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <SectionCard title="Alerts" subtitle="Security & grant lifecycle">
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#9AA4B2]">
@@ -150,7 +150,7 @@ export function Alerts() {
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-6 text-center text-xs text-[#9AA4B2]">
+            <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
               No alerts match this filter.
             </div>
           )}
@@ -163,7 +163,7 @@ export function Alerts() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setSelectedAlert(null)}
           />
-          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-6">
+          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-4 sm:py-5 lg:py-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-xs uppercase tracking-[0.2em] text-[#9AA4B2]">Alert</div>

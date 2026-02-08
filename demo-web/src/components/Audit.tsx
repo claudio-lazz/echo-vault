@@ -86,7 +86,7 @@ export function Audit() {
   };
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <SectionCard title="Audit trail" subtitle="Immutable context operations">
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
@@ -125,7 +125,7 @@ export function Audit() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setSelectedEntry(null)}
           />
-          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-6">
+          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-4 sm:py-5 lg:py-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-xs uppercase tracking-[0.2em] text-[#9AA4B2]">Audit event</div>

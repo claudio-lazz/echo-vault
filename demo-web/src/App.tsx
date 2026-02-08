@@ -47,7 +47,7 @@ function App() {
   return (
     <DataModeProvider>
       <div className="min-h-screen bg-[#0f1117] text-[#f4f6fa]">
-        <div className="flex h-screen">
+        <div className="flex h-full flex-col sm:h-screen sm:flex-row">
           <Sidebar active={active} onSelect={setActive} />
           <main className="flex-1 overflow-auto">
             <TopBar title={pageTitles[active]} />

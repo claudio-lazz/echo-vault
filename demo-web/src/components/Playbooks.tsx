@@ -74,7 +74,7 @@ export function Playbooks() {
   };
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <SectionCard title="Automation coverage" subtitle="% of alerts with a playbook">
           <div className="text-3xl font-semibold">82%</div>
@@ -169,7 +169,7 @@ export function Playbooks() {
 
       {selectedPlaybook && detail && (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/40">
-          <div className="h-full w-full max-w-xl overflow-y-auto border-l border-[#1f2430] bg-[#0b0f17] px-6 py-6">
+          <div className="h-full w-full max-w-xl overflow-y-auto border-l border-[#1f2430] bg-[#0b0f17] px-6 py-4 sm:py-5 lg:py-6">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-[#9AA4B2]">Playbook detail</div>

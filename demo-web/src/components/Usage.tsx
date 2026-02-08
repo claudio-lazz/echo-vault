@@ -68,7 +68,7 @@ export function Usage() {
   };
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Monthly Burn" value={`$${demoUsage.monthlyBurn}k`} subLabel="Compute + storage" />
         <StatCard label="Edge Egress" value={`${demoUsage.egressTB} TB`} subLabel="Last 30 days" />

@@ -317,7 +317,7 @@ export function AccessGrants() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setSelectedGrant(null)}
           />
-          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-6">
+          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[#1f2430] bg-[#0f1219] px-6 py-4 sm:py-5 lg:py-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-xs uppercase tracking-[0.2em] text-[#9AA4B2]">Access grant</div>

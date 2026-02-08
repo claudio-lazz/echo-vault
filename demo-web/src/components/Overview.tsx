@@ -14,7 +14,7 @@ export function Overview() {
   const grantSummary = useGrantSummary(apiBase, mode === 'live');
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Vault Health" value="99.98%" subLabel="Strict checks enabled" />
         <StatCard label="Records Stored" value={`${demoMetrics.totalStorageGB} GB`} subLabel="Encrypted blobs" />

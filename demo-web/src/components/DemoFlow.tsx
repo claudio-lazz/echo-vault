@@ -282,7 +282,7 @@ export function DemoFlow() {
   );
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <SectionCard title="Demo readiness" subtitle="Guided flow for the full EchoVault journey">
         <div className="grid gap-4 text-sm lg:grid-cols-3">
           <div className="rounded-lg border border-[#2A3040] bg-[#11141c] p-4">

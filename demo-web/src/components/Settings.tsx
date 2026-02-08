@@ -9,7 +9,7 @@ export function Settings() {
   const status = useApiStatus(apiBase, mode === 'live');
 
   return (
-    <section className="space-y-6 px-8 py-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
       <SectionCard title="Environment" subtitle="Local or live mode">
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <div>
