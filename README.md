@@ -115,6 +115,7 @@ export ECHOVAULT_AUDIT_OFFSET=0
 export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
 export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)
 npx echovault audit
+npx echovault audit-summary
 ```
 
 Dangerous reset (dev store only):
