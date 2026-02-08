@@ -75,6 +75,31 @@ const summarizeGrants = (list: Grant[]) =>
     { active: 0, revoked: 0, expired: 0 }
   );
 
+const grantMatchesExpiry = (
+  grant: Grant,
+  {
+    expiresBefore,
+    expiresAfter,
+    expiresWithin,
+    nowSeconds
+  }: { expiresBefore?: number; expiresAfter?: number; expiresWithin?: number; nowSeconds: number }
+) => {
+  if (expiresBefore !== undefined) {
+    if (!grant.expires_at) return false;
+    if (grant.expires_at > expiresBefore) return false;
+  }
+  if (expiresAfter !== undefined) {
+    if (!grant.expires_at) return false;
+    if (grant.expires_at < expiresAfter) return false;
+  }
+  if (expiresWithin !== undefined) {
+    if (!grant.expires_at) return false;
+    if (grant.expires_at < nowSeconds) return false;
+    if (grant.expires_at > nowSeconds + expiresWithin) return false;
+  }
+  return true;
+};
+
 const storePath = process.env.ECHOVAULT_STORE_PATH || path.join(process.cwd(), 'echovault-store.json');
 
 function recordAudit(event: Omit<AuditEvent, 'id' | 'ts'>) {
@@ -308,8 +333,11 @@ app.get(
 // Grant summary (dev stub)
 app.get(
   '/vault/grants/summary',
-  (req: Request<{}, {}, {}, { owner?: string; grantee?: string; expires_before?: string; expires_after?: string }>, res: Response) => {
-    const { owner, grantee, expires_before, expires_after } = req.query || {};
+  (
+    req: Request<{}, {}, {}, { owner?: string; grantee?: string; expires_before?: string; expires_after?: string; expires_within?: string }>,
+    res: Response
+  ) => {
+    const { owner, grantee, expires_before, expires_after, expires_within } = req.query || {};
     const expiresBefore = expires_before !== undefined ? Number(expires_before) : undefined;
     if (expires_before !== undefined && Number.isNaN(expiresBefore)) {
       return res.status(400).json({ ok: false, reason: 'invalid_expires_before', code: 'invalid_expires_before' });
@@ -318,18 +346,15 @@ app.get(
     if (expires_after !== undefined && Number.isNaN(expiresAfter)) {
       return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
     }
+    const expiresWithin = expires_within !== undefined ? Number(expires_within) : undefined;
+    if (expires_within !== undefined && (Number.isNaN(expiresWithin) || expiresWithin < 0)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+    }
+    const nowSeconds = Math.floor(Date.now() / 1000);
     const list = Array.from(grants.values()).filter((grant) => {
       if (owner && grant.owner !== owner) return false;
       if (grantee && grant.grantee !== grantee) return false;
-      if (expiresBefore !== undefined) {
-        if (!grant.expires_at) return false;
-        if (grant.expires_at > expiresBefore) return false;
-      }
-      if (expiresAfter !== undefined) {
-        if (!grant.expires_at) return false;
-        if (grant.expires_at < expiresAfter) return false;
-      }
-      return true;
+      return grantMatchesExpiry(grant, { expiresBefore, expiresAfter, expiresWithin, nowSeconds });
     });
     const counts = summarizeGrants(list);
     res.status(200).json({ ok: true, total: list.length, counts });
@@ -340,10 +365,10 @@ app.get(
 app.get(
   '/vault/grants',
   (
-    req: Request<{}, {}, {}, { owner?: string; grantee?: string; status?: string; limit?: string; offset?: string; expires_before?: string; expires_after?: string }>,
+    req: Request<{}, {}, {}, { owner?: string; grantee?: string; status?: string; limit?: string; offset?: string; expires_before?: string; expires_after?: string; expires_within?: string }>,
     res: Response
   ) => {
-    const { owner, grantee, status, limit, offset, expires_before, expires_after } = req.query || {};
+    const { owner, grantee, status, limit, offset, expires_before, expires_after, expires_within } = req.query || {};
     const allowedStatuses = new Set(['active', 'revoked', 'expired', 'all']);
     if (status && !allowedStatuses.has(status)) {
       return res.status(400).json({ ok: false, reason: 'invalid_status', code: 'invalid_status' });
@@ -364,20 +389,17 @@ app.get(
     if (expires_after !== undefined && Number.isNaN(expiresAfter)) {
       return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
     }
+    const expiresWithin = expires_within !== undefined ? Number(expires_within) : undefined;
+    if (expires_within !== undefined && (Number.isNaN(expiresWithin) || expiresWithin < 0)) {
+      return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+    }
     const cappedLimit = limitValue !== undefined ? Math.min(limitValue, 500) : undefined;
+    const nowSeconds = Math.floor(Date.now() / 1000);
     const list = Array.from(grants.values())
       .filter((grant) => {
         if (owner && grant.owner !== owner) return false;
         if (grantee && grant.grantee !== grantee) return false;
-        if (expiresBefore !== undefined) {
-          if (!grant.expires_at) return false;
-          if (grant.expires_at > expiresBefore) return false;
-        }
-        if (expiresAfter !== undefined) {
-          if (!grant.expires_at) return false;
-          if (grant.expires_at < expiresAfter) return false;
-        }
-        return true;
+        return grantMatchesExpiry(grant, { expiresBefore, expiresAfter, expiresWithin, nowSeconds });
       })
       .map((grant) => ({
         ...grant,

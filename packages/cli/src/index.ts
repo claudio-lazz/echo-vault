@@ -70,6 +70,7 @@ if (!cmd) {
     const offset = process.env.ECHOVAULT_GRANT_OFFSET;
     const expiresBefore = process.env.ECHOVAULT_GRANT_EXPIRES_BEFORE;
     const expiresAfter = process.env.ECHOVAULT_GRANT_EXPIRES_AFTER;
+    const expiresWithin = process.env.ECHOVAULT_GRANT_EXPIRES_WITHIN;
     const qs = new URLSearchParams();
     if (owner) qs.set('owner', owner);
     if (grantee) qs.set('grantee', grantee);
@@ -78,6 +79,7 @@ if (!cmd) {
     if (offset) qs.set('offset', offset);
     if (expiresBefore) qs.set('expires_before', expiresBefore);
     if (expiresAfter) qs.set('expires_after', expiresAfter);
+    if (expiresWithin) qs.set('expires_within', expiresWithin);
     const url = qs.toString() ? `${api}/vault/grants?${qs.toString()}` : `${api}/vault/grants`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);
@@ -87,11 +89,13 @@ if (!cmd) {
     const grantee = process.env.ECHOVAULT_GRANTEE;
     const expiresBefore = process.env.ECHOVAULT_GRANT_EXPIRES_BEFORE;
     const expiresAfter = process.env.ECHOVAULT_GRANT_EXPIRES_AFTER;
+    const expiresWithin = process.env.ECHOVAULT_GRANT_EXPIRES_WITHIN;
     const qs = new URLSearchParams();
     if (owner) qs.set('owner', owner);
     if (grantee) qs.set('grantee', grantee);
     if (expiresBefore) qs.set('expires_before', expiresBefore);
     if (expiresAfter) qs.set('expires_after', expiresAfter);
+    if (expiresWithin) qs.set('expires_within', expiresWithin);
     const url = qs.toString() ? `${api}/vault/grants/summary?${qs.toString()}` : `${api}/vault/grants/summary`;
     const { status, json } = await getJson<ApiError>(url);
     if (json?.code) console.error('error', json.code);

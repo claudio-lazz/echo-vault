@@ -156,6 +156,20 @@ describe('api basic flow', () => {
     expect(summaryRes.status).toBe(200);
     expect(summaryRes.body?.total).toBe(1);
     expect(summaryRes.body?.counts?.active).toBe(1);
+
+    const withinRes = await request(server)
+      .get('/vault/grants')
+      .query({ owner, expires_within: 120 });
+    expect(withinRes.status).toBe(200);
+    expect(withinRes.body?.grants?.length).toBe(1);
+    expect(withinRes.body?.grants?.[0]?.scope_hash).toBe('SCOPE_SOON');
+
+    const withinSummary = await request(server)
+      .get('/vault/grants/summary')
+      .query({ owner, expires_within: 120 });
+    expect(withinSummary.status).toBe(200);
+    expect(withinSummary.body?.total).toBe(1);
+    expect(withinSummary.body?.counts?.active).toBe(1);
   });
 
   it('paginates grant list with limit/offset', async () => {

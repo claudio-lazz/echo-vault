@@ -126,15 +126,17 @@ Grant access to a grantee.
 Revoke an access grant.
 
 ## GET /vault/grants
-List grants (filter by `owner`, `grantee`, `status`, `expires_before`, or `expires_after`). Supports pagination via `limit` and `offset`.
+List grants (filter by `owner`, `grantee`, `status`, `expires_before`, `expires_after`, or `expires_within`). Supports pagination via `limit` and `offset`.
 
 `status` values: `active`, `revoked`, `expired`, `all`.
 
 `expires_before` / `expires_after` are epoch seconds (inclusive) and only match grants with `expires_at` set.
 
+`expires_within` is a window in seconds from now (only matches grants expiring soon and not yet expired).
+
 Example:
 ```
-GET /vault/grants?owner=OWNER&status=active&expires_before=1730000000&limit=50&offset=0
+GET /vault/grants?owner=OWNER&status=active&expires_within=3600&limit=50&offset=0
 ```
 
 **Response**
@@ -167,11 +169,11 @@ GET /vault/grants?owner=OWNER&status=active&expires_before=1730000000&limit=50&o
 ```
 
 ## GET /vault/grants/summary
-Summarize grant counts by status (optional `owner`, `grantee`, `expires_before`, `expires_after` filters).
+Summarize grant counts by status (optional `owner`, `grantee`, `expires_before`, `expires_after`, `expires_within` filters).
 
 Example:
 ```
-GET /vault/grants/summary?owner=OWNER&expires_before=1730000000
+GET /vault/grants/summary?owner=OWNER&expires_within=3600
 ```
 
 **Response**

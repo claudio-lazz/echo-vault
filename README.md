@@ -108,6 +108,7 @@ export ECHOVAULT_GRANT_LIMIT=25
 export ECHOVAULT_GRANT_OFFSET=0
 export ECHOVAULT_GRANT_EXPIRES_BEFORE=$(date +%s)
 export ECHOVAULT_GRANT_EXPIRES_AFTER=$(date +%s)
+export ECHOVAULT_GRANT_EXPIRES_WITHIN=3600
 npx echovault grants
 npx echovault grants-summary
 

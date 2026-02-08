@@ -99,6 +99,7 @@ export type ListGrantsArgs = {
   offset?: number;
   expires_before?: number;
   expires_after?: number;
+  expires_within?: number;
   api?: string;
 };
 
@@ -107,6 +108,7 @@ export type GrantSummaryArgs = {
   grantee?: string;
   expires_before?: number;
   expires_after?: number;
+  expires_within?: number;
   api?: string;
 };
 
@@ -177,7 +179,7 @@ export async function revokeAccess({ owner, grantee, scope_hash, api = defaultAp
   return postJson(`${api}/vault/revoke`, { owner, grantee, scope_hash });
 }
 
-export async function listGrants({ owner, grantee, status, limit, offset, expires_before, expires_after, api = defaultApi }: ListGrantsArgs) {
+export async function listGrants({ owner, grantee, status, limit, offset, expires_before, expires_after, expires_within, api = defaultApi }: ListGrantsArgs) {
   const query = buildQuery({
     owner,
     grantee,
@@ -185,17 +187,19 @@ export async function listGrants({ owner, grantee, status, limit, offset, expire
     limit: limit !== undefined ? String(limit) : undefined,
     offset: offset !== undefined ? String(offset) : undefined,
     expires_before: expires_before !== undefined ? String(expires_before) : undefined,
-    expires_after: expires_after !== undefined ? String(expires_after) : undefined
+    expires_after: expires_after !== undefined ? String(expires_after) : undefined,
+    expires_within: expires_within !== undefined ? String(expires_within) : undefined
   });
   return getJson<{ ok: boolean; total: number; offset: number; limit: number | null; grants: Grant[] }>(`${api}/vault/grants${query}`);
 }
 
-export async function grantSummary({ owner, grantee, expires_before, expires_after, api = defaultApi }: GrantSummaryArgs) {
+export async function grantSummary({ owner, grantee, expires_before, expires_after, expires_within, api = defaultApi }: GrantSummaryArgs) {
   const query = buildQuery({
     owner,
     grantee,
     expires_before: expires_before !== undefined ? String(expires_before) : undefined,
-    expires_after: expires_after !== undefined ? String(expires_after) : undefined
+    expires_after: expires_after !== undefined ? String(expires_after) : undefined,
+    expires_within: expires_within !== undefined ? String(expires_within) : undefined
   });
   return getJson<{ ok: boolean; total: number; counts: GrantSummary['counts'] }>(`${api}/vault/grants/summary${query}`);
 }
