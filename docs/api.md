@@ -183,19 +183,22 @@ GET /vault/grants/summary?owner=OWNER
 ```
 
 ## GET /audit
-List audit events (optional `owner`, `grantee`, `action`, `limit`, `since`, `until`).
+List audit events (optional `owner`, `grantee`, `action`, `limit`, `offset`, `since`, `until`).
 
 `since`/`until` are unix epoch milliseconds, useful for time-windowed audit queries.
 
 Example:
 ```
-GET /audit?action=grant&limit=20&since=1730000000000
+GET /audit?action=grant&limit=20&offset=0&since=1730000000000
 ```
 
 **Response**
 ```json
 {
   "ok": true,
+  "total": 1,
+  "offset": 0,
+  "limit": 20,
   "events": [
     {
       "id": "evt_...",

@@ -224,9 +224,20 @@ app.post('/vault/revoke', (req: Request<{}, {}, { owner?: string; grantee?: stri
 // Audit log (dev stub)
 app.get(
   '/audit',
-  (req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; limit?: string; since?: string; until?: string }>, res: Response) => {
-    const { owner, grantee, action, limit, since, until } = req.query || {};
-    const max = Math.min(Number(limit) || 100, 500);
+  (
+    req: Request<{}, {}, {}, { owner?: string; grantee?: string; action?: string; limit?: string; offset?: string; since?: string; until?: string }>,
+    res: Response
+  ) => {
+    const { owner, grantee, action, limit, offset, since, until } = req.query || {};
+    const limitValue = limit !== undefined ? Number(limit) : 100;
+    if (Number.isNaN(limitValue) || limitValue < 0) {
+      return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+    }
+    const offsetValue = offset !== undefined ? Number(offset) : 0;
+    if (Number.isNaN(offsetValue) || offsetValue < 0) {
+      return res.status(400).json({ ok: false, reason: 'invalid_offset', code: 'invalid_offset' });
+    }
+    const cappedLimit = Math.min(limitValue, 500);
     const sinceMs = since !== undefined ? Number(since) : undefined;
     if (since !== undefined && Number.isNaN(sinceMs)) {
       return res.status(400).json({ ok: false, reason: 'invalid_since', code: 'invalid_since' });
@@ -235,18 +246,18 @@ app.get(
     if (until !== undefined && Number.isNaN(untilMs)) {
       return res.status(400).json({ ok: false, reason: 'invalid_until', code: 'invalid_until' });
     }
-    const list = audits
-      .filter((event) => {
-        if (owner && event.owner !== owner) return false;
-        if (grantee && event.grantee !== grantee) return false;
-        if (action && event.action !== action) return false;
-        if (sinceMs !== undefined && event.ts < sinceMs) return false;
-        if (untilMs !== undefined && event.ts > untilMs) return false;
-        return true;
-      })
-      .slice(-max)
-      .reverse();
-    res.status(200).json({ ok: true, events: list });
+    const filtered = audits.filter((event) => {
+      if (owner && event.owner !== owner) return false;
+      if (grantee && event.grantee !== grantee) return false;
+      if (action && event.action !== action) return false;
+      if (sinceMs !== undefined && event.ts < sinceMs) return false;
+      if (untilMs !== undefined && event.ts > untilMs) return false;
+      return true;
+    });
+    const ordered = filtered.slice().sort((a, b) => b.ts - a.ts);
+    const total = ordered.length;
+    const sliced = ordered.slice(offsetValue, offsetValue + cappedLimit);
+    res.status(200).json({ ok: true, total, offset: offsetValue, limit: cappedLimit, events: sliced });
   }
 );
 

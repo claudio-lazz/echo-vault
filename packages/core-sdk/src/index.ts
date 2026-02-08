@@ -110,6 +110,7 @@ export type ListAuditArgs = {
   grantee?: string;
   action?: AuditAction;
   limit?: number;
+  offset?: number;
   since?: number;
   until?: number;
   api?: string;
@@ -176,16 +177,17 @@ export async function listVaults({ owner, api = defaultApi }: ListVaultsArgs) {
   return getJson<{ ok: boolean; vaults: VaultSummary[] }>(`${api}/vaults${query}`);
 }
 
-export async function listAudit({ owner, grantee, action, limit, since, until, api = defaultApi }: ListAuditArgs) {
+export async function listAudit({ owner, grantee, action, limit, offset, since, until, api = defaultApi }: ListAuditArgs) {
   const query = buildQuery({
     owner,
     grantee,
     action,
-    limit: limit ? String(limit) : undefined,
+    limit: limit !== undefined ? String(limit) : undefined,
+    offset: offset !== undefined ? String(offset) : undefined,
     since: since !== undefined ? String(since) : undefined,
     until: until !== undefined ? String(until) : undefined
   });
-  return getJson<{ ok: boolean; events: AuditEvent[] }>(`${api}/audit${query}`);
+  return getJson<{ ok: boolean; total: number; offset: number; limit: number; events: AuditEvent[] }>(`${api}/audit${query}`);
 }
 
 export async function previewContext({ owner, grantee, scope_hash, api = defaultApi }: PreviewContextArgs) {

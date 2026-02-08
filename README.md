@@ -99,8 +99,10 @@ export ECHOVAULT_GRANT_OFFSET=0
 npx echovault grants
 npx echovault grants-summary
 
-# audit log (optional filters)
+# audit log (optional filters + pagination)
 export ECHOVAULT_AUDIT_ACTION=grant
+export ECHOVAULT_AUDIT_LIMIT=25
+export ECHOVAULT_AUDIT_OFFSET=0
 export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
 # ...run a few actions...
 export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)

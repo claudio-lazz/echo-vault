@@ -208,6 +208,12 @@ describe('api basic flow', () => {
     expect(auditRes.body?.events?.length).toBeGreaterThanOrEqual(3);
     expect(auditRes.body?.events?.[0]?.action).toBe('revoke');
 
+    const pagedRes = await request(server).get('/audit').query({ owner, limit: 2, offset: 1 });
+    expect(pagedRes.status).toBe(200);
+    expect(pagedRes.body?.limit).toBe(2);
+    expect(pagedRes.body?.offset).toBe(1);
+    expect(pagedRes.body?.events?.length).toBeLessThanOrEqual(2);
+
     const grantRes = await request(server).get('/audit').query({ owner, action: 'grant' });
     expect(grantRes.status).toBe(200);
     expect(grantRes.body?.events?.length).toBe(1);
