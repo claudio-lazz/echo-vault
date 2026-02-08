@@ -18,7 +18,11 @@ export function TopBar({ title, subtitle = 'Secure, permissioned context layer f
         <div className="rounded-xl border border-[#2A3040] bg-[#171B24] px-4 py-2 text-xs text-[#9AA4B2]">
           {mode === 'live' ? 'Live Mode' : 'Mock Mode'}
         </div>
-        <div className="h-9 w-9 rounded-full bg-[#2BD4C8]" />
+        <img
+          src="/echovault-logo.svg"
+          alt="EchoVault logo"
+          className="h-9 w-9 rounded-xl border border-[#2A3040] bg-[#0f1117] p-1"
+        />
       </div>
     </header>
   );

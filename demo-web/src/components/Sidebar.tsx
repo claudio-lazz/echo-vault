@@ -19,7 +19,14 @@ type SidebarProps = {
 export function Sidebar({ active, onSelect }: SidebarProps) {
   return (
     <aside className="w-64 border-r border-[#2A3040] bg-[#171B24] p-6">
-      <div className="text-xl font-semibold tracking-tight">EchoVault</div>
+      <div className="flex items-center gap-3">
+        <img
+          src="/echovault-logo.svg"
+          alt="EchoVault logo"
+          className="h-9 w-9 rounded-xl border border-[#2A3040] bg-[#0f1117] p-1"
+        />
+        <div className="text-xl font-semibold tracking-tight">EchoVault</div>
+      </div>
       <div className="mt-8 space-y-2 text-sm">
         {navItems.map((item) => (
           <button

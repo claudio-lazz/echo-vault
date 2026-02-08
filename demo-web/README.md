@@ -40,7 +40,12 @@ npm run build
 ## Deploy (Vercel)
 
 1) Push the repo to GitHub.
-2) Import the repo into Vercel.
-3) Set env vars from `.env.example`.
-4) Build: `npm run build`
-5) Output: `dist/`
+2) In Vercel, import the repo and set **Root Directory** to `demo-web/`.
+3) Framework preset: **Vite** (or leave auto-detect).
+4) Set env vars from `.env.example` (optional: add `VITE_DEMO_*` links for Demo Flow).
+5) Build: `npm run build`
+6) Output: `dist/`
+
+## Branding
+
+The logo lives at `public/echovault-logo.svg`. Update it in-place if you want a different mark or colorway.
