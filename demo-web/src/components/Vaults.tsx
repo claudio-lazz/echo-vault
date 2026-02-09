@@ -73,6 +73,7 @@ export function Vaults() {
 
   const usingLive = mode === 'live' && !vaultsState.error && apiBase;
   const vaults: VaultItem[] = usingLive && liveVaults.length ? liveVaults : fallbackVaults.length ? fallbackVaults : demoVaults;
+  const showLiveEmpty = usingLive && !vaultsState.loading && !vaultsState.error && liveVaults.length === 0;
 
   const vaultReport = useMemo(() => {
     if (!selectedVault) return '';
@@ -138,27 +139,38 @@ export function Vaults() {
           </div>
         )}
         <div className="space-y-3 text-sm">
-          {vaults.map((vault) => (
-            <div key={vault.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
-              <div>
-                <div className="font-semibold text-white">{vault.id}</div>
-                <div className="text-xs text-[#9AA4B2]">{vault.owner} · {vault.region}</div>
-                {vault.lastActivity && (
-                  <div className="text-xs text-[#6E7683]">{vault.lastActivity}</div>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-[#9AA4B2]">{vault.storageGB} GB</div>
-                <StatusPill label={vault.status} tone={vault.status === 'healthy' ? 'success' : 'warning'} />
-                <button
-                  onClick={() => setSelectedVault(vault)}
-                  className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-2.5 py-1 text-[11px] text-white"
-                >
-                  View
-                </button>
-              </div>
+          {showLiveEmpty && (
+            <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
+              Live is connected but returned zero vaults. Showing sample inventory below while data warms up.
             </div>
-          ))}
+          )}
+          {vaults.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
+              No vaults to display yet. Connect live data or add a sample vault to get started.
+            </div>
+          ) : (
+            vaults.map((vault) => (
+              <div key={vault.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
+                <div>
+                  <div className="font-semibold text-white">{vault.id}</div>
+                  <div className="text-xs text-[#9AA4B2]">{vault.owner} · {vault.region}</div>
+                  {vault.lastActivity && (
+                    <div className="text-xs text-[#6E7683]">{vault.lastActivity}</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-xs text-[#9AA4B2]">{vault.storageGB} GB</div>
+                  <StatusPill label={vault.status} tone={vault.status === 'healthy' ? 'success' : 'warning'} />
+                  <button
+                    onClick={() => setSelectedVault(vault)}
+                    className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-2.5 py-1 text-[11px] text-white"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </SectionCard>
 
