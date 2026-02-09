@@ -43,6 +43,8 @@ VITE_DEMO_OUTPUT_URL=https://your-demo-output
 VITE_DEMO_VIDEO_URL=https://your-demo-video
 ```
 
+Live mode will show sample data if the API is unreachable or returns zero vaults, so the UI stays populated during demos.
+
 ---
 
 ## 🧱 Build

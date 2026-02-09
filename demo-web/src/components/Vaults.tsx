@@ -131,7 +131,9 @@ export function Vaults() {
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {vaultsState.loading && 'Loading live vault summaries...'}
             {!vaultsState.loading && vaultsState.error && `Live data unavailable (${vaultsState.error}). Showing sample data.`}
-            {!vaultsState.loading && !vaultsState.error && apiBase && `Live data connected (${vaults.length} vaults).`}
+            {!vaultsState.loading && !vaultsState.error && apiBase && (liveVaults.length
+              ? `Live data connected (${liveVaults.length} vaults).`
+              : 'Live data connected (0 vaults). Showing sample data.')}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>
         )}
