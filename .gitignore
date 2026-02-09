@@ -5,3 +5,19 @@ echovault-storage/
 node_modules/
 **/dist/
 **/*.tsbuildinfo
+
+# Local assistant/workspace artifacts
+memory/
+tmp/
+echovault-store.json
+AGENTS.md
+HEARTBEAT.md
+SOUL.md
+USER.md
+IDENTITY.md
+MEMORY.md
+TOOLS.md
+
+# Misc
+*.log
+.DS_Store
