@@ -28,6 +28,19 @@ afterAll(async () => {
 });
 
 describe('api basic flow', () => {
+  it('returns status counts and store path', async () => {
+    const statusRes = await request(server).get('/status');
+    expect(statusRes.status).toBe(200);
+    expect(statusRes.body?.ok).toBe(true);
+    expect(statusRes.body?.counts).toEqual({
+      vaults: 0,
+      grants: 0,
+      revoked: 0,
+      blobs: 0
+    });
+    expect(statusRes.body?.storePath).toContain('echovault-store.test.json');
+  });
+
   it('init/grant/preview/request/revoke works', async () => {
     const owner = 'OWNER_TEST';
     const grantee = 'GRANTEE_TEST';

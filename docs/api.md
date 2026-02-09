@@ -5,6 +5,20 @@ Base URL: `http://localhost:8787`
 ## GET /status
 Returns dev store counts.
 
+**Response**
+```json
+{
+  "ok": true,
+  "counts": {
+    "vaults": 1,
+    "grants": 2,
+    "revoked": 0,
+    "blobs": 1
+  },
+  "storePath": "/tmp/echovault-store.json"
+}
+```
+
 ## On-chain validation (optional)
 Set the following env vars to enable read-only on-chain grant validation:
 - `ECHOVAULT_ONCHAIN_RPC` — Solana RPC endpoint
@@ -21,20 +35,6 @@ Clears dev in-memory + persisted store (dangerous).
 **Response**
 ```json
 { "ok": true }
-```
-
-**Response**
-```json
-{
-  "ok": true,
-  "counts": {
-    "vaults": 1,
-    "grants": 2,
-    "revoked": 0,
-    "blobs": 1
-  },
-  "storePath": "/tmp/echovault-store.json"
-}
 ```
 
 ## POST /vault/init
