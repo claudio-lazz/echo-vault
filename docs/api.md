@@ -385,7 +385,7 @@ The core SDK wraps these endpoints and provides a few helpers:
 - `fetchContext` → request + `unwrapOrThrow`
 - `listAudit` → GET `/audit`
 - `decryptBlob` → stub decrypt hook (pass your decryptor)
-- `unwrapOrThrow` → throws on non-OK responses
+- `unwrapOrThrow` → throws on non-OK responses (attaches `status` + `payload` to the Error for 402/error handling)
 
 ## Error Codes
 All 400/403/404/402 error responses include `reason` and `code`.

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { demoVaults } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
@@ -19,6 +19,10 @@ export function Vaults() {
   const vaultsState = useVaults(apiBase, mode === 'live');
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  useEffect(() => {
+    setCopyState('idle');
+  }, [selectedVault?.id]);
 
   const liveVaults = useMemo<VaultItem[]>(() => {
     if (!vaultsState.vaults.length) return [];
