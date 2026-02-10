@@ -386,6 +386,7 @@ The core SDK wraps these endpoints and provides a few helpers:
 - `listAudit` → GET `/audit`
 - `decryptBlob` → stub decrypt hook (pass your decryptor)
 - `unwrapOrThrow` → throws on non-OK responses (attaches `status` + `payload` to the Error for 402/error handling)
+- Tip: when `status === 402`, `payload` includes the payment requirements (`amount`, `mint`, `paymentUrl`) so you can prompt for payment and retry.
 
 ## Error Codes
 All 400/403/404/402 error responses include `reason` and `code`.

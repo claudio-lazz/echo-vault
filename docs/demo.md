@@ -128,14 +128,22 @@ await revokeAccess({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH
 try {
   const res = await requestContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api });
   console.log('request', res.status, res.json);
-  // or throw on errors:
-  // const payload = unwrapOrThrow(res);
 
-  // helper path: fetch + decrypt
-  // const payload = await fetchContext({ owner: 'OWNER', grantee: 'GRANTEE', scope_hash: 'SCOPE_HASH', api, payment: { txSig: 'TX_SIG', mint: 'USDC', amount: '0.001' } });
-  // const plaintext = decryptBlobPayload({ secret, ...payload.encrypted_blob });
-  // const fallback = decryptBlob({ encrypted_blob: payload.encrypted_blob, decryptor: (blob) => blob });
+  // helper path: request + 402 handling + decrypt
+  const payload = await fetchContext({
+    owner: 'OWNER',
+    grantee: 'GRANTEE',
+    scope_hash: 'SCOPE_HASH',
+    api,
+    payment: { txSig: 'TX_SIG', mint: 'USDC', amount: '0.001' }
+  });
+  const plaintext = decryptBlobPayload({ secret, ...payload.encrypted_blob });
+  console.log('plaintext', plaintext);
 } catch (e) {
-  console.error('request failed', e.code, e.status);
+  if (e.status === 402) {
+    console.error('payment required', e.payload);
+  } else {
+    console.error('request failed', e.code, e.status);
+  }
 }
 ```
