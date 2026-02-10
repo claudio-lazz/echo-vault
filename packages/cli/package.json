@@ -5,5 +5,8 @@
   "bin": { "echovault": "dist/index.js" },
   "scripts": {
     "build": "tsc -p ."
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
   }
 }
