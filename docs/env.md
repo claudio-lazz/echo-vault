@@ -6,3 +6,4 @@
 - `ECHOVAULT_PAYMENT_RECIPIENT` — expected recipient token account (optional)
 - `ECHOVAULT_PAYMENT_PAYER` — expected payer authority (optional)
 - `ECHOVAULT_STORE_PATH` — file path for dev persistence store (optional)
+- `ECHOVAULT_API` — default API base used by the SDK (optional)

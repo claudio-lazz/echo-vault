@@ -21,6 +21,17 @@ describe('core-sdk unwrapOrThrow', () => {
   it('throws on non-ok', () => {
     expect(() => unwrapOrThrow({ ok: false, status: 400, json: { code: 'bad' } })).toThrow('bad');
   });
+  it('attaches status and payload on errors', () => {
+    try {
+      unwrapOrThrow({ ok: false, status: 402, json: { code: 'payment_required', detail: 'missing tx' } });
+    } catch (err) {
+      const error = err as Error & { status?: number; payload?: unknown };
+      expect(error.status).toBe(402);
+      expect(error.payload).toEqual({ code: 'payment_required', detail: 'missing tx' });
+      return;
+    }
+    throw new Error('expected unwrapOrThrow to throw');
+  });
   it('throws using reason when code missing', () => {
     expect(() => unwrapOrThrow({ ok: false, status: 400, json: { reason: 'nope' } })).toThrow('nope');
   });
