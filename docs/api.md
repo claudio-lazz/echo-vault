@@ -122,8 +122,35 @@ Grant access to a grantee.
 }
 ```
 
+**Response**
+```json
+{
+  "ok": true,
+  "grant": {
+    "owner": "OWNER",
+    "grantee": "GRANTEE",
+    "scope_hash": "SCOPE_HASH",
+    "expires_at": 1730000000
+  }
+}
+```
+
 ## POST /vault/revoke
 Revoke an access grant.
+
+**Request**
+```json
+{
+  "owner": "OWNER",
+  "grantee": "GRANTEE",
+  "scope_hash": "SCOPE_HASH"
+}
+```
+
+**Response**
+```json
+{ "ok": true, "revoked": true }
+```
 
 ## GET /vault/grants
 List grants (filter by `owner`, `grantee`, `status`, `expires_before`, `expires_after`, or `expires_within`). Supports pagination via `limit` and `offset`.
