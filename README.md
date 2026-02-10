@@ -61,10 +61,8 @@ Agent
 ```bash
 npm install
 
-# Terminal A: start local API
-cd packages/api
-npm install
-npx tsx src/index.ts
+# Terminal A: start local API (workspace)
+npm --workspace @echovault/api run dev
 ```
 
 ```bash
