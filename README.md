@@ -60,6 +60,16 @@ Agent
 
 ```bash
 npm install
+
+# Terminal A: start local API
+cd packages/api
+npm install
+npx tsx src/index.ts
+```
+
+```bash
+# Terminal B: run the demo (uses http://localhost:8787 by default)
+export ECHOVAULT_API=http://localhost:8787
 npx tsx scripts/e2e-demo.ts
 ```
 
