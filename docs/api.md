@@ -135,6 +135,15 @@ Grant access to a grantee.
 }
 ```
 
+**400 Response**
+```json
+{
+  "ok": false,
+  "reason": "missing_fields",
+  "code": "missing_fields"
+}
+```
+
 ## POST /vault/revoke
 Revoke an access grant.
 
@@ -150,6 +159,24 @@ Revoke an access grant.
 **Response**
 ```json
 { "ok": true, "revoked": true }
+```
+
+**400 Response**
+```json
+{
+  "ok": false,
+  "reason": "missing_fields",
+  "code": "missing_fields"
+}
+```
+
+**404 Response**
+```json
+{
+  "ok": false,
+  "reason": "grant_not_found",
+  "code": "grant_not_found"
+}
 ```
 
 ## GET /vault/grants
