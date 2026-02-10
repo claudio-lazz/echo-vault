@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { SectionCard } from './SectionCard';
@@ -100,6 +100,10 @@ export function AccessGrants() {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [selectedGrant, setSelectedGrant] = useState<ActiveGrant | null>(null);
   const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDrawerNotice(null);
+  }, [selectedGrant]);
 
   const liveActive = useMemo<ActiveGrant[]>(() => {
     if (!grantsState.grants.length) return [];

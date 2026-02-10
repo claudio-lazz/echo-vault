@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { demoRecordDetails, demoRecords } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
@@ -38,6 +38,10 @@ export function Records() {
     setStatusFilter('all');
     setSortKey('default');
   };
+
+  useEffect(() => {
+    setCopyStatus(null);
+  }, [selectedRecord]);
 
   const liveRecords = useMemo<RecordItem[]>(() => {
     if (!grantsState.grants.length) return [];
