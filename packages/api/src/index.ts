@@ -196,9 +196,13 @@ app.post('/vault/init', (req: Request<{}, {}, { owner?: string; context_uri?: st
 // Vault list (dev stub)
 app.get('/vaults', (req: Request<{}, {}, {}, { owner?: string; limit?: string; offset?: string }>, res: Response) => {
   const { owner, limit, offset } = req.query || {};
-  const limitValue = limit !== undefined ? Number(limit) : undefined;
-  if (limit !== undefined && (Number.isNaN(limitValue) || limitValue < 0)) {
-    return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+  let limitValue: number | undefined;
+  if (limit !== undefined) {
+    const parsed = Number(limit);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+    }
+    limitValue = parsed;
   }
   const offsetValue = offset !== undefined ? Number(offset) : 0;
   if (offset !== undefined && (Number.isNaN(offsetValue) || offsetValue < 0)) {
@@ -338,23 +342,39 @@ app.get(
     res: Response
   ) => {
     const { owner, grantee, expires_before, expires_after, expires_within } = req.query || {};
-    const expiresBefore = expires_before !== undefined ? Number(expires_before) : undefined;
-    if (expires_before !== undefined && Number.isNaN(expiresBefore)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_before', code: 'invalid_expires_before' });
+    let expiresBefore: number | undefined;
+    if (expires_before !== undefined) {
+      const parsed = Number(expires_before);
+      if (Number.isNaN(parsed)) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_before', code: 'invalid_expires_before' });
+      }
+      expiresBefore = parsed;
     }
-    const expiresAfter = expires_after !== undefined ? Number(expires_after) : undefined;
-    if (expires_after !== undefined && Number.isNaN(expiresAfter)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
+    let expiresAfter: number | undefined;
+    if (expires_after !== undefined) {
+      const parsed = Number(expires_after);
+      if (Number.isNaN(parsed)) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
+      }
+      expiresAfter = parsed;
     }
-    const expiresWithin = expires_within !== undefined ? Number(expires_within) : undefined;
-    if (expires_within !== undefined && (Number.isNaN(expiresWithin) || expiresWithin < 0)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+    let expiresWithin: number | undefined;
+    if (expires_within !== undefined) {
+      const parsed = Number(expires_within);
+      if (Number.isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+      }
+      expiresWithin = parsed;
     }
     const nowSeconds = Math.floor(Date.now() / 1000);
+    const expiryFilters: { expiresBefore?: number; expiresAfter?: number; expiresWithin?: number; nowSeconds: number } = { nowSeconds };
+    if (expiresBefore !== undefined) expiryFilters.expiresBefore = expiresBefore;
+    if (expiresAfter !== undefined) expiryFilters.expiresAfter = expiresAfter;
+    if (expiresWithin !== undefined) expiryFilters.expiresWithin = expiresWithin;
     const list = Array.from(grants.values()).filter((grant) => {
       if (owner && grant.owner !== owner) return false;
       if (grantee && grant.grantee !== grantee) return false;
-      return grantMatchesExpiry(grant, { expiresBefore, expiresAfter, expiresWithin, nowSeconds });
+      return grantMatchesExpiry(grant, expiryFilters);
     });
     const counts = summarizeGrants(list);
     res.status(200).json({ ok: true, total: list.length, counts });
@@ -373,33 +393,53 @@ app.get(
     if (status && !allowedStatuses.has(status)) {
       return res.status(400).json({ ok: false, reason: 'invalid_status', code: 'invalid_status' });
     }
-    const limitValue = limit !== undefined ? Number(limit) : undefined;
-    if (limit !== undefined && (Number.isNaN(limitValue) || limitValue < 0)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+    let limitValue: number | undefined;
+    if (limit !== undefined) {
+      const parsed = Number(limit);
+      if (Number.isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ ok: false, reason: 'invalid_limit', code: 'invalid_limit' });
+      }
+      limitValue = parsed;
     }
     const offsetValue = offset !== undefined ? Number(offset) : 0;
     if (offset !== undefined && (Number.isNaN(offsetValue) || offsetValue < 0)) {
       return res.status(400).json({ ok: false, reason: 'invalid_offset', code: 'invalid_offset' });
     }
-    const expiresBefore = expires_before !== undefined ? Number(expires_before) : undefined;
-    if (expires_before !== undefined && Number.isNaN(expiresBefore)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_before', code: 'invalid_expires_before' });
+    let expiresBefore: number | undefined;
+    if (expires_before !== undefined) {
+      const parsed = Number(expires_before);
+      if (Number.isNaN(parsed)) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_before', code: 'invalid_expires_before' });
+      }
+      expiresBefore = parsed;
     }
-    const expiresAfter = expires_after !== undefined ? Number(expires_after) : undefined;
-    if (expires_after !== undefined && Number.isNaN(expiresAfter)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
+    let expiresAfter: number | undefined;
+    if (expires_after !== undefined) {
+      const parsed = Number(expires_after);
+      if (Number.isNaN(parsed)) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_after', code: 'invalid_expires_after' });
+      }
+      expiresAfter = parsed;
     }
-    const expiresWithin = expires_within !== undefined ? Number(expires_within) : undefined;
-    if (expires_within !== undefined && (Number.isNaN(expiresWithin) || expiresWithin < 0)) {
-      return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+    let expiresWithin: number | undefined;
+    if (expires_within !== undefined) {
+      const parsed = Number(expires_within);
+      if (Number.isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ ok: false, reason: 'invalid_expires_within', code: 'invalid_expires_within' });
+      }
+      expiresWithin = parsed;
     }
     const cappedLimit = limitValue !== undefined ? Math.min(limitValue, 500) : undefined;
     const nowSeconds = Math.floor(Date.now() / 1000);
+    const expiryFilters: { expiresBefore?: number; expiresAfter?: number; expiresWithin?: number; nowSeconds: number } = { nowSeconds };
+    if (expiresBefore !== undefined) expiryFilters.expiresBefore = expiresBefore;
+    if (expiresAfter !== undefined) expiryFilters.expiresAfter = expiresAfter;
+    if (expiresWithin !== undefined) expiryFilters.expiresWithin = expiresWithin;
     const list = Array.from(grants.values())
       .filter((grant) => {
         if (owner && grant.owner !== owner) return false;
         if (grantee && grant.grantee !== grantee) return false;
-        return grantMatchesExpiry(grant, { expiresBefore, expiresAfter, expiresWithin, nowSeconds });
+        return grantMatchesExpiry(grant, expiryFilters);
       })
       .map((grant) => ({
         ...grant,
