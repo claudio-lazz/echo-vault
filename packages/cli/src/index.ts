@@ -14,8 +14,27 @@ function readEnvPath(key: string): string | undefined {
 const cmd = process.argv[2];
 const api = process.env.ECHOVAULT_API || 'http://localhost:8787';
 
-if (!cmd) {
+function printHelp() {
   console.log('echovault <status|init|vault|vaults|grant|revoke|grants|grants-summary|audit|audit-summary|preview|request|reset>');
+  console.log('');
+  console.log('Env vars:');
+  console.log('  ECHOVAULT_API (default: http://localhost:8787)');
+  console.log('  ECHOVAULT_OWNER, ECHOVAULT_GRANTEE, ECHOVAULT_SCOPE_HASH');
+  console.log('  ECHOVAULT_CONTEXT_URI, ECHOVAULT_CONTEXT_URI_PATH');
+  console.log('  ECHOVAULT_ENCRYPTED_BLOB, ECHOVAULT_ENCRYPTED_BLOB_PATH');
+  console.log('  ECHOVAULT_EXPIRES_AT');
+  console.log('  ECHOVAULT_VAULT_LIMIT, ECHOVAULT_VAULT_OFFSET');
+  console.log('  ECHOVAULT_GRANT_STATUS, ECHOVAULT_GRANT_LIMIT, ECHOVAULT_GRANT_OFFSET');
+  console.log('  ECHOVAULT_GRANT_EXPIRES_BEFORE, ECHOVAULT_GRANT_EXPIRES_AFTER, ECHOVAULT_GRANT_EXPIRES_WITHIN');
+  console.log('  ECHOVAULT_AUDIT_ACTION, ECHOVAULT_AUDIT_LIMIT, ECHOVAULT_AUDIT_OFFSET');
+  console.log('  ECHOVAULT_AUDIT_SINCE, ECHOVAULT_AUDIT_UNTIL');
+  console.log('  ECHOVAULT_PAYMENT_TX, ECHOVAULT_PAYMENT_MINT, ECHOVAULT_PAYMENT_AMOUNT');
+  console.log('  ECHOVAULT_PAYMENT_PAYER, ECHOVAULT_PAYMENT_RECIPIENT');
+  console.log('  ECHOVAULT_RESET_OK=yes');
+}
+
+if (!cmd || cmd === 'help' || cmd === '--help' || cmd === '-h') {
+  printHelp();
   process.exit(0);
 }
 
