@@ -33,6 +33,11 @@ export function Records() {
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const handleResetFilters = () => {
+    setQuery('');
+    setStatusFilter('all');
+    setSortKey('default');
+  };
 
   const liveRecords = useMemo<RecordItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -157,7 +162,7 @@ export function Records() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by vault, owner, or scope"
+              placeholder="Search by record, owner, grantee, or scope"
               className="w-60 rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white placeholder:text-[#6E7683]"
             />
             <select
@@ -222,7 +227,13 @@ export function Records() {
           ))}
           {filtered.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
-              No records match this filter.
+              <div>No records match this filter.</div>
+              <button
+                onClick={handleResetFilters}
+                className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
+              >
+                Reset filters
+              </button>
             </div>
           )}
         </div>
