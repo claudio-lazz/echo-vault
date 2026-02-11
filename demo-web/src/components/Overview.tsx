@@ -28,7 +28,7 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live API status" subtitle="/status health check">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'VITE_ECHOVAULT_API not set.'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'Live API endpoint configured in environment.'}</div>
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white">
               {status.loading && 'Checking...'}
               {!status.loading && status.error && `Unavailable (${status.error})`}
@@ -41,7 +41,7 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live grant summary" subtitle="/vault/grants/summary">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'VITE_ECHOVAULT_API not set.'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'Live API endpoint configured in environment.'}</div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-white">
               {grantSummary.loading && (
                 <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Loading…</div>
