@@ -191,6 +191,7 @@ export function AccessGrants() {
     anchor.download = `echovault-grant-${grant.id.toLowerCase()}.md`;
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Grant summary downloaded.', 'success');
   };
 
   const downloadReport = () => {
@@ -201,6 +202,7 @@ export function AccessGrants() {
     anchor.download = 'echovault-access-grants.md';
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Access grants report downloaded.', 'success');
   };
 
   return (
@@ -279,8 +281,16 @@ export function AccessGrants() {
                   <span>Reason: {request.reason}</span>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button className="rounded-lg bg-[#1f2430] px-3 py-1 text-xs">Approve</button>
-                  <button className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#C8D0DD]">
+                  <button
+                    onClick={() => toast.push('Approval queued for signature.', 'success')}
+                    className="rounded-lg bg-[#1f2430] px-3 py-1 text-xs"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => toast.push('Request marked for denial review.', 'warning')}
+                    className="rounded-lg border border-[#2A3040] px-3 py-1 text-xs text-[#C8D0DD]"
+                  >
                     Deny
                   </button>
                 </div>
@@ -402,7 +412,10 @@ export function AccessGrants() {
                   >
                     Download .md
                   </button>
-                  <button className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">
+                  <button
+                    onClick={() => toast.push('Revocation queued. Awaiting confirmation.', 'warning')}
+                    className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]"
+                  >
                     Revoke access
                   </button>
                 </div>

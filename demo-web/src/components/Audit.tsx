@@ -91,6 +91,7 @@ export function Audit() {
     anchor.download = `echovault-audit-${selectedEntry.id.toLowerCase()}.md`;
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Audit report downloaded.', 'success');
   };
 
   return (
@@ -202,9 +203,24 @@ export function Audit() {
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Follow-ups</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Export audit line</button>
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Open incident</button>
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Notify owner</button>
+                  <button
+                    onClick={() => toast.push('Audit line exported.', 'success')}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Export audit line
+                  </button>
+                  <button
+                    onClick={() => toast.push('Incident workspace opened.', 'info')}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Open incident
+                  </button>
+                  <button
+                    onClick={() => toast.push('Owner notification queued.', 'success')}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Notify owner
+                  </button>
                 </div>
               </div>
             </div>
