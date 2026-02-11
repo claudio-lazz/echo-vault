@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { demoAudit } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
@@ -17,6 +17,10 @@ export function Audit() {
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [selectedEntry, setSelectedEntry] = useState<AuditItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  useEffect(() => {
+    setCopyState('idle');
+  }, [selectedEntry]);
 
   const liveAudit = useMemo<AuditItem[]>(() => {
     if (!grantsState.grants.length) return [];
@@ -185,6 +189,8 @@ export function Audit() {
                 </div>
                 <textarea
                   readOnly
+                  aria-label="Audit report markdown"
+                  spellCheck={false}
                   value={auditReport}
                   className="mt-3 h-36 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-[11px] text-[#9AA4B2]"
                 />
