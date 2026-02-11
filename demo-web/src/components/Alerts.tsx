@@ -71,6 +71,13 @@ export function Alerts() {
     return `# EchoVault alert briefing\n\n- Generated: ${now}\n- Mode: ${usingLive ? 'Live' : 'Local'}\n- Alert ID: ${alert.id}\n- Title: ${alert.title}\n- Severity: ${alert.severity}\n- Time: ${alert.time}\n\n## System context\nPolicy engine detected a delta between scope hash and current on-chain grant.\n\n## Recommended response\n- Notify grant owner and request re-auth.\n- Inspect access trail for repeated anomalies.\n- Rotate vault key if anomaly persists.\n\n## Notes\n- `;
   };
 
+  const hasFilters = query.trim().length > 0 || severityFilter !== 'all';
+
+  const handleResetFilters = () => {
+    setQuery('');
+    setSeverityFilter('all');
+  };
+
   const copyAlertSummary = async (alert: AlertItem) => {
     try {
       await navigator.clipboard.writeText(buildAlertSummary(alert));
@@ -106,11 +113,13 @@ export function Alerts() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search alerts"
+              aria-label="Search alerts"
               className="w-52 rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white placeholder:text-[#6E7683]"
             />
             <select
               value={severityFilter}
               onChange={(event) => setSeverityFilter(event.target.value as SeverityFilter)}
+              aria-label="Filter alerts by severity"
               className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white"
             >
               {severityOptions.map((option) => (
@@ -119,6 +128,14 @@ export function Alerts() {
                 </option>
               ))}
             </select>
+            {hasFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
+              >
+                Reset filters
+              </button>
+            )}
           </div>
         </div>
         {mode === 'live' && (
@@ -151,7 +168,15 @@ export function Alerts() {
           ))}
           {filtered.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
-              No alerts match this filter.
+              <div>No alerts match this filter.</div>
+              {hasFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
+                >
+                  Reset filters
+                </button>
+              )}
             </div>
           )}
         </div>
