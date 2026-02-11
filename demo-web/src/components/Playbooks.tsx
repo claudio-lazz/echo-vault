@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 import { demoPlaybookRuns, demoPlaybooks } from '../lib/demoData';
@@ -23,6 +23,10 @@ type PlaybookRunSummary = {
 export function Playbooks() {
   const [selectedPlaybook, setSelectedPlaybook] = useState<PlaybookItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  useEffect(() => {
+    setCopyState('idle');
+  }, [selectedPlaybook]);
 
   const detail = useMemo<PlaybookRunSummary | null>(() => {
     if (!selectedPlaybook) return null;
@@ -254,6 +258,8 @@ export function Playbooks() {
                 <textarea
                   readOnly
                   value={report}
+                  aria-label="Playbook report"
+                  spellCheck={false}
                   className="mt-3 h-40 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-xs text-[#9AA4B2]"
                 />
               </div>
