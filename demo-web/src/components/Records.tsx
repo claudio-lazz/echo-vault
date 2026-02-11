@@ -163,7 +163,7 @@ export function Records() {
             <span>Active: <span className="text-white">{activeCount}</span></span>
             <span>Revoked: <span className="text-white">{revokedCount}</span></span>
             <span>Total: <span className="text-white">{records.length}</span></span>
-            <span>Results: <span className="text-white">{filtered.length}</span></span>
+            <span>Results: <span className="text-white">{filtered.length}</span> (filtered)</span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
