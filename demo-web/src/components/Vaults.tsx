@@ -3,6 +3,7 @@ import { useDataMode } from '../lib/dataMode';
 import { demoVaults } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
 import { useVaults } from '../lib/useVaults';
+import { useToast } from '../lib/toast';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -19,6 +20,7 @@ export function Vaults() {
   const vaultsState = useVaults(apiBase, mode === 'live');
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const toast = useToast();
 
   useEffect(() => {
     setCopyState('idle');
@@ -111,9 +113,11 @@ export function Vaults() {
     try {
       await navigator.clipboard.writeText(vaultReport);
       setCopyState('copied');
+      toast.push('Vault report copied.', 'success');
       window.setTimeout(() => setCopyState('idle'), 1600);
     } catch {
       setCopyState('error');
+      toast.push('Copy failed. Try again.', 'error');
       window.setTimeout(() => setCopyState('idle'), 1600);
     }
   };

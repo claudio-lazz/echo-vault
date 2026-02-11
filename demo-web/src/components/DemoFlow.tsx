@@ -4,6 +4,7 @@ import { StatusPill } from './StatusPill';
 import { useDataMode } from '../lib/dataMode';
 import { useApiStatus } from '../lib/useApiStatus';
 import { useVaultGrants } from '../lib/useVaultGrants';
+import { useToast } from '../lib/toast';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
 const apiRoot = apiBase?.replace(/\/$/, '');
@@ -110,6 +111,7 @@ export function DemoFlow() {
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [commandCopy, setCommandCopy] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     try {
@@ -244,9 +246,11 @@ export function DemoFlow() {
     try {
       await navigator.clipboard.writeText(report);
       setCopyState('copied');
+      toast.push('Report copied to clipboard.', 'success');
       window.setTimeout(() => setCopyState('idle'), 1800);
     } catch {
       setCopyState('error');
+      toast.push('Copy failed. Try again.', 'error');
       window.setTimeout(() => setCopyState('idle'), 1800);
     }
   };
@@ -259,15 +263,18 @@ export function DemoFlow() {
     anchor.download = 'echovault-demo-report.md';
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Report downloaded.', 'success');
   };
 
   const copyCommand = async (value: string, id: string) => {
     try {
       await navigator.clipboard.writeText(value);
       setCommandCopy(id);
+      toast.push('Command copied.', 'success');
       window.setTimeout(() => setCommandCopy(null), 1400);
     } catch {
       setCommandCopy('error');
+      toast.push('Copy failed.', 'error');
       window.setTimeout(() => setCommandCopy(null), 1400);
     }
   };

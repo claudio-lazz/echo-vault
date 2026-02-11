@@ -5,12 +5,14 @@ import { StatusPill } from './StatusPill';
 import { demoUsage } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useApiStatus } from '../lib/useApiStatus';
+import { useToast } from '../lib/toast';
 
 export function Usage() {
   const { mode } = useDataMode();
   const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
   const status = useApiStatus(apiBase, mode === 'live');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const toast = useToast();
 
   const maxTrend = Math.max(...demoUsage.trend.map((item) => item.spend));
   const maxForecast = Math.max(...demoUsage.forecast.map((item) => item.spend));
@@ -50,9 +52,11 @@ export function Usage() {
     try {
       await navigator.clipboard.writeText(report);
       setCopyState('copied');
+      toast.push('Usage report copied.', 'success');
       window.setTimeout(() => setCopyState('idle'), 1600);
     } catch {
       setCopyState('error');
+      toast.push('Copy failed. Try again.', 'error');
       window.setTimeout(() => setCopyState('idle'), 1600);
     }
   };
@@ -65,6 +69,7 @@ export function Usage() {
     anchor.download = 'echovault-usage-report.md';
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Usage report downloaded.', 'success');
   };
 
   return (

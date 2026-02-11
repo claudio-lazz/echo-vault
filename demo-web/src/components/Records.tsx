@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { demoRecordDetails, demoRecords } from '../lib/demoData';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
+import { useToast } from '../lib/toast';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -33,6 +34,7 @@ export function Records() {
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const toast = useToast();
   const handleResetFilters = () => {
     setQuery('');
     setStatusFilter('all');
@@ -88,9 +90,11 @@ export function Records() {
     try {
       await navigator.clipboard.writeText(value);
       setCopyStatus(`${label} copied`);
+      toast.push(`${label} copied.`, 'success');
     } catch (error) {
       console.error(error);
       setCopyStatus('Copy unavailable');
+      toast.push('Copy unavailable.', 'error');
     } finally {
       window.setTimeout(() => setCopyStatus(null), 1800);
     }
@@ -108,6 +112,7 @@ export function Records() {
     link.download = `echovault-record-${record.id.toLowerCase()}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    toast.push('Record metadata downloaded.', 'success');
   };
 
   const filtered = useMemo(() => {

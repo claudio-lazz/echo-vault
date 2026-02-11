@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { useVaultGrants } from '../lib/useVaultGrants';
+import { useToast } from '../lib/toast';
 import { SectionCard } from './SectionCard';
 import { StatusPill } from './StatusPill';
 
@@ -98,6 +99,7 @@ export function AccessGrants() {
   const { mode } = useDataMode();
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const toast = useToast();
   const [selectedGrant, setSelectedGrant] = useState<ActiveGrant | null>(null);
   const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
 
@@ -159,9 +161,11 @@ export function AccessGrants() {
     try {
       await navigator.clipboard.writeText(report);
       setCopyState('copied');
+      toast.push('Access grants report copied.', 'success');
       window.setTimeout(() => setCopyState('idle'), 1600);
     } catch {
       setCopyState('error');
+      toast.push('Copy failed. Try again.', 'error');
       window.setTimeout(() => setCopyState('idle'), 1600);
     }
   };
@@ -170,8 +174,10 @@ export function AccessGrants() {
     try {
       await navigator.clipboard.writeText(buildGrantSummary(grant));
       setDrawerNotice('Grant summary copied');
+      toast.push('Grant summary copied.', 'success');
     } catch {
       setDrawerNotice('Copy failed');
+      toast.push('Copy failed.', 'error');
     } finally {
       window.setTimeout(() => setDrawerNotice(null), 1600);
     }

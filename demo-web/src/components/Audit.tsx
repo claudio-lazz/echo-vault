@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDataMode } from '../lib/dataMode';
 import { demoAudit } from '../lib/demoData';
 import { useVaultGrants } from '../lib/useVaultGrants';
+import { useToast } from '../lib/toast';
 import { SectionCard } from './SectionCard';
 
 const apiBase = import.meta.env.VITE_ECHOVAULT_API as string | undefined;
@@ -17,6 +18,7 @@ export function Audit() {
   const grantsState = useVaultGrants(apiBase, mode === 'live');
   const [selectedEntry, setSelectedEntry] = useState<AuditItem | null>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const toast = useToast();
 
   useEffect(() => {
     setCopyState('idle');
@@ -71,9 +73,11 @@ export function Audit() {
     try {
       await navigator.clipboard.writeText(auditReport);
       setCopyState('copied');
+      toast.push('Audit report copied.', 'success');
       window.setTimeout(() => setCopyState('idle'), 1600);
     } catch {
       setCopyState('error');
+      toast.push('Copy failed. Try again.', 'error');
       window.setTimeout(() => setCopyState('idle'), 1600);
     }
   };
