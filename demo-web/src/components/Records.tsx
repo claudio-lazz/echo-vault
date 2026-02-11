@@ -62,6 +62,7 @@ export function Records() {
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
   const records: RecordItem[] = usingLive && liveRecords.length ? liveRecords : (demoRecords as RecordItem[]);
+  const showLiveEmpty = usingLive && !grantsState.loading && !grantsState.error && liveRecords.length === 0;
 
   const selectedDetail = useMemo<RecordDetail | null>(() => {
     if (!selectedRecord) return null;
@@ -203,11 +204,18 @@ export function Records() {
           <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live grants...'}
             {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
-            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${records.length} grants).`}
+            {!grantsState.loading && !grantsState.error && apiBase && (liveRecords.length
+              ? `Live data connected (${liveRecords.length} grants).`
+              : 'Live data connected (0 grants). Showing sample data.')}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>
         )}
         <div className="space-y-3 text-sm">
+          {showLiveEmpty && (
+            <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
+              Live is connected but returned zero grants. Showing sample records below while data warms up.
+            </div>
+          )}
           {sorted.map((record) => (
             <div key={record.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
               <div>

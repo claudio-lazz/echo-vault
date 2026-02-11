@@ -16,6 +16,15 @@ npm install
 npx tsx src/index.ts
 ```
 
+## Demo web
+```
+# from repo root
+npm install
+VITE_ECHOVAULT_API=http://localhost:8787 npm run dev -- --filter demo-web
+```
+Notes:
+- If live grants return zero, the UI falls back to sample data while the API warms up.
+
 ## CLI
 ```
 # Set API URL
