@@ -128,7 +128,9 @@ export function AccessGrants() {
   }, [grantsState.grants]);
 
   const usingLive = mode === 'live' && !grantsState.error && apiBase;
-  const grants = usingLive && liveActive.length ? liveActive : activeGrants;
+  const liveCount = liveActive.length;
+  const showingSampleData = usingLive && liveCount === 0;
+  const grants = usingLive && liveCount ? liveActive : activeGrants;
 
   const report = useMemo(() => {
     const now = new Date().toISOString();
@@ -221,7 +223,10 @@ export function AccessGrants() {
           >
             {grantsState.loading && 'Loading live grants...'}
             {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
-            {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${grants.length} grants).`}
+            {!grantsState.loading && !grantsState.error && apiBase && showingSampleData &&
+              'Live data connected but returned zero grants. Showing sample data while the vault warms up.'}
+            {!grantsState.loading && !grantsState.error && apiBase && !showingSampleData &&
+              `Live data connected (${liveCount} grants).`}
             {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
           </div>
         )}
