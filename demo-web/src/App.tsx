@@ -50,9 +50,9 @@ function App() {
       <div className="min-h-screen bg-[#0f1117] text-[#f4f6fa]">
         <div className="flex h-full flex-col sm:h-screen sm:flex-row">
           <Sidebar active={active} onSelect={setActive} />
-          <main className="flex-1 overflow-auto">
+          <main className="flex min-h-screen flex-1 flex-col overflow-auto">
             <TopBar title={pageTitles[active]} />
-            {pages[active]}
+            <div className="flex-1">{pages[active]}</div>
             <Footer />
           </main>
         </div>

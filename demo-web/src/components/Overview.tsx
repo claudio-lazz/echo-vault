@@ -2,6 +2,7 @@ import { demoAlerts, demoMetrics, demoRecords } from '../lib/demoData';
 import { SectionCard } from './SectionCard';
 import { StatCard } from './StatCard';
 import { StatusPill } from './StatusPill';
+import { SolanaIntegration } from './SolanaIntegration';
 import { useDataMode } from '../lib/dataMode';
 import { useApiStatus } from '../lib/useApiStatus';
 import { useGrantSummary } from '../lib/useGrantSummary';
@@ -21,6 +22,8 @@ export function Overview() {
         <StatCard label="Alerts Open" value={demoAlerts.length} subLabel="Last 24h" />
         <StatCard label="Ingestion Rate" value="4.2k/min" subLabel="Avg 5m" />
       </div>
+
+      <SolanaIntegration />
 
       {mode === 'live' && (
         <SectionCard title="Live API status" subtitle="/status health check">

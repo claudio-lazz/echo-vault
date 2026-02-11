@@ -7,7 +7,7 @@ export function Footer() {
             Solana
           </span>
           <a
-            className="text-[#9AA4B2] hover:text-white"
+            className="text-[#9AA4B2] underline decoration-[#2A3040] underline-offset-4 hover:text-white"
             href="https://echo-vault-two.vercel.app/"
             target="_blank"
             rel="noreferrer"
@@ -15,7 +15,7 @@ export function Footer() {
             Project
           </a>
           <a
-            className="text-[#9AA4B2] hover:text-white"
+            className="text-[#9AA4B2] underline decoration-[#2A3040] underline-offset-4 hover:text-white"
             href="https://github.com/claudio-lazz/echo-vault"
             target="_blank"
             rel="noreferrer"
@@ -23,7 +23,7 @@ export function Footer() {
             GitHub
           </a>
           <a
-            className="text-[#9AA4B2] hover:text-white"
+            className="text-[#9AA4B2] underline decoration-[#2A3040] underline-offset-4 hover:text-white"
             href="https://solana.com/"
             target="_blank"
             rel="noreferrer"
