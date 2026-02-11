@@ -224,7 +224,7 @@ export function Records() {
             {!grantsState.loading && !grantsState.error && apiBase && (liveRecords.length
               ? `Live data connected (${liveRecords.length} grants).`
               : 'Live data connected (0 grants). Showing sample data.')}
-            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
           </div>
         )}
         <div className="space-y-3 text-sm">

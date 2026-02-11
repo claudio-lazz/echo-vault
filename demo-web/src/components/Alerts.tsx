@@ -143,7 +143,7 @@ export function Alerts() {
             {grantsState.loading && 'Loading live alerts...'}
             {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample alerts.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${alerts.length} alerts).`}
-            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
           </div>
         )}
         <div className="space-y-3 text-sm">

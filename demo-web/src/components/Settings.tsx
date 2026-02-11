@@ -35,7 +35,7 @@ export function Settings() {
 
       <SectionCard title="API base URL" subtitle="Live mode endpoint">
         <div className="space-y-2 text-xs text-[#9AA4B2]">
-          <div>{apiBase ?? 'Set VITE_ECHOVAULT_API to enable live calls.'}</div>
+          <div>{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
           {mode === 'live' && (
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs">
               <div className="font-semibold text-white">Live status</div>

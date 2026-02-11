@@ -139,7 +139,7 @@ export function Vaults() {
             {!vaultsState.loading && !vaultsState.error && apiBase && (liveVaults.length
               ? `Live data connected (${liveVaults.length} vaults).`
               : 'Live data connected (0 vaults). Showing sample data.')}
-            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
           </div>
         )}
         <div className="space-y-3 text-sm">

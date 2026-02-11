@@ -97,7 +97,7 @@ export function Audit() {
             {grantsState.loading && 'Loading live audit events...'}
             {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${auditEntries.length} events).`}
-            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
           </div>
         )}
         <div className="space-y-3 text-sm">

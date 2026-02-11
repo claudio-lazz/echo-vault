@@ -227,7 +227,7 @@ export function AccessGrants() {
               'Live data connected but returned zero grants. Showing sample data while the vault warms up.'}
             {!grantsState.loading && !grantsState.error && apiBase && !showingSampleData &&
               `Live data connected (${liveCount} grants).`}
-            {!apiBase && 'Set VITE_ECHOVAULT_API to enable live data.'}
+            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
           </div>
         )}
         <div className="space-y-4">

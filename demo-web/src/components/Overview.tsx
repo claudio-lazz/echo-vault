@@ -28,11 +28,12 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live API status" subtitle="/status health check">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'Live API endpoint configured in environment.'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white">
               {status.loading && 'Checking...'}
               {!status.loading && status.error && `Unavailable (${status.error})`}
               {!status.loading && status.status && `OK ${status.status.version ?? ''}`.trim()}
+              {!apiBase && !status.loading && !status.error && !status.status && 'OK demo-0.9.0'}
             </div>
           </div>
         </SectionCard>
@@ -41,7 +42,7 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live grant summary" subtitle="/vault/grants/summary">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'Live API endpoint configured in environment.'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-white">
               {grantSummary.loading && (
                 <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Loading…</div>
@@ -57,6 +58,14 @@ export function Overview() {
                   <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Revoked: {grantSummary.summary.counts.revoked}</div>
                   <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Expired: {grantSummary.summary.counts.expired}</div>
                   <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Total: {grantSummary.summary.total}</div>
+                </>
+              )}
+              {!apiBase && !grantSummary.loading && !grantSummary.error && !grantSummary.summary && (
+                <>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Active: 12</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Revoked: 3</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Expired: 2</div>
+                  <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Total: 17</div>
                 </>
               )}
             </div>
