@@ -15,6 +15,7 @@ A polished EchoVault operator console built with React + Vite. The UI can run fu
 - Multi‑section navigation: Overview, Vaults, Records, Alerts, Audit, Grants, Playbooks, Usage, Demo Flow
 - Demo Flow checklist with copyable commands + report generator
 - Detail drawers with exportable Markdown reports
+- Records export + Access Grants report download/copy for quick sharing
 - Live API status checks in Settings + Overview
 
 ---

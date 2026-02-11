@@ -214,7 +214,11 @@ export function AccessGrants() {
         }
       >
         {mode === 'live' && (
-          <div className="mb-4 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+          <div
+            className="mb-4 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]"
+            role="status"
+            aria-live="polite"
+          >
             {grantsState.loading && 'Loading live grants...'}
             {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${grants.length} grants).`}
@@ -338,7 +342,11 @@ export function AccessGrants() {
 
             <div className="mt-6 space-y-4 text-sm">
               {drawerNotice && (
-                <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+                <div
+                  className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]"
+                  role="status"
+                  aria-live="polite"
+                >
                   {drawerNotice}
                 </div>
               )}
