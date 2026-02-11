@@ -14,6 +14,7 @@ import { AccessGrants } from './components/AccessGrants';
 import { Playbooks } from './components/Playbooks';
 import { Usage } from './components/Usage';
 import { DataModeProvider } from './lib/dataMode';
+import { SolanaFooter } from './components/SolanaFooter';
 
 const pages: Record<string, React.ReactNode> = {
   overview: <Overview />,
@@ -52,6 +53,7 @@ function App() {
           <main className="flex-1 overflow-auto">
             <TopBar title={pageTitles[active]} />
             {pages[active]}
+            <SolanaFooter />
           </main>
         </div>
       </div>
