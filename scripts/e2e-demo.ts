@@ -33,10 +33,16 @@ async function run() {
 
   if (process.env.ECHOVAULT_PAYMENT_TX) {
     console.log('\n4) request with payment');
+    const amount = Number(process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001');
+    const feeBps = Number(process.env.ECHOVAULT_FEE_BPS || '200');
+    const feeAmount = Number(((amount * feeBps) / 10000).toFixed(9));
     const payment = {
       txSig: process.env.ECHOVAULT_PAYMENT_TX,
       mint: process.env.ECHOVAULT_PAYMENT_MINT || 'USDC',
-      amount: process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001'
+      amount,
+      recipient: process.env.ECHOVAULT_PAYMENT_RECIPIENT || owner,
+      feeRecipient: process.env.ECHOVAULT_FEE_RECIPIENT || 'TREASURY',
+      feeAmount
     };
     const paid = await postJson(`${api}/context/request`, { owner, grantee, scope_hash, payment });
     console.log(paid.status, paid.json);

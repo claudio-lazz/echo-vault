@@ -4,6 +4,8 @@ type Challenge = {
   amount: number;
   mint: string;
   paymentUrl: string;
+  feeBps?: number;
+  feeRecipient?: string | null;
 };
 
 type VerifyResult =
@@ -16,15 +18,21 @@ type PaymentPayload = {
   amount?: string | number;
   payer?: string;
   recipient?: string;
+  feeRecipient?: string;
+  feeAmount?: string | number;
 };
 
 export function build402Challenge({ amount, mint }: { amount: number; mint: string }): Challenge {
+  const feeBps = Number(process.env.ECHOVAULT_FEE_BPS ?? 200);
+  const feeRecipient = process.env.ECHOVAULT_FEE_RECIPIENT || null;
   return {
     status: 402,
     required: true,
     amount,
     mint,
-    paymentUrl: '/pay'
+    paymentUrl: '/pay',
+    feeBps: Number.isFinite(feeBps) ? feeBps : undefined,
+    feeRecipient
   };
 }
 
@@ -81,8 +89,18 @@ export async function verify402Payment(payload: PaymentPayload | null | undefine
       .map((parsed: any) => ({ type: parsed.type, info: parsed.info }))
       .filter((ix: any) => ix.type === 'transfer' || ix.type === 'transferChecked');
 
+    const feeBps = Number(process.env.ECHOVAULT_FEE_BPS ?? 200);
     const expectedRecipient = payload.recipient || process.env.ECHOVAULT_PAYMENT_RECIPIENT || null;
+    const expectedFeeRecipient = payload.feeRecipient || process.env.ECHOVAULT_FEE_RECIPIENT || null;
     const expectedPayer = payload.payer || process.env.ECHOVAULT_PAYMENT_PAYER || null;
+    const expectedFeeAmount = payload.feeAmount
+      ? Number(payload.feeAmount)
+      : amount != null && Number.isFinite(feeBps)
+        ? Number(((amount * feeBps) / 10000).toFixed(9))
+        : null;
+
+    if (!expectedRecipient) return { ok: false, reason: 'recipient_missing' };
+    if (feeBps > 0 && !expectedFeeRecipient) return { ok: false, reason: 'fee_recipient_missing' };
 
     const accountKeys = (tx?.transaction?.message?.accountKeys || []).map((k: any) =>
       typeof k === 'string' ? k : k?.pubkey
@@ -100,38 +118,49 @@ export async function verify402Payment(payload: PaymentPayload | null | undefine
       };
     });
 
-    const matches = transfers.some(({ info }: any) => {
-      if (!info) return false;
-      if (info.mint && info.mint !== mint) return false;
+    const transferTotals = transfers.reduce<Record<string, number>>((acc, { info }: any) => {
+      if (!info) return acc;
+      if (info.mint && info.mint !== mint) return acc;
       const tokenAmount = info.tokenAmount || {};
       const uiAmount = typeof tokenAmount.uiAmount === 'number' ? tokenAmount.uiAmount : Number(tokenAmount.uiAmountString);
-      if (!Number.isFinite(uiAmount)) return false;
-      if (amount != null && uiAmount + 1e-9 < amount) return false;
-      if (expectedRecipient && info.destination && info.destination !== expectedRecipient) return false;
-      if (expectedPayer) {
-        const authority = info.authority || info.owner || null;
-        if (authority && authority !== expectedPayer && info.source !== expectedPayer) return false;
-      }
-      return true;
-    }) || tokenBalances.some((bal: any) => {
-      if (bal.mint !== mint) return false;
-      if (amount != null && bal.delta + 1e-9 < amount) return false;
-      if (expectedRecipient && bal.account !== expectedRecipient && bal.owner !== expectedRecipient) return false;
-      if (expectedPayer && bal.owner !== expectedPayer && bal.account !== expectedPayer) return false;
-      return true;
-    });
+      if (!Number.isFinite(uiAmount)) return acc;
+      if (!info.destination) return acc;
+      acc[info.destination] = (acc[info.destination] ?? 0) + uiAmount;
+      return acc;
+    }, {});
 
-    if (!matches) {
-      const anyRecipient = transfers.some(({ info }: any) => info?.destination === expectedRecipient)
-        || tokenBalances.some((bal: any) => bal.account === expectedRecipient || bal.owner === expectedRecipient);
-      const anyPayer = transfers.some(({ info }: any) => {
-        const authority = info?.authority || info?.owner || null;
-        return authority === expectedPayer || info?.source === expectedPayer;
-      }) || tokenBalances.some((bal: any) => bal.account === expectedPayer || bal.owner === expectedPayer || bal.delta < 0);
-      if (expectedRecipient && !anyRecipient) return { ok: false, reason: 'recipient_mismatch' };
-      if (expectedPayer && !anyPayer) return { ok: false, reason: 'payer_mismatch' };
-      return { ok: false, reason: 'mint_amount_mismatch' };
+    const balanceTotals = tokenBalances.reduce<Record<string, number>>((acc, bal: any) => {
+      if (bal.mint !== mint) return acc;
+      if (!Number.isFinite(bal.delta) || bal.delta <= 0) return acc;
+      if (!bal.account) return acc;
+      acc[bal.account] = (acc[bal.account] ?? 0) + bal.delta;
+      return acc;
+    }, {});
+
+    const getPaid = (address: string | null) => {
+      if (!address) return 0;
+      if (transferTotals[address] !== undefined) return transferTotals[address];
+      return balanceTotals[address] ?? 0;
+    };
+
+    const paidToRecipient = getPaid(expectedRecipient);
+    const paidToFee = expectedFeeRecipient ? getPaid(expectedFeeRecipient) : 0;
+    const totalPaid = paidToRecipient + paidToFee;
+
+    if (amount != null && totalPaid + 1e-9 < amount) return { ok: false, reason: 'mint_amount_mismatch' };
+    if (expectedFeeAmount != null && expectedFeeRecipient) {
+      if (paidToFee + 1e-9 < expectedFeeAmount) return { ok: false, reason: 'fee_mismatch' };
     }
+    if (amount != null && expectedFeeAmount != null) {
+      const expectedProviderAmount = amount - expectedFeeAmount;
+      if (paidToRecipient + 1e-9 < expectedProviderAmount) return { ok: false, reason: 'recipient_mismatch' };
+    }
+
+    const anyPayer = transfers.some(({ info }: any) => {
+      const authority = info?.authority || info?.owner || null;
+      return authority === expectedPayer || info?.source === expectedPayer;
+    }) || tokenBalances.some((bal: any) => bal.account === expectedPayer || bal.owner === expectedPayer || bal.delta < 0);
+    if (expectedPayer && !anyPayer) return { ok: false, reason: 'payer_mismatch' };
   } catch {
     return { ok: false, reason: 'rpc_error' };
   }

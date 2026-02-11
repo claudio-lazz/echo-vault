@@ -38,6 +38,8 @@ type PaymentPayload = {
   amount?: string | number;
   payer?: string;
   recipient?: string;
+  feeRecipient?: string;
+  feeAmount?: string | number;
 };
 
 type ContextRequestBody = {

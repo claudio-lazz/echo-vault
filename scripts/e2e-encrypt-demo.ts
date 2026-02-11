@@ -49,11 +49,21 @@ async function run() {
   console.log(request.status, request.json);
 
   console.log('request with stub payment');
+  const amount = Number(process.env.ECHOVAULT_PAYMENT_AMOUNT || '0.001');
+  const feeBps = Number(process.env.ECHOVAULT_FEE_BPS || '200');
+  const feeAmount = Number(((amount * feeBps) / 10000).toFixed(9));
   const paid = await postJson<{ encrypted_blob?: EncryptedPayload }>(`${api}/context/request`, {
     owner,
     grantee,
     scope_hash,
-    payment: { txSig: process.env.ECHOVAULT_PAYMENT_TX || 'TX_SIG', mint: 'USDC', amount: '0.001' }
+    payment: {
+      txSig: process.env.ECHOVAULT_PAYMENT_TX || 'TX_SIG',
+      mint: 'USDC',
+      amount,
+      recipient: process.env.ECHOVAULT_PAYMENT_RECIPIENT || owner,
+      feeRecipient: process.env.ECHOVAULT_FEE_RECIPIENT || 'TREASURY',
+      feeAmount
+    }
   });
   console.log(paid.status, paid.json);
 

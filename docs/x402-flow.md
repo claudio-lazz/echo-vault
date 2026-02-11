@@ -15,11 +15,14 @@ Allow agents to pay per context read using x402, with verification before data i
 - `txSig`
 - `mint`
 - `amount`
+- `recipient` (context owner/provider payout)
+- `feeRecipient` (EchoVault treasury)
+- `feeAmount` (amount sent to treasury)
 - `payer` (optional but recommended)
-- `recipient` (optional but recommended)
 
 ## Verification (server)
 - Confirm tx on Solana
 - Validate token mint/amount
-- Confirm recipient matches EchoVault vault address
+- Confirm provider + treasury transfers in same tx
+- Validate fee split (default 2% via `ECHOVAULT_FEE_BPS`)
 
