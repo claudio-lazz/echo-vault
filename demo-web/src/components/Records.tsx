@@ -39,6 +39,8 @@ export function Records() {
     setSortKey('default');
   };
 
+  const filtersActive = query.trim().length > 0 || statusFilter !== 'all' || sortKey !== 'default';
+
   useEffect(() => {
     setCopyStatus(null);
   }, [selectedRecord]);
@@ -168,11 +170,13 @@ export function Records() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search by record, owner, grantee, or scope"
+              aria-label="Search records"
               className="w-60 rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white placeholder:text-[#6E7683]"
             />
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+              aria-label="Filter by status"
               className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white"
             >
               {statusOptions.map((option) => (
@@ -184,6 +188,7 @@ export function Records() {
             <select
               value={sortKey}
               onChange={(event) => setSortKey(event.target.value as SortKey)}
+              aria-label="Sort records"
               className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-white"
             >
               {sortOptions.map((option) => (
@@ -192,6 +197,14 @@ export function Records() {
                 </option>
               ))}
             </select>
+            {filtersActive && (
+              <button
+                onClick={handleResetFilters}
+                className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-[#C8D0DD]"
+              >
+                Reset filters
+              </button>
+            )}
             <button
               onClick={handleExport}
               className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white"
