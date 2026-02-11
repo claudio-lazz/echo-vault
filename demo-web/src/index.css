@@ -11,3 +11,42 @@ body {
   background: #0f1117;
   color: #f4f6fa;
 }
+
+button,
+[role="button"] {
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+button:hover,
+[role="button"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 17, 23, 0.35);
+}
+
+button:active,
+[role="button"]:active {
+  transform: translateY(0) scale(0.98);
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid rgba(91, 127, 255, 0.75);
+  outline-offset: 2px;
+}
+
+button:disabled,
+[role="button"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.button-ghost {
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.button-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
