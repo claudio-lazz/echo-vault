@@ -65,24 +65,25 @@ export ECHOVAULT_ENCRYPTED_BLOB=$(cat /tmp/echovault-encrypted.json)
 # End-to-end demo with encryption
 npx tsx scripts/e2e-encrypt-demo.ts
 
-echovault init
+# If echovault isn't installed globally, prefix with npx
+npx echovault init
 
 # Grant access (stub)
 export ECHOVAULT_OWNER=OWNER
 export ECHOVAULT_GRANTEE=GRANTEE
 export ECHOVAULT_SCOPE_HASH=SCOPE_HASH
 
-# Grant stores in-memory grant
-echovault grant
+# Grants are stored in-memory (dev)
+npx echovault grant
 
 # Optional: revoke grant
-echovault revoke
+npx echovault revoke
 
 # Preview context (metadata only)
-echovault preview
+npx echovault preview
 
 # Request context (returns 402 challenge)
-echovault request
+npx echovault request
 
 # If revoked, request will return grant_revoked
 
@@ -94,7 +95,7 @@ export ECHOVAULT_PAYMENT_AMOUNT=0.001
 export ECHOVAULT_PAYMENT_PAYER=PAYER_PUBKEY
 export ECHOVAULT_PAYMENT_RECIPIENT=RECIPIENT_TOKEN_ACCOUNT
 
-echovault request
+npx echovault request
 ```
 
 ## SDK (minimal)
