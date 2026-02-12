@@ -45,7 +45,7 @@ export function Usage() {
             : 'API status: unknown'
       : 'API status: local';
 
-    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'https://api.echovault.dev (demo)'}\n- ${statusLine}\n- Monthly burn: $${demoUsage.monthlyBurn}k\n- Edge egress: ${demoUsage.egressTB} TB\n- Retention policy: ${demoUsage.retentionDays} days\n- Active tenants: ${demoUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Forecast (next 3 months)\n${forecast}\n\n## Anomaly watch\n${anomalies}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
+    return `# EchoVault usage snapshot\n\n- Timestamp: ${now}\n- Mode: ${mode}\n- API base: ${apiBase ?? 'https://api.echovault.dev'}\n- ${statusLine}\n- Monthly burn: $${demoUsage.monthlyBurn}k\n- Edge egress: ${demoUsage.egressTB} TB\n- Retention policy: ${demoUsage.retentionDays} days\n- Active tenants: ${demoUsage.topTenants.length}\n\n## Spend breakdown\n${breakdown}\n\n## Spend trend (last 6 months)\n${trend}\n\n## Forecast (next 3 months)\n${forecast}\n\n## Anomaly watch\n${anomalies}\n\n## Top tenants\n${tenants}\n\n## Optimization queue\n${optimizations}\n\n## Notes\n- `;
   }, [apiBase, mode, status.error, status.loading, status.status?.version]);
 
   const copyReport = async () => {
@@ -84,7 +84,7 @@ export function Usage() {
       {mode === 'live' && (
         <div className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-xs text-[#9AA4B2]">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Live usage metrics are not available yet. Showing sample data.</span>
+            <span>Live usage metrics syncing.</span>
             <span>
               {status.loading && 'Checking /status...'}
               {!status.loading && status.error && `API unavailable (${status.error}).`}

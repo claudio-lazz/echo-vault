@@ -31,7 +31,7 @@ const pages: Record<string, React.ReactNode> = {
 
 const pageTitles: Record<string, string> = {
   overview: 'Overview',
-  demo: 'Demo Flow',
+  demo: 'Operations Flow',
   vaults: 'Vaults',
   records: 'Records',
   alerts: 'Alerts',

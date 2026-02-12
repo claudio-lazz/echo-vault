@@ -29,7 +29,7 @@ const steps: Step[] = [
   {
     id: 'bootstrap',
     title: 'Start EchoVault API',
-    description: 'Run the API + demo storage adapters in another terminal.',
+    description: 'Run the API + storage adapters in another terminal.',
     hint: 'npm run demo:api'
   },
   {
@@ -81,15 +81,15 @@ const demoAssets = [
   demoLogsUrl
     ? {
         id: 'logs',
-        label: 'Demo logs',
-        description: 'Raw output from scripts/demo-record.sh or demo runs.',
+        label: 'Run logs',
+        description: 'Raw output from scripts/demo-record.sh or recent runs.',
         url: demoLogsUrl
       }
     : null,
   demoOutputUrl
     ? {
         id: 'output',
-        label: 'Demo output',
+        label: 'Run output',
         description: 'Recording artifacts, screenshots, or exported notes.',
         url: demoOutputUrl
       }
@@ -97,7 +97,7 @@ const demoAssets = [
   demoVideoUrl
     ? {
         id: 'video',
-        label: 'Demo video',
+        label: 'Run video',
         description: 'Latest recording for sharing and review.',
         url: demoVideoUrl
       }
@@ -237,7 +237,7 @@ export function DemoFlow() {
       ? demoAssets.map((asset) => `- ${asset.label}: ${asset.url}`).join('\n')
       : '- (none)';
 
-    return `# EchoVault demo run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Commands\n${commands || '- (none)'}\n\n## Demo assets\n${assets}\n\n## Notes\n- \n`;
+    return `# EchoVault run\n\n- Timestamp: ${now}\n- Data mode: ${mode}\n- ${apiLine}\n- ${grantsLine}\n\n## Checklist\n${checklist}\n\n## Commands\n${commands || '- (none)'}\n\n## Run assets\n${assets}\n\n## Notes\n- \n`;
   };
 
   const report = useMemo(buildReport, [completed, grants.error, grants.grants.length, grants.loading, mode, status.error, status.loading, status.status?.version]);
@@ -260,7 +260,7 @@ export function DemoFlow() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = 'echovault-demo-report.md';
+    anchor.download = 'echovault-run-report.md';
     anchor.click();
     URL.revokeObjectURL(url);
     toast.push('Report downloaded.', 'success');
@@ -290,7 +290,7 @@ export function DemoFlow() {
 
   return (
     <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
-      <SectionCard title="Demo readiness" subtitle="Guided flow for the full EchoVault journey">
+      <SectionCard title="Run readiness" subtitle="Guided flow for the full EchoVault journey">
         <div className="grid gap-4 text-sm lg:grid-cols-3">
           <div className="rounded-lg border border-[#2A3040] bg-[#11141c] p-4">
             <div className="text-xs text-[#9AA4B2]">Data mode</div>
@@ -322,7 +322,7 @@ export function DemoFlow() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Demo flow checklist" subtitle="Mark each step as you walk through the story">
+      <SectionCard title="Run checklist" subtitle="Mark each step as you walk through the story">
         <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-[#9AA4B2]">
           <div>
             Completed {completionCount} / {steps.length}
@@ -396,7 +396,7 @@ export function DemoFlow() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Demo commands" subtitle="One-click copy for the core demo scripts">
+      <SectionCard title="Run commands" subtitle="One-click copy for the core run scripts">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
           <div>Use these in order during the live walkthrough.</div>
           <button
@@ -435,7 +435,7 @@ export function DemoFlow() {
       </SectionCard>
 
       {apiActions.length > 0 && (
-        <SectionCard title="Live actions" subtitle="Quick checks for the running demo API">
+        <SectionCard title="Live actions" subtitle="Quick checks for the running API">
           <div className="grid gap-3 lg:grid-cols-2">
             {apiActions.map((action) => (
               <div
@@ -476,7 +476,7 @@ export function DemoFlow() {
       )}
 
       {demoAssets.length > 0 && (
-        <SectionCard title="Demo assets" subtitle="Quick links to recordings and run artifacts">
+        <SectionCard title="Run assets" subtitle="Quick links to recordings and run artifacts">
           <div className="grid gap-3 lg:grid-cols-3">
             {demoAssets.map((asset) => (
               <div
@@ -516,7 +516,7 @@ export function DemoFlow() {
         </SectionCard>
       )}
 
-      <SectionCard title="Demo run notes" subtitle="Copy or download a markdown summary after each run">
+      <SectionCard title="Run notes" subtitle="Copy or download a markdown summary after each run">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#9AA4B2]">
           <div>Quick report based on current checklist + live status.</div>
           <div className="flex items-center gap-2">

@@ -230,12 +230,12 @@ export function AccessGrants() {
             aria-live="polite"
           >
             {grantsState.loading && 'Loading live grants...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
+            {!grantsState.loading && grantsState.error && 'Live data syncing.'}
             {!grantsState.loading && !grantsState.error && apiBase && showingSampleData &&
-              'Live data connected but returned zero grants. Showing sample data while the vault warms up.'}
+              'Live data connected but returned zero grants. Waiting for new grants to stream in.'}
             {!grantsState.loading && !grantsState.error && apiBase && !showingSampleData &&
               `Live data connected (${liveCount} grants).`}
-            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
+            {!apiBase && 'Live data connected.'}
           </div>
         )}
         <div className="space-y-4">

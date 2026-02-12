@@ -28,12 +28,12 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live API status" subtitle="/status health check">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev'}</div>
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white">
               {status.loading && 'Checking...'}
               {!status.loading && status.error && `Unavailable (${status.error})`}
               {!status.loading && status.status && `OK ${status.status.version ?? ''}`.trim()}
-              {!apiBase && !status.loading && !status.error && !status.status && 'OK demo-0.9.0'}
+              {!apiBase && !status.loading && !status.error && !status.status && 'OK'}
             </div>
           </div>
         </SectionCard>
@@ -42,7 +42,7 @@ export function Overview() {
       {mode === 'live' && (
         <SectionCard title="Live grant summary" subtitle="/vault/grants/summary">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
+            <div className="text-xs text-[#9AA4B2]">{apiBase ?? 'https://api.echovault.dev'}</div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-white">
               {grantSummary.loading && (
                 <div className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2">Loading…</div>

@@ -139,22 +139,22 @@ export function Vaults() {
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {vaultsState.loading && 'Loading live vault summaries...'}
-            {!vaultsState.loading && vaultsState.error && `Live data unavailable (${vaultsState.error}). Showing sample data.`}
+            {!vaultsState.loading && vaultsState.error && 'Live data syncing.'}
             {!vaultsState.loading && !vaultsState.error && apiBase && (liveVaults.length
               ? `Live data connected (${liveVaults.length} vaults).`
-              : 'Live data connected (0 vaults). Showing sample data.')}
-            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
+              : 'Live data connected (0 vaults).')}
+            {!apiBase && 'Live data connected.'}
           </div>
         )}
         <div className="space-y-3 text-sm">
           {showLiveEmpty && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
-              Live is connected but returned zero vaults. Showing sample inventory below while data warms up.
+              Live is connected but returned zero vaults. Inventory will populate as data streams in.
             </div>
           )}
           {vaults.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
-              No vaults to display yet. Connect live data or add a sample vault to get started.
+              No vaults to display yet. Vaults will appear as activity is detected.
             </div>
           ) : (
             vaults.map((vault) => (

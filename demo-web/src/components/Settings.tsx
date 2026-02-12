@@ -14,7 +14,7 @@ export function Settings() {
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <div>
             <div className="font-semibold text-white">Data mode</div>
-            <div className="text-xs text-[#9AA4B2]">Switch between sample data and live API calls.</div>
+            <div className="text-xs text-[#9AA4B2]">Switch between local data and live API calls.</div>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -35,7 +35,7 @@ export function Settings() {
 
       <SectionCard title="API base URL" subtitle="Live mode endpoint">
         <div className="space-y-2 text-xs text-[#9AA4B2]">
-          <div>{apiBase ?? 'https://api.echovault.dev (demo)'}</div>
+          <div>{apiBase ?? 'https://api.echovault.dev'}</div>
           {mode === 'live' && (
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs">
               <div className="font-semibold text-white">Live status</div>

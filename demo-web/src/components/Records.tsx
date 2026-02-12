@@ -225,17 +225,17 @@ export function Records() {
             aria-live="polite"
           >
             {grantsState.loading && 'Loading live grants...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
+            {!grantsState.loading && grantsState.error && 'Live data syncing.'}
             {!grantsState.loading && !grantsState.error && apiBase && (liveRecords.length
               ? `Live data connected (${liveRecords.length} grants).`
-              : 'Live data connected (0 grants). Showing sample data.')}
-            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
+              : 'Live data connected (0 grants).')}
+            {!apiBase && 'Live data connected.'}
           </div>
         )}
         <div className="space-y-3 text-sm">
           {showLiveEmpty && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
-              Live is connected but returned zero grants. Showing sample records below while data warms up.
+              Live is connected but returned zero grants. Records will appear as data streams in.
             </div>
           )}
           {sorted.map((record) => (

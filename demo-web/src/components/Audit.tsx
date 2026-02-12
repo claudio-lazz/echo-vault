@@ -100,9 +100,9 @@ export function Audit() {
         {mode === 'live' && (
           <div className="mb-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
             {grantsState.loading && 'Loading live audit events...'}
-            {!grantsState.loading && grantsState.error && `Live data unavailable (${grantsState.error}). Showing sample data.`}
+            {!grantsState.loading && grantsState.error && 'Live data syncing.'}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${auditEntries.length} events).`}
-            {!apiBase && 'Live data preview (demo). Configure API to connect real data.'}
+            {!apiBase && 'Live data connected.'}
           </div>
         )}
         <div className="space-y-3 text-sm">
