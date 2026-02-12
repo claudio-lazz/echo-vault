@@ -89,6 +89,11 @@ export function Overview() {
 
         <SectionCard title="Recent alerts" subtitle="Triage priority">
           <div className="space-y-3">
+            {demoAlerts.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#11141c] p-3 text-xs text-[#9AA4B2]">
+                No alerts in the last 24h. Live traffic will appear here.
+              </div>
+            )}
             {demoAlerts.map((alert) => (
               <div key={alert.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between">
@@ -103,6 +108,11 @@ export function Overview() {
 
         <SectionCard title="Recent records" subtitle="Latest context activity">
           <div className="space-y-3">
+            {demoRecords.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#11141c] p-3 text-xs text-[#9AA4B2]">
+                No recent records yet. New grants populate this stream.
+              </div>
+            )}
             {demoRecords.map((record) => (
               <div key={record.id} className="rounded-xl border border-[#2A3040] bg-[#11141c] p-3 text-sm">
                 <div className="flex items-center justify-between">
