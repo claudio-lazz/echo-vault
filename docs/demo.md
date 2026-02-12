@@ -10,14 +10,14 @@
 ```
 
 ## Local API
-```
+```bash
 cd packages/api
 npm install
 npx tsx src/index.ts
 ```
 
 ## Demo web
-```
+```bash
 # from repo root
 npm install
 VITE_ECHOVAULT_API=http://localhost:8787 npm run dev -- --filter demo-web
@@ -26,7 +26,7 @@ Notes:
 - If live grants return zero, the UI falls back to sample data while the API warms up.
 
 ## CLI
-```
+```bash
 # Set API URL
 export ECHOVAULT_API=http://localhost:8787
 # Optional: file-backed dev store
@@ -37,11 +37,11 @@ npx tsx scripts/e2e-demo.ts
 # Run validation script (optional)
 npx tsx scripts/validate-e2e.ts
 
-# Reset dev store (optional)
-curl -X POST http://localhost:8787/dev/reset
+# Reset dev store (optional, dev store only)
+ECHOVAULT_RESET_OK=yes npx echovault reset
 
 # Check dev status counts
-echovault status
+npx echovault status
 
 # Init vault (stub)
 export ECHOVAULT_CONTEXT_URI=ipfs://encrypted-context-placeholder
