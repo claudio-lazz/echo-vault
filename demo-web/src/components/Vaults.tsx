@@ -255,6 +255,8 @@ export function Vaults() {
                 <textarea
                   readOnly
                   value={vaultReport}
+                  aria-label="Vault report"
+                  spellCheck={false}
                   className="mt-3 h-36 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-[11px] text-[#9AA4B2]"
                 />
               </div>

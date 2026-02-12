@@ -221,6 +221,8 @@ export function Usage() {
         <textarea
           readOnly
           value={report}
+          aria-label="Usage report"
+          spellCheck={false}
           className="mt-3 h-44 w-full rounded-lg border border-[#2A3040] bg-[#0b0f17] p-3 text-xs text-[#9AA4B2]"
         />
       </SectionCard>
