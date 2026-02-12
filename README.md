@@ -71,6 +71,11 @@ export ECHOVAULT_API=http://localhost:8787
 npx tsx scripts/e2e-demo.ts
 ```
 
+```bash
+# Terminal C: demo web UI
+VITE_ECHOVAULT_API=http://localhost:8787 npm run dev -- --filter demo-web
+```
+
 See `docs/demo.md` for the full walkthrough.
 
 ### Encrypted demo (AES‑GCM)

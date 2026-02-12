@@ -131,6 +131,7 @@ export function Vaults() {
     anchor.download = `echovault-vault-${selectedVault.id.toLowerCase()}.md`;
     anchor.click();
     URL.revokeObjectURL(url);
+    toast.push('Vault report downloaded.', 'success');
   };
 
   return (
