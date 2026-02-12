@@ -18,12 +18,16 @@ export function Settings() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              aria-pressed={mode === 'local'}
               className={`rounded-lg border px-3 py-2 text-xs ${mode === 'local' ? 'border-[#3B3FEE] bg-[#1B1F2E] text-white' : 'border-[#2A3040] bg-[#11141c] text-[#9AA4B2]'}`}
               onClick={() => setMode('local')}
             >
               Local
             </button>
             <button
+              type="button"
+              aria-pressed={mode === 'live'}
               className={`rounded-lg border px-3 py-2 text-xs ${mode === 'live' ? 'border-[#2BD4C8] bg-[#152026] text-white' : 'border-[#2A3040] bg-[#11141c] text-[#9AA4B2]'}`}
               onClick={() => setMode('live')}
             >
@@ -36,6 +40,9 @@ export function Settings() {
       <SectionCard title="API base URL" subtitle="Live mode endpoint">
         <div className="space-y-2 text-xs text-[#9AA4B2]">
           <div>{apiBase ?? 'https://api.echovault.dev'}</div>
+          <div className="text-[11px] text-[#6F7A8A]">
+            {apiBase ? 'Override set via VITE_ECHOVAULT_API.' : 'Using default. Set VITE_ECHOVAULT_API to override.'}
+          </div>
           {mode === 'live' && (
             <div className="rounded-lg border border-[#2A3040] bg-[#11141c] p-3 text-xs">
               <div className="font-semibold text-white">Live status</div>
