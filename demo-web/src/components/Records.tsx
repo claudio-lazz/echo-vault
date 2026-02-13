@@ -225,7 +225,7 @@ export function Records() {
             aria-live="polite"
           >
             {grantsState.loading && 'Loading live grants...'}
-            {!grantsState.loading && grantsState.error && 'Live data syncing.'}
+            {!grantsState.loading && grantsState.error && 'Live data unavailable; showing demo data.'}
             {!grantsState.loading && !grantsState.error && apiBase && (liveRecords.length
               ? `Live data connected (${liveRecords.length} grants).`
               : 'Live data connected (0 grants).')}
@@ -364,9 +364,13 @@ export function Records() {
               <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Recent activity</div>
                 <ul className="mt-2 space-y-2 text-xs text-[#9AA4B2]">
-                  {selectedDetail?.activity.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
+                  {selectedDetail?.activity.length ? (
+                    selectedDetail.activity.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))
+                  ) : (
+                    <li className="text-[#6E7683]">No activity yet.</li>
+                  )}
                 </ul>
               </div>
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
