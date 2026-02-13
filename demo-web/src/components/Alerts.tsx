@@ -129,7 +129,7 @@ export function Alerts() {
               ))}
             </select>
             {hasFilters && (
-              <button
+              <button type="button"
                 onClick={handleResetFilters}
                 className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
               >
@@ -139,7 +139,11 @@ export function Alerts() {
           </div>
         </div>
         {mode === 'live' && (
-          <div className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]">
+          <div
+            className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-[#9AA4B2]"
+            role="status"
+            aria-live="polite"
+          >
             {grantsState.loading && 'Loading live alerts...'}
             {!grantsState.loading && grantsState.error && 'Live data syncing.'}
             {!grantsState.loading && !grantsState.error && apiBase && `Live data connected (${alerts.length} alerts).`}
@@ -156,7 +160,7 @@ export function Alerts() {
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusPill label={alert.severity} tone={alert.severity as any} />
-                  <button
+                  <button type="button"
                     onClick={() => setSelectedAlert(alert)}
                     className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-2.5 py-1 text-[11px] text-white"
                   >
@@ -170,7 +174,7 @@ export function Alerts() {
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
               <div>No alerts match this filter.</div>
               {hasFilters && (
-                <button
+                <button type="button"
                   onClick={handleResetFilters}
                   className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
                 >
@@ -195,7 +199,7 @@ export function Alerts() {
                 <div className="text-xl font-semibold text-white">{selectedAlert.title}</div>
                 <div className="text-xs text-[#9AA4B2]">{selectedAlert.id} · {selectedAlert.time}</div>
               </div>
-              <button
+              <button type="button"
                 onClick={() => setSelectedAlert(null)}
                 className="rounded-lg border border-[#2A3040] bg-[#11141c] px-2.5 py-1 text-xs"
               >
@@ -229,13 +233,13 @@ export function Alerts() {
                   {drawerNotice && <span className="text-[11px] text-[#9AA4B2]">{drawerNotice}</span>}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => copyAlertSummary(selectedAlert)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
                     Copy summary
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => downloadAlertSummary(selectedAlert)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
@@ -246,9 +250,9 @@ export function Alerts() {
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Actions</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Open audit trail</button>
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Notify owner</button>
-                  <button className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Escalate</button>
+                  <button type="button" className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Open audit trail</button>
+                  <button type="button" className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Notify owner</button>
+                  <button type="button" className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Escalate</button>
                 </div>
               </div>
             </div>
