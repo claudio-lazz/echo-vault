@@ -203,14 +203,14 @@ export function Records() {
               ))}
             </select>
             {filtersActive && (
-              <button
+              <button type="button"
                 onClick={handleResetFilters}
                 className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-3 py-2 text-xs text-[#C8D0DD]"
               >
                 Reset filters
               </button>
             )}
-            <button
+            <button type="button"
               onClick={handleExport}
               className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white"
             >
@@ -250,7 +250,7 @@ export function Records() {
               <div className="flex items-center gap-3">
                 <div className="text-xs text-[#9AA4B2]">{record.updated}</div>
                 <StatusPill label={record.status} tone={record.status === 'active' ? 'success' : 'danger'} />
-                <button
+                <button type="button"
                   onClick={() => setSelectedRecord(record)}
                   className="rounded-lg border border-[#2A3040] bg-[#0f1219] px-2.5 py-1 text-[11px] text-white"
                 >
@@ -262,7 +262,7 @@ export function Records() {
           {filtered.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
               <div>No records match this filter.</div>
-              <button
+              <button type="button"
                 onClick={handleResetFilters}
                 className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
               >
@@ -289,7 +289,7 @@ export function Records() {
                   <div className="text-xs text-[#9AA4B2]">Grantee: {selectedRecord.grantee}</div>
                 )}
               </div>
-              <button
+              <button type="button"
                 onClick={() => setSelectedRecord(null)}
                 className="rounded-lg border border-[#2A3040] bg-[#11141c] px-2.5 py-1 text-xs"
               >
@@ -337,19 +337,19 @@ export function Records() {
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Quick actions</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => handleCopy('Owner', selectedRecord.owner)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
                     Copy owner
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => handleCopy('Scope', selectedRecord.scope)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
                     Copy scope
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => handleDownloadMetadata(selectedRecord)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
@@ -372,8 +372,8 @@ export function Records() {
               <div className="rounded-xl border border-[#2A3040] bg-[#0f1219] px-4 py-3">
                 <div className="text-xs text-[#9AA4B2]">Governance</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Rotate keys</button>
-                  <button className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Revoke</button>
+                  <button type="button" className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs">Rotate keys</button>
+                  <button type="button" className="rounded-lg border border-[#3d1e24] bg-[#1b1216] px-3 py-2 text-xs text-[#F3B5B5]">Revoke</button>
                 </div>
               </div>
             </div>

@@ -91,6 +91,7 @@ npx tsx scripts/e2e-encrypt-demo.ts
 ## 🧰 CLI
 
 ```bash
+# ECHOVAULT_API defaults to http://localhost:8787 when unset.
 export ECHOVAULT_API=http://localhost:8787
 export ECHOVAULT_OWNER=OWNER
 export ECHOVAULT_GRANTEE=GRANTEE
