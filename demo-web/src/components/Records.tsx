@@ -143,6 +143,10 @@ export function Records() {
   }, [filtered, sortKey]);
 
   const handleExport = () => {
+    if (!sorted.length) {
+      toast.push('No records to export yet.', 'error');
+      return;
+    }
     const payload = {
       generated_at: new Date().toISOString(),
       total: sorted.length,
@@ -155,6 +159,7 @@ export function Records() {
     link.download = `echovault-records-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    toast.push('Records exported.', 'success');
   };
 
   const activeCount = records.filter((record) => record.status === 'active').length;
@@ -212,7 +217,8 @@ export function Records() {
             )}
             <button type="button"
               onClick={handleExport}
-              className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white"
+              disabled={sorted.length === 0}
+              className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               Export JSON
             </button>
