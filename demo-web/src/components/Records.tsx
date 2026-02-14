@@ -218,6 +218,8 @@ export function Records() {
             <button type="button"
               onClick={handleExport}
               disabled={sorted.length === 0}
+              aria-disabled={sorted.length === 0}
+              title={sorted.length === 0 ? 'No records to export yet.' : 'Export records as JSON'}
               className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               Export JSON
@@ -268,6 +270,9 @@ export function Records() {
           {filtered.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
               <div>No records match this filter.</div>
+              {filtersActive && (
+                <div className="mt-2 text-[11px] text-[#6E7683]">Try clearing search or resetting filters.</div>
+              )}
               <button type="button"
                 onClick={handleResetFilters}
                 className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
