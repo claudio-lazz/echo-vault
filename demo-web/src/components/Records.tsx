@@ -164,6 +164,11 @@ export function Records() {
 
   const activeCount = records.filter((record) => record.status === 'active').length;
   const revokedCount = records.filter((record) => record.status !== 'active').length;
+  const exportCount = sorted.length;
+  const exportLabel = exportCount ? `Export JSON (${exportCount})` : 'Export JSON';
+  const exportTitle = exportCount
+    ? `Export ${exportCount} record${exportCount === 1 ? '' : 's'} as JSON`
+    : 'No records to export yet.';
 
   return (
     <section className="space-y-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
@@ -217,12 +222,12 @@ export function Records() {
             )}
             <button type="button"
               onClick={handleExport}
-              disabled={sorted.length === 0}
-              aria-disabled={sorted.length === 0}
-              title={sorted.length === 0 ? 'No records to export yet.' : 'Export records as JSON'}
+              disabled={exportCount === 0}
+              aria-disabled={exportCount === 0}
+              title={exportTitle}
               className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Export JSON
+              {exportLabel}
             </button>
           </div>
         </div>
