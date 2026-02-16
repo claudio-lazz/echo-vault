@@ -356,11 +356,25 @@ export function Records() {
                 <div className="text-xs text-[#9AA4B2]">Quick actions</div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button"
+                    onClick={() => handleCopy('Record ID', selectedRecord.id)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    Copy record ID
+                  </button>
+                  <button type="button"
                     onClick={() => handleCopy('Owner', selectedRecord.owner)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
                     Copy owner
                   </button>
+                  {selectedRecord.grantee && (
+                    <button type="button"
+                      onClick={() => handleCopy('Grantee', selectedRecord.grantee ?? '')}
+                      className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                    >
+                      Copy grantee
+                    </button>
+                  )}
                   <button type="button"
                     onClick={() => handleCopy('Scope', selectedRecord.scope)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
