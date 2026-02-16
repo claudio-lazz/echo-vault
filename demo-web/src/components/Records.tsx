@@ -274,16 +274,18 @@ export function Records() {
           ))}
           {filtered.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-4 sm:py-5 lg:py-6 text-center text-xs text-[#9AA4B2]">
-              <div>No records match this filter.</div>
+              <div>{filtersActive ? 'No records match this filter.' : 'No records to show yet.'}</div>
               {filtersActive && (
-                <div className="mt-2 text-[11px] text-[#6E7683]">Try clearing search or resetting filters.</div>
+                <>
+                  <div className="mt-2 text-[11px] text-[#6E7683]">Try clearing search or resetting filters.</div>
+                  <button type="button"
+                    onClick={handleResetFilters}
+                    className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
+                  >
+                    Reset filters
+                  </button>
+                </>
               )}
-              <button type="button"
-                onClick={handleResetFilters}
-                className="mt-3 rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-[11px] text-white"
-              >
-                Reset filters
-              </button>
             </div>
           )}
         </div>
