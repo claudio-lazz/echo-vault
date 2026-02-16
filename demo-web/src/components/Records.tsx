@@ -35,6 +35,8 @@ export function Records() {
   const [selectedRecord, setSelectedRecord] = useState<RecordItem | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const toast = useToast();
+
+  const isCopied = (label: string) => copyStatus === label;
   const handleResetFilters = () => {
     setQuery('');
     setStatusFilter('all');
@@ -89,7 +91,7 @@ export function Records() {
     if (!value) return;
     try {
       await navigator.clipboard.writeText(value);
-      setCopyStatus(`${label} copied`);
+      setCopyStatus(label);
       toast.push(`${label} copied.`, 'success');
     } catch (error) {
       console.error(error);
@@ -322,7 +324,7 @@ export function Records() {
                   role="status"
                   aria-live="polite"
                 >
-                  {copyStatus}
+                  {copyStatus === 'Copy unavailable' ? copyStatus : `${copyStatus} copied`}
                 </div>
               )}
               <div className="rounded-xl border border-[#2A3040] bg-[#11141c] px-4 py-3">
@@ -359,27 +361,33 @@ export function Records() {
                     onClick={() => handleCopy('Record ID', selectedRecord.id)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
-                    Copy record ID
+                    {isCopied('Record ID') ? 'Copied' : 'Copy record ID'}
                   </button>
                   <button type="button"
                     onClick={() => handleCopy('Owner', selectedRecord.owner)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
-                    Copy owner
+                    {isCopied('Owner') ? 'Copied' : 'Copy owner'}
                   </button>
                   {selectedRecord.grantee && (
                     <button type="button"
                       onClick={() => handleCopy('Grantee', selectedRecord.grantee ?? '')}
                       className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                     >
-                      Copy grantee
+                      {isCopied('Grantee') ? 'Copied' : 'Copy grantee'}
                     </button>
                   )}
                   <button type="button"
                     onClick={() => handleCopy('Scope', selectedRecord.scope)}
                     className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
                   >
-                    Copy scope
+                    {isCopied('Scope') ? 'Copied' : 'Copy scope'}
+                  </button>
+                  <button type="button"
+                    onClick={() => handleCopy('Owner + scope', `${selectedRecord.owner} · ${selectedRecord.scope}`)}
+                    className="rounded-lg border border-[#2A3040] bg-[#11141c] px-3 py-2 text-xs"
+                  >
+                    {isCopied('Owner + scope') ? 'Copied' : 'Copy owner + scope'}
                   </button>
                   <button type="button"
                     onClick={() => handleDownloadMetadata(selectedRecord)}
