@@ -241,14 +241,14 @@ export function Records() {
             {!grantsState.loading && grantsState.error && 'Live data unavailable; showing demo data.'}
             {!grantsState.loading && !grantsState.error && apiBase && (liveRecords.length
               ? `Live data connected (${liveRecords.length} grants).`
-              : 'Live data connected (0 grants).')}
+              : 'Live data connected (0 grants). Showing demo records until data arrives.')}
             {!apiBase && 'Live data connected.'}
           </div>
         )}
         <div className="space-y-3 text-sm">
           {showLiveEmpty && (
             <div className="rounded-xl border border-dashed border-[#2A3040] bg-[#0f1219] px-4 py-3 text-xs text-[#9AA4B2]">
-              Live is connected but returned zero grants. Records will appear as data streams in.
+              Live is connected but returned zero grants. Showing demo records while data streams in.
             </div>
           )}
           {sorted.map((record) => (
