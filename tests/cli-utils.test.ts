@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { logResult } from '../packages/cli/src/utils';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { logResult, readEnvPath } from '../packages/cli/src/utils';
 
 describe('cli utils logResult', () => {
   const consoleError = vi.spyOn(console, 'error');
@@ -25,5 +28,27 @@ describe('cli utils logResult', () => {
     logResult({ status: 403, json: { message: 'forbidden' } });
     expect(consoleError).toHaveBeenCalledWith('error', 'forbidden');
     expect(consoleLog).toHaveBeenCalledWith(403, { message: 'forbidden' });
+  });
+});
+
+describe('cli utils readEnvPath', () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it('returns trimmed file contents when path exists', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'echovault-cli-'));
+    const filePath = join(dir, 'value.txt');
+    writeFileSync(filePath, ' value\n');
+    process.env.ECHOVAULT_CONTEXT_URI_PATH = filePath;
+    expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBe('value');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('returns undefined when path is missing', () => {
+    process.env.ECHOVAULT_CONTEXT_URI_PATH = '/tmp/does-not-exist.txt';
+    expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
   });
 });

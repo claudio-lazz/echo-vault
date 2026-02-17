@@ -7,7 +7,11 @@ type JsonResult<T = unknown> = { status: number; json: T };
 function readEnvPath(key: string): string | undefined {
   const path = process.env[key];
   if (!path) return undefined;
-  return readFileSync(path, 'utf8').trim();
+  try {
+    return readFileSync(path, 'utf8').trim();
+  } catch (error) {
+    return undefined;
+  }
 }
 
 function getApi(): string {
