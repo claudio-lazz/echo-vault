@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-type ApiError = { code?: string } & Record<string, unknown>;
+type ApiError = { code?: string; reason?: string; message?: string } & Record<string, unknown>;
 
 type JsonResult<T = unknown> = { status: number; json: T };
 
@@ -16,7 +16,15 @@ function getApi(): string {
 
 function logResult<T = ApiError>(result: JsonResult<T>) {
   const json = result.json as ApiError;
-  if (json?.code) console.error('error', json.code);
+  if (json?.code || json?.reason || json?.message) {
+    const detail = json?.message || json?.reason || json?.code;
+    const code = json?.code || json?.reason || json?.message;
+    if (detail && code && detail !== code) {
+      console.error('error', code, '-', detail);
+    } else if (detail) {
+      console.error('error', detail);
+    }
+  }
   console.log(result.status, result.json);
 }
 
