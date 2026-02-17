@@ -144,7 +144,7 @@ export type Decryptor<T = unknown, R = unknown> = (blob: T) => R;
 function buildQuery(params: Record<string, string | undefined>) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (!value) return;
+    if (value === undefined || value === '') return;
     search.set(key, value);
   });
   const query = search.toString();

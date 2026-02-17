@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { encryptBlob, decryptBlob } from '../packages/core-sdk/src/crypto';
-import { unwrapOrThrow } from '../packages/core-sdk/src/index';
+import { unwrapOrThrow, listGrants } from '../packages/core-sdk/src/index';
 
 describe('core-sdk crypto', () => {
   it('encrypts and decrypts payload', () => {
@@ -37,5 +37,22 @@ describe('core-sdk unwrapOrThrow', () => {
   });
   it('returns json on ok', () => {
     expect(unwrapOrThrow({ ok: true, status: 200, json: { ok: true } })).toEqual({ ok: true });
+  });
+});
+
+describe('core-sdk listGrants query', () => {
+  it('includes zero values in query params', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, total: 0, offset: 0, limit: 0, grants: [] })
+    });
+    // @ts-expect-error override
+    global.fetch = mockFetch;
+    await listGrants({ owner: 'owner', offset: 0, limit: 0, api: 'http://localhost:8787' });
+    expect(mockFetch).toHaveBeenCalled();
+    const url = mockFetch.mock.calls[0][0] as string;
+    expect(url).toContain('offset=0');
+    expect(url).toContain('limit=0');
   });
 });
