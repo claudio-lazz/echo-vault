@@ -51,4 +51,13 @@ describe('cli utils readEnvPath', () => {
     process.env.ECHOVAULT_CONTEXT_URI_PATH = '/tmp/does-not-exist.txt';
     expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
   });
+
+  it('returns undefined when file is empty after trim', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'echovault-cli-'));
+    const filePath = join(dir, 'value.txt');
+    writeFileSync(filePath, '   \n\n');
+    process.env.ECHOVAULT_CONTEXT_URI_PATH = filePath;
+    expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
+    rmSync(dir, { recursive: true, force: true });
+  });
 });

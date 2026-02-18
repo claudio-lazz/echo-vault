@@ -8,7 +8,8 @@ function readEnvPath(key: string): string | undefined {
   const path = process.env[key];
   if (!path) return undefined;
   try {
-    return readFileSync(path, 'utf8').trim();
+    const value = readFileSync(path, 'utf8').trim();
+    return value.length > 0 ? value : undefined;
   } catch (error) {
     return undefined;
   }
