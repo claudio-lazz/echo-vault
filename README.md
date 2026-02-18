@@ -90,6 +90,8 @@ npx tsx scripts/e2e-encrypt-demo.ts
 
 ## 🧰 CLI
 
+See `docs/env.md` for CLI environment flags (including `ECHOVAULT_CLI_DEBUG`).
+
 ```bash
 # ECHOVAULT_API defaults to http://localhost:8787 when unset.
 export ECHOVAULT_API=http://localhost:8787
