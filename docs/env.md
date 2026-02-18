@@ -9,3 +9,6 @@
 - `ECHOVAULT_FEE_RECIPIENT` — protocol treasury token account
 - `ECHOVAULT_STORE_PATH` — file path for dev persistence store (optional)
 - `ECHOVAULT_API` — default API base used by the SDK (optional)
+
+## CLI
+- `ECHOVAULT_CLI_DEBUG` — set to `1` to emit debug warnings (e.g., missing/empty env-path files).
