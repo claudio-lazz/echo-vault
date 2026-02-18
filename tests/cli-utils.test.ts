@@ -33,9 +33,11 @@ describe('cli utils logResult', () => {
 
 describe('cli utils readEnvPath', () => {
   const originalEnv = { ...process.env };
+  const consoleWarn = vi.spyOn(console, 'warn');
 
   afterEach(() => {
     process.env = { ...originalEnv };
+    consoleWarn.mockReset();
   });
 
   it('returns trimmed file contents when path exists', () => {
@@ -52,12 +54,36 @@ describe('cli utils readEnvPath', () => {
     expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
   });
 
+  it('warns in debug when path is missing', () => {
+    process.env.ECHOVAULT_CLI_DEBUG = '1';
+    process.env.ECHOVAULT_CONTEXT_URI_PATH = '/tmp/does-not-exist.txt';
+    expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
+    expect(console.warn).toHaveBeenCalledWith(
+      'warn',
+      'ECHOVAULT_CONTEXT_URI_PATH file not found at /tmp/does-not-exist.txt'
+    );
+  });
+
   it('returns undefined when file is empty after trim', () => {
     const dir = mkdtempSync(join(tmpdir(), 'echovault-cli-'));
     const filePath = join(dir, 'value.txt');
     writeFileSync(filePath, '   \n\n');
     process.env.ECHOVAULT_CONTEXT_URI_PATH = filePath;
     expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('warns in debug when file is empty after trim', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'echovault-cli-'));
+    const filePath = join(dir, 'value.txt');
+    writeFileSync(filePath, '   \n\n');
+    process.env.ECHOVAULT_CLI_DEBUG = '1';
+    process.env.ECHOVAULT_CONTEXT_URI_PATH = filePath;
+    expect(readEnvPath('ECHOVAULT_CONTEXT_URI_PATH')).toBeUndefined();
+    expect(console.warn).toHaveBeenCalledWith(
+      'warn',
+      `ECHOVAULT_CONTEXT_URI_PATH file is empty at ${filePath}`
+    );
     rmSync(dir, { recursive: true, force: true });
   });
 });

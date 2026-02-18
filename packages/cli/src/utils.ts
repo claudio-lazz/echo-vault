@@ -7,10 +7,14 @@ type JsonResult<T = unknown> = { status: number; json: T };
 function readEnvPath(key: string): string | undefined {
   const path = process.env[key];
   if (!path) return undefined;
+  const debug = process.env.ECHOVAULT_CLI_DEBUG === '1';
   try {
     const value = readFileSync(path, 'utf8').trim();
-    return value.length > 0 ? value : undefined;
+    if (value.length > 0) return value;
+    if (debug) console.warn('warn', `${key} file is empty at ${path}`);
+    return undefined;
   } catch (error) {
+    if (debug) console.warn('warn', `${key} file not found at ${path}`);
     return undefined;
   }
 }
