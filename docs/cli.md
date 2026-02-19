@@ -37,6 +37,15 @@ npx echovault preview
 npx echovault request
 ```
 
+## File-backed env values
+
+```bash
+# load payloads from files instead of env strings
+export ECHOVAULT_CONTEXT_URI_PATH=./context-uri.txt
+export ECHOVAULT_ENCRYPTED_BLOB_PATH=./encrypted-blob.txt
+npx echovault init
+```
+
 ## Pagination / filters
 
 ```bash

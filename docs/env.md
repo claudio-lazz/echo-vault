@@ -12,3 +12,5 @@
 
 ## CLI
 - `ECHOVAULT_CLI_DEBUG` — set to `1` to emit debug warnings (e.g., missing/empty env-path files).
+- `ECHOVAULT_CONTEXT_URI_PATH` — file path containing the context URI (CLI `init`).
+- `ECHOVAULT_ENCRYPTED_BLOB_PATH` — file path containing the encrypted blob pointer (CLI `init`).
