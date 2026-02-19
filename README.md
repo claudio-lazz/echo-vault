@@ -174,6 +174,7 @@ console.log(vaults.data, grants.data, summary.data, audit.data);
 | `docs/demo.md` | End‑to‑end demo walkthrough |
 | `docs/demo-video-plan.md` | Recording checklist |
 | `docs/forum.md` | Forum helper |
+| `docs/cli.md` | CLI usage + env-driven flows |
 
 ---
 
