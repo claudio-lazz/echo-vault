@@ -68,7 +68,9 @@ npx echovault grants-summary
 ```bash
 # emit debug warnings for missing/empty env-path files
 export ECHOVAULT_CLI_DEBUG=1
-npx echovault vault
+export ECHOVAULT_CONTEXT_URI_PATH=./context-uri.txt
+export ECHOVAULT_ENCRYPTED_BLOB_PATH=./encrypted-blob.txt
+npx echovault init
 ```
 
 See `docs/env.md` for the full environment variable reference.
