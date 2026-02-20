@@ -175,6 +175,7 @@ console.log(vaults.data, grants.data, summary.data, audit.data);
 | `docs/demo-video-plan.md` | Recording checklist |
 | `docs/forum.md` | Forum helper |
 | `docs/cli.md` | CLI usage + env-driven flows |
+| `docs/env.md` | Full environment variable reference |
 
 ---
 
