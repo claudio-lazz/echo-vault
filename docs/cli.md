@@ -65,6 +65,19 @@ npx echovault grants
 npx echovault grants-summary
 ```
 
+## Audit filters
+
+```bash
+export ECHOVAULT_AUDIT_ACTION=grant
+export ECHOVAULT_AUDIT_LIMIT=25
+export ECHOVAULT_AUDIT_OFFSET=0
+# audit timestamps are unix ms
+export ECHOVAULT_AUDIT_SINCE=$(date +%s%3N)
+export ECHOVAULT_AUDIT_UNTIL=$(date +%s%3N)
+npx echovault audit
+npx echovault audit-summary
+```
+
 ## Debugging
 
 ```bash
