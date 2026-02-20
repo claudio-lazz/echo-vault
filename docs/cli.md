@@ -37,6 +37,8 @@ npx echovault preview
 npx echovault request
 ```
 
+**Tip:** use `vault` when you want a single vault by id; use `vaults` for paginated lists.
+
 ## File-backed env values
 
 ```bash
