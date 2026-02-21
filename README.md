@@ -176,6 +176,10 @@ console.log(vaults.data, grants.data, summary.data, audit.data);
 | `docs/forum.md` | Forum helper |
 | `docs/cli.md` | CLI usage + env-driven flows |
 | `docs/env.md` | Full environment variable reference |
+| `docs/onchain-model.md` | On-chain primitives + account model |
+| `docs/spec.md` | System spec + core design |
+| `docs/plan.md` | Build plan + milestones |
+| `docs/x402-flow.md` | x402 payment flow outline |
 
 ---
 
