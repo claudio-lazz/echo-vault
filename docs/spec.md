@@ -11,6 +11,8 @@ Wallet-native, encrypted personal context stored as on-chain assets with permiss
 - **Access Grant PDA**: { owner, grantee, scope, expires_at }
 - **Revocation Registry**: { grant_id -> revoked }
 
+See `docs/onchain-model.md` for account layouts and PDA derivations.
+
 ## Off-chain services
 - **Encryption Gateway**: client-side encryption, store to IPFS/Arweave/S3
 - **Context API**: verify grant, return encrypted blob pointer
